@@ -1,4 +1,4 @@
-# eggjs-backend
+# eFront
 
 基于 eggjs 的node后端框架
 
