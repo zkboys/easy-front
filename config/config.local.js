@@ -15,7 +15,7 @@ module.exports = () => {
     port: 3306,
     username: 'fd',
     password: '123456',
-    database: 'egg-demo',
+    database: 'easy_front',
     timezone: '+08:00',
     logging: false,
   };
