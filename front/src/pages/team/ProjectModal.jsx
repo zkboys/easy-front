@@ -7,7 +7,7 @@ import { useGet, usePost, usePut } from 'src/commons/ajax';
 
 export default config({
     modal: {
-        title: props => props.isEdit ? '修改项目' : '添加项目',
+        title: props => props.isEdit ? '修改项目' : '创建项目',
         width: 500,
     },
 })(props => {

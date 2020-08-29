@@ -7,7 +7,7 @@ import { useGet, usePost, usePut } from 'src/commons/ajax';
 
 export default config({
     modal: {
-        title: props => props.isEdit ? '修改团队' : '添加团队',
+        title: props => props.isEdit ? '修改团队' : '创建团队',
         width: 500,
     },
 })(props => {
