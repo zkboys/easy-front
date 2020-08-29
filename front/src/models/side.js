@@ -1,4 +1,4 @@
-const INIT_WIDTH = 256;
+const INIT_WIDTH = 150;
 
 export default {
     initialState: {
@@ -13,10 +13,10 @@ export default {
         collapsed: true,
     },
 
-    setDragging: (dragging) => ({dragging}),
-    hide: () => ({show: false}),
-    show: () => ({show: true}),
-    setWidth: (width) => ({width}),
-    initWidth: () => ({width: INIT_WIDTH}),
-    setCollapsed: (collapsed) => ({collapsed}),
-}
+    setDragging: (dragging) => ({ dragging }),
+    hide: () => ({ show: false }),
+    show: () => ({ show: true }),
+    setWidth: (width) => ({ width }),
+    initWidth: () => ({ width: INIT_WIDTH }),
+    setCollapsed: (collapsed) => ({ collapsed }),
+};

@@ -46,7 +46,7 @@ module.exports = app => {
         { text: '用户管理', icon: 'user', path: '/users', order: 900 },
         { text: '角色管理', icon: 'lock', path: '/roles', order: 900 },
         { text: '菜单管理', icon: 'align-left', path: '/menu', order: 900 },
-        { text: '代码生成', icon: 'code', path: '/gen', order: 900 },
+        // { text: '代码生成', icon: 'code', path: '/gen', order: 900 },
       ];
       for (const menu of menus) {
         await adminRole.createMenu(menu);
