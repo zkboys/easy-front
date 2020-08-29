@@ -18,9 +18,10 @@ export default config({
     path: '/team/:teamId/:tabId',
     connect: true,
 })(props => {
+    const { params } = props.match;
     const [ height, setHeight ] = useState(document.documentElement.clientHeight - otherHeight);
-    const [ teamId, setTeamId ] = useState('');
-    const [ tabId, setTabId ] = useState('');
+    const [ teamId, setTeamId ] = useState(params.teamId);
+    const [ tabId, setTabId ] = useState(params.tabId === ':tabId' ? 'project' : params.tabId);
     // const [ teams, setTeams ] = useState([]);
     const [ teams, setTeams ] = useState([ { id: '1', name: '测试团队', description: '测试团队描述' }, { id: '2', name: '研发中心', description: '描述' } ]);
     const [ projects, setProjects ] = useState([]);
@@ -79,20 +80,17 @@ export default config({
     const handleWindowResize = _.debounce(() => {
         const windowHeight = document.documentElement.clientHeight;
         const height = windowHeight - otherHeight;
-        console.log(height);
         setHeight(height);
     }, 100);
 
     useEffect(() => {
         (async () => {
-            const { teamId, tabId } = props.match.params;
-            setTabId(tabId === ':tabId' ? 'project' : tabId);
-            setTeamId(teamId === ':teamId' ? '' : teamId);
-
             const teams = await fetchTeams();
             setTeams(teams);
 
-            if (teamId === ':teamId' && teams.length) setTeamId(teamId);
+            if (teamId === ':teamId' && teams.length) {
+                handleMenuClick({ key: teams[0].id });
+            }
         })();
 
         window.addEventListener('resize', handleWindowResize);
@@ -130,6 +128,8 @@ export default config({
                     <div styleName="top">
                         <div styleName="team-title">
                             <h1>{team.name}</h1>
+
+                            {/* TODO 只有管理员才可以修改 */}
                             <Tooltip title="修改团队" placement="right">
                                 <FormOutlined styleName="team-operator" onClick={handleEditTeam}/>
                             </Tooltip>
