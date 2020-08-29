@@ -1,4 +1,6 @@
 'use strict';
+const path = require('path');
+const fs = require('fs');
 
 module.exports = app => {
   const { router, controller } = app;
@@ -47,13 +49,19 @@ module.exports = app => {
   // 菜单 crud
   api.resources('/menus', menu);
 
-
   // 未捕获请求，返回404
   api.get('/*', async ctx => {
     ctx.status = 404;
   });
 
+
+  // 文档
+  router.get('/docs', async ctx => {
+    const docFile = path.join(__dirname, '../', 'docs', 'index.html');
+    ctx.body = fs.readFileSync(docFile, 'UTF-8');
+  });
+
   // 所有页面请求 返回首页
   // TODO 区分是页面请求，还是其他ajax 请求、静态文件请求
-  router.get('/*', async ctx => ctx.render('index.html'));
+  router.get('/*', async ctx => await ctx.render('index.html'));
 };

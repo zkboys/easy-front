@@ -29,6 +29,9 @@ $ npm run dev-front
 
 # 浏览器访问
 $ open http://localhost:4000/
+
+# 文档
+$ open http://localhost:3000/docs/#/
 ```
 
 ### 发布

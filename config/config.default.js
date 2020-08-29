@@ -35,7 +35,11 @@ module.exports = appInfo => {
       {
         prefix: '/public/static',
         dir: path.join(appInfo.baseDir, 'app/public/static'),
-        maxAge: 31536000,
+        maxAge: 3153600000, // 一百年
+      },
+      {
+        prefix: '/docs',
+        dir: path.join(appInfo.baseDir, 'docs'),
       },
     ],
   };

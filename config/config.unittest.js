@@ -11,20 +11,21 @@ module.exports = () => {
   // 数据库配置
   exports.sequelize = {
     dialect: 'mysql',
-    // host: '172.16.60.247',
-    host: 'localhost',
-    port: 3306,
-    // username: 'fd',
-    // password: '123456',
-    username: 'root',
+    host: '172.16.60.247',
+    username: 'fd',
     password: '123456',
+
+    // host: 'localhost',
+    // username: 'root',
+    // password: '123456',
+    port: 3306,
     database: 'easy_front',
     timezone: '+08:00',
     define: {
       charset: 'utf8',
       dialectOptions: {
-        collate: 'utf8_general_ci'
-      }
+        collate: 'utf8_general_ci',
+      },
     },
     logging: false,
   };
