@@ -1,0 +1,47 @@
+.team-root {
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+    //padding: 0;
+    //margin: 0;
+}
+
+.list {
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 300px;
+    background: red;
+
+    .top {
+        flex: 0 0 150px;
+        background: #22224e;
+        color: #fff;
+    }
+
+    .menu {
+        flex: 1;
+        overflow-y: auto;
+    }
+}
+
+.detail {
+    margin-left: 10px;
+    flex: 1;
+
+    :global {
+        .ant-tabs-bar {
+            margin: 0;
+        }
+
+        .ant-tabs-tabpane {
+            padding-left: 1px;
+        }
+    }
+}
+
+.pan-content {
+    height: 100%;
+    background: #fff;
+    overflow-y: scroll;
+}
+
