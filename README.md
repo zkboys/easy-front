@@ -8,10 +8,13 @@
 ### 开发
 
 ```bash
-# 安装后端依赖
+# 安装前后端依赖
+$ npm run ins-all
+
+# 单独安装后端依赖
 $ npm i --registry https://registry.npm.taobao.org
 
-# 安装前端依赖
+# 单独安装前端依赖
 $ cd front 
 $ yarn 
 

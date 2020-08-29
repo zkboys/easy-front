@@ -17,6 +17,12 @@ module.exports = () => {
     password: '123456',
     database: 'easy_front',
     timezone: '+08:00',
+    define: {
+      charset: 'utf8',
+      dialectOptions: {
+        collate: 'utf8_general_ci'
+      }
+    },
   };
 
   return exports;
