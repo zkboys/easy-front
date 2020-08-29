@@ -40,6 +40,7 @@ module.exports = app => {
   api.put('/relateUserRoles', user.relateUserRoles);
   // 获取当前登录用户菜单
   api.get('/sessionUserMenus', user.sessionUserMenus);
+  api.post('/uploadUserAvatar', user.uploadUserAvatar);
 
   // 角色 crud
   api.resources('/roles', role);

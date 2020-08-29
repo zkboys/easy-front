@@ -70,8 +70,8 @@ export default config({
                             src={avatar}
                             alt="头像"
                             style={{
-                                width: 25,
-                                height: 25,
+                                width: 30,
+                                height: 30,
                                 marginRight: 8,
                                 borderRadius: '50%',
                             }}

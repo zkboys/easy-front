@@ -30,6 +30,7 @@ module.exports = app => {
         jobNumber: 'admin',
         password: defaultPassword,
         name: '管理员',
+        email: 'admin@qq.com',
       });
 
       // 创建一个游客

@@ -88,6 +88,13 @@ module.exports = appInfo => {
     '/api/register',
   ];
 
+  // 配置上传
+  exports.multipart = {
+    fileSize: '2mb',
+    mode: 'stream',
+    fileExtensions: [ '.jpg', '.jpeg', '.png' ], // 扩展几种上传的文件格式
+  };
+
   return {
     ...exports,
     ...userConfig,

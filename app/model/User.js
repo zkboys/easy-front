@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = app => {
-  const { STRING, INTEGER, UUID, UUIDV4 } = app.Sequelize;
+  const { STRING, TEXT, INTEGER, UUID, UUIDV4 } = app.Sequelize;
 
   const User = app.model.define('user', {
     id: {
@@ -18,7 +18,7 @@ module.exports = app => {
     email: STRING(100),
     mobile: STRING(20),
     gender: INTEGER, // 1 男 2 女
-    avatar: STRING(200),
+    avatar: TEXT('long'),
     position: STRING(50),
     status: INTEGER,
     enable: INTEGER,

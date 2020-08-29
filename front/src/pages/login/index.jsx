@@ -45,6 +45,7 @@ export default class extends Component {
                 setLoginUser({
                     id,
                     name,
+                    ...res,
                 });
                 toHome();
             })

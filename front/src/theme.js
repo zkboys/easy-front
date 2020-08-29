@@ -7,7 +7,7 @@
 * 注：此文件修改之后，需要重新启动webpack才能生效：yarn start
 * */
 module.exports = {
-    '@primary-color': '#2F54EB',                         // 全局主色
+    '@primary-color': '#2f54eb',                         // 全局主色
     '@link-color': '@primary-color',                     // 链接色
     '@success-color': '#52c41a',                         // 成功色
     '@warning-color': '#faad14',                         // 警告色

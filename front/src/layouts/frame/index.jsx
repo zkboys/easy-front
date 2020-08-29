@@ -1,24 +1,24 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import {Spin} from 'antd';
-import {Helmet} from 'react-helmet';
-import {withRouter} from 'react-router-dom';
+import { Spin } from 'antd';
+import { Helmet } from 'react-helmet';
+import { withRouter } from 'react-router-dom';
 import PageHead from '../page-head';
 import Header from '../header';
 import Side from '../side';
 import PageTabs from '../page-tabs';
-import {connect} from 'src/models';
-import {getLoginUser, getSelectedMenuByPath, setLoginUser} from 'src/commons';
-import {PAGE_FRAME_LAYOUT} from 'src/models/settings';
+import { connect } from 'src/models';
+import { getLoginUser, getSelectedMenuByPath, setLoginUser } from 'src/commons';
+import { PAGE_FRAME_LAYOUT } from 'src/models/settings';
 import './style.less';
 
 @withRouter
 @connect(state => {
-    const {selectedMenu, menus} = state.menu;
-    const {title, breadcrumbs, showHead} = state.page;
-    const {show: showSide, width, collapsed, collapsedWidth, dragging} = state.side;
-    const {loading, loadingTip, isMobile} = state.system;
-    const {pageFrameLayout, pageHeadFixed, pageHeadShow, tabsShow} = state.settings;
+    const { selectedMenu, menus } = state.menu;
+    const { title, breadcrumbs, showHead } = state.page;
+    const { show: showSide, width, collapsed, collapsedWidth, dragging } = state.side;
+    const { loading, loadingTip, isMobile } = state.system;
+    const { pageFrameLayout, pageHeadFixed, pageHeadShow, tabsShow } = state.settings;
     return {
         menus,
         selectedMenu,
@@ -43,7 +43,7 @@ import './style.less';
 export default class FrameTopSideMenu extends Component {
     constructor(...props) {
         super(...props);
-        const {action: {menu, side, system}, isMobile} = this.props;
+        const { action: { menu, side, system }, isMobile } = this.props;
         // 从Storage中获取出需要同步到redux的数据
         this.props.action.getStateFromStorage();
 
@@ -53,13 +53,13 @@ export default class FrameTopSideMenu extends Component {
         // 获取系统菜单 和 随菜单携带过来的权限
         this.state.loading = true;
         menu.getMenus({
-            params: {userId},
+            params: { userId },
             onResolve: (res) => {
                 const menus = res || [];
                 const permissions = [];
                 const paths = [];
 
-                menus.forEach(({type, path, code}) => {
+                menus.forEach(({ type, path, code }) => {
                     if (type === '2' && code) permissions.push(code);
 
                     if (path) paths.push(path);
@@ -80,7 +80,7 @@ export default class FrameTopSideMenu extends Component {
                 system.setUserPaths(paths);
             },
             onComplete: () => {
-                this.setState({loading: false});
+                this.setState({ loading: false });
             },
         });
 
@@ -118,7 +118,7 @@ export default class FrameTopSideMenu extends Component {
 
     setTitleAndBreadcrumbs() {
         const {
-            action: {page},
+            action: { page },
             pageHeadShow,
             menus,
             title: prevTitle,
@@ -228,7 +228,7 @@ export default class FrameTopSideMenu extends Component {
 
             if (pageHeadFixed) {
                 pageHead = (
-                    <div className="frame-page-head-fixed" styleName={`page-head-fixed ${tabsShow ? 'with-tabs' : ''}`} style={{left: hasSide ? sideWidth : 0, transitionDuration}}>
+                    <div className="frame-page-head-fixed" styleName={`page-head-fixed ${tabsShow ? 'with-tabs' : ''}`} style={{ left: hasSide ? sideWidth : 0, transitionDuration }}>
                         {pageHead}
                     </div>
                 );
@@ -240,7 +240,7 @@ export default class FrameTopSideMenu extends Component {
         const titleText = title?.text || title;
         const titleIsString = typeof titleText === 'string';
 
-        const topSpaceClass = ['content-top-space'];
+        const topSpaceClass = [ 'content-top-space' ];
 
         if (showPageHead && pageHead && pageHeadFixed) topSpaceClass.push('with-fixed-page-head');
         if (tabsShow) topSpaceClass.push('with-tabs');
@@ -255,8 +255,8 @@ export default class FrameTopSideMenu extends Component {
                 <Side layout={layout} theme={theme}/>
                 <div styleName={topSpaceClass.join(' ')} className={topSpaceClass.join(' ')}/>
                 {pageHead}
-                {tabsShow ? <div styleName="page-tabs" id="frame-page-tabs" style={{left: sideWidthSpace, width: windowWidth - sideWidthSpace, transitionDuration}}><PageTabs width={windowWidth - sideWidthSpace}/></div> : null}
-                <div styleName="global-loading" style={{display: globalLoading ? 'block' : 'none'}}>
+                {tabsShow ? <div styleName="page-tabs" id="frame-page-tabs" style={{ left: sideWidthSpace, width: windowWidth - sideWidthSpace, transitionDuration }}><PageTabs width={windowWidth - sideWidthSpace}/></div> : null}
+                <div styleName="global-loading" style={{ display: globalLoading ? 'block' : 'none' }}>
                     <Spin spinning size="large" tip={globalLoadingTip}/>
                 </div>
             </div>
