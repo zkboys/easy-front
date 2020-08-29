@@ -9,6 +9,7 @@ import EditModal from './EditModal';
 import './style.less';
 
 @config({
+    pageHead: true,
     path: '/menu',
     title: { text: '菜单&权限', icon: 'lock' },
     ajax: true,

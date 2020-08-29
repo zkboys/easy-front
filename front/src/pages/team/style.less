@@ -1,3 +1,8 @@
+.root {
+    display: flex;
+    background: none;
+}
+
 .team-root {
     display: flex;
     flex-direction: row;
@@ -10,18 +15,41 @@
     display: flex;
     flex-direction: column;
     flex: 0 0 300px;
-    background: red;
+    background: #fff;
 
     .top {
-        flex: 0 0 150px;
-        background: #22224e;
+        flex: 0 0 110px;
+        background: darken(@primary-color, 30);
         color: #fff;
+        padding: 16px;
     }
 
     .menu {
         flex: 1;
         overflow-y: auto;
     }
+}
+
+.team-title {
+    display: flex;
+    align-items: center;
+
+    h1 {
+        flex: 1;
+        color: #fff;
+        margin: 0;
+    }
+
+    .team-operator {
+        flex: 0;
+        margin-left: 8px;
+        font-size: 18px;
+        cursor: pointer;
+    }
+}
+
+.team-description {
+    padding-top: 16px;
 }
 
 .detail {
@@ -45,3 +73,6 @@
     overflow-y: scroll;
 }
 
+.empty {
+    margin-top: 100px;
+}

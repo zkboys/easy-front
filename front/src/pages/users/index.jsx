@@ -19,6 +19,7 @@ import EditModal from './EditModal';
 import defaultAvatar from './default_avatar.jpeg';
 
 export default config({
+    pageHead: true,
     path: '/users',
     title: '用户管理',
 })(() => {

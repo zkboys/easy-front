@@ -14,6 +14,7 @@ import EditModal from './EditModal';
 import './style.less';
 
 @config({
+    pageHead: true,
     path: '/roles',
     ajax: true,
 })
