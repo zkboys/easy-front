@@ -87,9 +87,13 @@ module.exports = class UserController extends Controller {
 
     const { User, Role, Permission } = ctx.model;
 
-    const options = {
+    const page = 'pageNum' in ctx.query ? {
       offset: (pageNum - 1) * pageSize,
       limit: +pageSize,
+    } : undefined;
+
+    const options = {
+      ...page,
       include: {
         model: Role,
         where: roleId ? { id: roleId } : undefined,

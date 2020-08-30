@@ -10,7 +10,7 @@ import { Menu, Dropdown } from 'antd';
 import { toLogin, getLoginUser } from 'src/commons';
 import ModifyPassword from './ModifyPassword';
 import config from 'src/commons/config-hoc';
-import defaultAvatar from './default_avatar.jpeg';
+import { UserAvatar } from 'src/library/components';
 import './style.less';
 
 const Item = Menu.Item;
@@ -40,8 +40,6 @@ export default class HeaderUser extends Component {
         const user = getLoginUser() || {};
         let { name, avatar } = user;
 
-        avatar = avatar || defaultAvatar;
-
         const { className, theme } = this.props;
 
         const menu = (
@@ -56,7 +54,7 @@ export default class HeaderUser extends Component {
             <div styleName="user-menu" ref={node => this.userMenu = node}>
                 <Dropdown trigger="click" overlay={menu} getPopupContainer={() => (this.userMenu || document.body)}>
                     <span styleName="account" className={className}>
-                        <img styleName="avatar" src={avatar} alt="头像"/>
+                        <UserAvatar styleName="avatar" src={avatar} name={name}/>
                         <span styleName="user-name">{name}</span>
                         <CaretDownOutlined/>
                     </span>

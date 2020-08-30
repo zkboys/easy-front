@@ -8,13 +8,16 @@ import {
     FormOutlined,
     AppstoreOutlined,
     SolutionOutlined,
+    UserAddOutlined,
 } from '@ant-design/icons';
 import _ from 'lodash';
 import PageContent from 'src/layouts/page-content';
-import { useGet } from 'src/commons/ajax';
+import { useGet, usePost, usePut, useDel } from 'src/commons/ajax';
 import TeamModal from './TeamModal';
 import ProjectModal from 'src/pages/project/ProjectModal';
 import ProjectItem from 'src/pages/project/ProjectItem';
+import MemberItem from 'src/pages/team/MemberItem';
+import UserSelectModal from 'src/pages/users/UserSelectModal';
 
 import './style.less';
 
@@ -26,22 +29,27 @@ export default config({
     path: '/teams/:teamId/:tabId',
     connect: true,
 })(props => {
+    const { user } = props;
     const { params } = props.match;
     const [ height, setHeight ] = useState(document.documentElement.clientHeight - otherHeight);
     const [ teamId, setTeamId ] = useState(params.teamId);
     const [ tabId, setTabId ] = useState(params.tabId === ':tabId' ? 'project' : params.tabId);
-    // const [ teams, setTeams ] = useState([]);
-    const [ teams, setTeams ] = useState([ { id: '1', name: '测试团队', description: '测试团队描述' }, { id: '2', name: '研发中心', description: '描述' } ]);
+    const [ teams, setTeams ] = useState([]);
+    // const [ teams, setTeams ] = useState([ { id: '1', name: '测试团队', description: '测试团队描述' }, { id: '2', name: '研发中心', description: '描述' } ]);
     const [ projects, setProjects ] = useState([]);
     const [ members, setMembers ] = useState([]);
     const [ dynamics, setDynamics ] = useState([]);
     const [ teamVisible, setTeamVisible ] = useState(false);
     const [ projectVisible, setProjectVisible ] = useState(false);
+    const [ memberVisible, setMemberVisible ] = useState(false);
     const [ isTeamEdit, setIsTeamEdit ] = useState(false);
 
     const [ teamsLoading, fetchTeams ] = useGet('/teams');
     const [ projectLoading, fetchProjects ] = useGet('/projects');
     const [ memberLoading, fetchMembers ] = useGet('/teams/:id/members');
+    const [ addMemberLoading, addMembers ] = usePost('/teams/:id/members');
+    const [ updateMemberLoading, updateMember ] = usePut('/teams/:id/members/:memberId');
+    const [ deleteMemberLoading, deleteMember ] = useDel('/teams/:id/members/:memberId');
     const [ dynamicLoading, fetchDynamics ] = useGet('/teams/:id/dynamics');
 
 
@@ -91,6 +99,42 @@ export default config({
         setProjectVisible(true);
     }
 
+    function handleAddMember() {
+        setMemberVisible(true);
+    }
+
+    // 添加成员
+    async function handleAddMemberSubmit(values) {
+        const { userId, role } = values;
+
+        await addMembers({ id: teamId, userIds: userId, role }, { successTip: '添加成员成功！' });
+
+        await getMembers();
+        await getTeams();
+
+        setMemberVisible(false);
+    }
+
+    // 修改成员
+    async function handleMemberChange(memberId, role) {
+        await updateMember({ id: teamId, memberId, role }, { successTip: '角色修改成功！' });
+
+        await getMembers();
+    }
+
+    // 删除成员
+    async function handleMemberDelete(memberId) {
+        await deleteMember({ id: teamId, memberId }, { successTip: '删除成功！' });
+        await getMembers();
+        await getTeams();
+    }
+
+    async function handleMemberLeave(memberId) {
+        await deleteMember({ id: teamId, memberId }, { successTip: '离开成功！' });
+
+        props.history.replace('/');
+    }
+
     const handleSearchProject = _.debounce((e) => {
         // 获取不到e.target
         const input = document.getElementById('search-project');
@@ -103,6 +147,20 @@ export default config({
             item._hide = !name?.includes(value);
         });
         setProjects([ ...projects ]);
+    }, 100);
+
+    const handleSearchMember = _.debounce((e) => {
+        // 获取不到e.target
+        const input = document.getElementById('search-member');
+        const value = input.value;
+        members.forEach(item => {
+            const { name, account } = item;
+
+            if (!value) return item._hide = false;
+
+            item._hide = !name?.includes(value) && !account?.includes(value);
+        });
+        setProjects([ ...members ]);
     }, 100);
 
     const handleSearchTeam = _.debounce((e) => {
@@ -156,6 +214,9 @@ export default config({
     const team = teams.find(item => item.id === teamId) || { name: '暂无团队' };
     const showProjects = projects.filter(item => !item._hide);
     const showTeams = teams.filter(item => !item._hide);
+    const showMembers = members.filter(item => !item._hide);
+
+    const isTeamOwner = user.isAdmin || team?.users?.find(item => item.id === user.id && item.team_user?.role === 'owner');
 
     return (
         <PageContent
@@ -164,6 +225,8 @@ export default config({
                 teamsLoading ||
                 projectLoading ||
                 memberLoading ||
+                updateMemberLoading ||
+                deleteMemberLoading ||
                 dynamicLoading
             }
         >
@@ -255,8 +318,40 @@ export default config({
                             </div>
                         </TabPane>
                         <TabPane tab={<span><TeamOutlined/> 团队成员</span>} key="member">
+                            <div styleName="pan-operator">
+                                <span style={{ flex: 1, marginLeft: 0 }}>
+                                    当前团队共{members.length}个成员
+                                </span>
+                                <Input
+                                    id="search-member"
+                                    allowClear
+                                    style={{ width: 200, height: 28 }}
+                                    placeholder="输入成员名称进行搜索"
+                                    onChange={handleSearchMember}
+                                />
+                                {isTeamOwner ? <Button type="primary" onClick={handleAddMember}> <UserAddOutlined/> 添加成员</Button> : null}
+                            </div>
                             <div styleName="pan-content" style={{ height }}>
-                                这里是团队成员
+                                {showMembers?.length ? (
+                                    showMembers.map(member => {
+                                        return (
+                                            <MemberItem
+                                                isOwner={isTeamOwner}
+                                                data={member}
+                                                onRoleChange={handleMemberChange}
+                                                onDelete={handleMemberDelete}
+                                                onLeave={handleMemberLeave}
+                                            />
+                                        );
+                                    })
+                                ) : (
+                                    <Empty
+                                        styleName="empty"
+                                        description={members?.length ? '无匹配成员' : '此团队还没有成员'}
+                                    >
+                                        {members?.length ? null : <Button type="primary" onClick={UserAddOutlined}> <AppstoreAddOutlined/> 添加成员</Button>}
+                                    </Empty>
+                                )}
                             </div>
                         </TabPane>
                         <TabPane tab={<span><SolutionOutlined/> 团队动态</span>} key="dynamic">
@@ -287,11 +382,22 @@ export default config({
                 teamId={teamId}
                 teams={teams}
                 disabledTeam
-                onOk={async () => {
+                onOk={async (data) => {
+                    console.log(data);
                     setProjectVisible(false);
                     await getProjects();
+
+                    // TODO 项目创建成功之后，跳转到项目页面
                 }}
                 onCancel={() => setProjectVisible(false)}
+            />
+            <UserSelectModal
+                loading={addMemberLoading}
+                multiple
+                exclude={team?.users?.map(item => item.id)}
+                visible={memberVisible}
+                onOk={handleAddMemberSubmit}
+                onCancel={() => setMemberVisible(false)}
             />
         </PageContent>
     );

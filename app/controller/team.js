@@ -107,4 +107,96 @@ module.exports = class TeamController extends Controller {
 
     ctx.success(result);
   }
+
+  // 查询成员
+  async members(ctx) {
+    ctx.validate({
+      id: 'string',
+    }, ctx.params);
+
+    const { id } = ctx.params;
+    const { Team } = ctx.model;
+
+    const team = await Team.findByPk(id);
+    if (!team) ctx.fail('团队不存在，或已删除');
+
+    const result = await team.getUsers();
+
+    ctx.success(result);
+  }
+
+  // 添加成员
+  async addMembers(ctx) {
+    ctx.validate({
+      id: 'string',
+    }, ctx.params);
+
+    ctx.validate({
+      userIds: 'array',
+      role: [ 'master', 'member' ],
+    }, ctx.request.body);
+
+    const { id } = ctx.params;
+    const { userIds, role } = ctx.request.body;
+
+    const { Team, TeamUser } = ctx.model;
+
+    const team = await Team.findByPk(id);
+    if (!team) ctx.fail('团队不存在，或已删除');
+
+    const users = userIds.map(userId => ({ userId, role, teamId: id }));
+
+    const result = await TeamUser.bulkCreate(users);
+
+    ctx.success(result);
+  }
+
+  // 修改成员
+  async updateMember(ctx) {
+    ctx.validate({
+      id: 'string',
+      memberId: 'string',
+    }, ctx.params);
+
+    ctx.validate({
+      role: [ 'master', 'member' ],
+    }, ctx.request.body);
+
+    const { id, memberId } = ctx.params;
+    const { role } = ctx.request.body;
+
+    const { TeamUser } = ctx.model;
+
+    const teamUser = await TeamUser.findOne({
+      where: {
+        teamId: id,
+        userId: memberId,
+      },
+    });
+
+    if (!teamUser) ctx.fail('记录不存在，或已删除');
+
+    const result = await teamUser.update({ role });
+    ctx.success(result);
+  }
+
+  // 删除成员
+  async deleteMember(ctx) {
+    ctx.validate({
+      id: 'string',
+      memberId: 'string',
+    }, ctx.params);
+
+    const { id, memberId } = ctx.params;
+    const { TeamUser } = ctx.model;
+
+    const result = await TeamUser.destroy({
+      where: {
+        teamId: id,
+        userId: memberId,
+      },
+    });
+
+    ctx.success(result);
+  }
 };

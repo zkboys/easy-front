@@ -64,6 +64,11 @@ module.exports = app => {
   api.post('/teams', team.create);
   api.put('/teams/:id', permission.team.owner, team.update);
   api.del('/teams/:id', permission.team.owner, team.destroy);
+  api.get('/teams/:id/members', permission.team.owner, team.members);
+  api.post('/teams/:id/members', permission.team.owner, team.addMembers);
+  api.put('/teams/:id/members/:memberId', permission.team.owner, team.updateMember);
+  api.del('/teams/:id/members/:memberId', permission.team.owner, team.deleteMember);
+
 
   // 项目 crud
   api.get('/projects', project.index);

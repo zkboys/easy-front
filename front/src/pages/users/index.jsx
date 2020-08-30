@@ -13,10 +13,10 @@ import {
     Pagination,
     QueryBar,
     Table,
+    UserAvatar,
 } from 'src/library/components';
 
 import EditModal from './EditModal';
-import defaultAvatar from './default_avatar.jpeg';
 
 export default config({
     pageHead: true,
@@ -64,18 +64,14 @@ export default config({
             render: (name, record) => {
                 let { avatar } = record;
 
-                if (!avatar) avatar = defaultAvatar;
 
                 return (
                     <>
-                        <img
+                        <UserAvatar
                             src={avatar}
-                            alt="头像"
+                            name={name}
                             style={{
-                                width: 30,
-                                height: 30,
                                 marginRight: 8,
-                                borderRadius: '50%',
                             }}
                         />
                         {name}
@@ -93,7 +89,7 @@ export default config({
                         mode="multiple"
                         allowClear
                         showSearch
-                        optionFilterProp="children"
+                        optionFilterProp="label"
                         value={roleIds}
                         onChange={(ids) => handleRolesChange(ids, recode)}
                         options={roleOptions}
