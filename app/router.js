@@ -41,7 +41,7 @@ module.exports = app => {
   api.del('/users/:id', permission.admin, user.destroy);
 
   // 同步微信用户、组织架构
-  api.post('/syncWeChat', user.syncWeChat);
+  api.post('/syncWeChat', permission.admin, user.syncWeChat);
   // 修改密码
   api.put('/updatePassword', user.updatePassword);
   // 关联角色
