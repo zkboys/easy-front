@@ -1,7 +1,7 @@
-import {session} from 'src/library/utils/storage';
-import {getNodeByPropertyAndValue, convertToTree} from 'src/library/utils/tree-utils';
-import {pathToRegexp} from 'path-to-regexp';
-import {ROUTE_BASE_NAME} from 'src/router/AppRouter';
+import { session } from 'src/library/utils/storage';
+import { getNodeByPropertyAndValue, convertToTree } from 'src/library/utils/tree-utils';
+import { pathToRegexp } from 'path-to-regexp';
+import { ROUTE_BASE_NAME } from 'src/router/AppRouter';
 
 const LOGIN_USER_STORAGE_KEY = 'login-user';
 
@@ -23,7 +23,7 @@ export function hasPermission(code) {
  */
 export function setLoginUser(loginUser = {}) {
     // 将用户属性在这里展开，方便查看系统都用到了那些用户属性
-    const {id, name, avatar, token, permissions, ...others} = loginUser;
+    const { id, name, avatar, token, permissions, ...others } = loginUser;
     const userStr = JSON.stringify({
         id,             // 用户id 必须
         name,           // 用户名 必须
@@ -149,7 +149,7 @@ export function getMenuTreeDataAndPermissions(menus) {
     });
 
     // 菜单根据order 排序
-    const orderedData = [...menus].sort((a, b) => {
+    const orderedData = [ ...menus ].sort((a, b) => {
         const aOrder = a.order || 0;
         const bOrder = b.order || 0;
 
@@ -185,6 +185,24 @@ export function getMenuTreeDataAndPermissions(menus) {
     });
 
     const menuTreeData = convertToTree(orderedData);
-    return {menuTreeData, permissions};
+    return { menuTreeData, permissions };
+}
+
+
+const colors = [
+    'rgb(80, 193, 233)',
+    'rgb(255, 190, 26)',
+    '#2f54eb',
+    'rgb(169, 109, 243)',
+    'rgb(253, 117, 80)',
+    'rgb(103, 197, 12)',
+    'rgb(80, 193, 233)',
+    'rgb(103, 197, 12)',
+];
+
+// 根据字符获取颜色
+export function getColor(str) {
+    if (!str) return colors[0];
+    return colors[str.charCodeAt(0) % colors.length];
 }
 

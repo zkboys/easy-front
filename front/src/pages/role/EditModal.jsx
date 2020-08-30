@@ -7,7 +7,8 @@ import { ModalContent } from 'src/library/components';
 @config({
     ajax: true,
     modal: {
-        title: props => props.isEdit ? '修改' : '添加',
+        title: props => props.isEdit ? '修改角色' : '创建角色',
+        width: 500,
     },
 })
 export default class EditModal extends Component {

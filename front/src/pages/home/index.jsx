@@ -10,7 +10,7 @@ export default config({
     breadcrumbs: [ { key: 'home', text: '首页', icon: 'home' } ],
 })(props => {
     useEffect(() => {
-        props.history.replace('/team/:teamId/:tabId');
+        props.history.replace('/teams/:teamId/:tabId');
     }, []);
     return (
         <PageContent>

@@ -6,7 +6,10 @@ import { ModalContent } from 'src/library/components';
 import { useGet, usePost, usePut } from 'src/commons/ajax';
 
 export default config({
-    modal: props => props.isEdit ? '修改用户' : '添加用户',
+    modal: {
+        title: props => props.isEdit ? '修改用户' : '创建用户',
+        width: 500,
+    },
 })(props => {
     const [ data, setData ] = useState({});
     const { isEdit, id, onOk } = props;

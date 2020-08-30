@@ -1,6 +1,13 @@
 .root {
     display: flex;
     background: none;
+
+    :global {
+        .ant-tabs-nav .ant-tabs-tab .anticon {
+            margin-right: 0;
+            font-size: 14px;
+        }
+    }
 }
 
 .team-root {
@@ -22,6 +29,21 @@
         background: darken(@primary-color, 30);
         color: #fff;
         padding: 16px;
+
+        :global {
+            .ant-input-affix-wrapper {
+                background: none;
+            }
+
+            input {
+                background: none;
+                color: #fff;
+            }
+
+            .ant-input-suffix svg {
+                color: #fff;
+            }
+        }
     }
 
     .menu {
@@ -49,7 +71,7 @@
 }
 
 .team-description {
-    padding-top: 16px;
+    padding: 16px 0;
 }
 
 .detail {
@@ -67,12 +89,33 @@
     }
 }
 
+.pan-operator {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    height: 50px;
+    background: #fff;
+    border-bottom: 1px solid #e8e8e8;
+    padding: 0 24px;
+
+    & > * {
+        margin-left: 8px;
+    }
+}
+
 .pan-content {
     height: 100%;
     background: #fff;
     overflow-y: auto;
+    padding: 16px;
 }
 
 .empty {
     margin-top: 100px;
 }
+
+.project-wrap {
+    display: flex;
+    flex-flow: wrap;
+}
+

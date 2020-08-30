@@ -37,6 +37,16 @@ module.exports = app => {
     app.model.User.belongsToMany(app.model.Department, {
       through: app.model.DepartmentUser,
     });
+
+    // 与Team存在多对多关系，使用belongsToMany()
+    app.model.User.belongsToMany(app.model.Team, {
+      through: app.model.TeamUser,
+    });
+
+    // 与Project存在多对多关系，使用belongsToMany()
+    app.model.User.belongsToMany(app.model.Project, {
+      through: app.model.ProjectUser,
+    });
   };
 
   return User;

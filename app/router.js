@@ -10,6 +10,8 @@ module.exports = app => {
     user,
     role,
     menu,
+    team,
+    project,
   } = controller;
 
   // 登录
@@ -49,6 +51,12 @@ module.exports = app => {
 
   // 菜单 crud
   api.resources('/menus', menu);
+
+  // 团队 crud
+  api.resources('/teams', team);
+
+  // 项目 crud
+  api.resources('/projects', project);
 
   // 未捕获请求，返回404
   api.get('/*', async ctx => {

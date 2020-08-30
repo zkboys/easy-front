@@ -3,22 +3,20 @@ const { Op } = require('sequelize');
 const Controller = require('egg').Controller;
 
 module.exports = class RoleController extends Controller {
-  // 查询角色
+  // 查询
   async index(ctx) {
     const { name } = ctx.query;
 
     const { Role } = ctx.model;
 
-    const conditions = [];
-
-    if (name) conditions.push({ name: { [Op.like]: `%${name.trim()}%` } });
-
     const options = {
       where: {
-        [Op.and]: [ conditions ],
+        [Op.and]: [
+          name ? { name: { [Op.like]: `%${name.trim()}%` } } : undefined,
+        ],
       },
       order: [
-        [ 'updatedAt', 'ASC' ],
+        [ 'updatedAt', 'DESC' ],
       ],
     };
 
@@ -27,7 +25,7 @@ module.exports = class RoleController extends Controller {
     ctx.success(result);
   }
 
-  // 获取角色详情
+  // 获取详情
   async show(ctx) {
     ctx.validate({
       id: 'string',
@@ -44,7 +42,7 @@ module.exports = class RoleController extends Controller {
     ctx.success(result);
   }
 
-  // 创建角色
+  // 创建
   async create(ctx) {
     const requestBody = ctx.request.body;
     const Role = ctx.model.Role;
@@ -64,7 +62,7 @@ module.exports = class RoleController extends Controller {
     return ctx.success(savedRole);
   }
 
-  // 更新角色
+  // 更新
   async update(ctx) {
     const requestBody = ctx.request.body;
 
@@ -91,7 +89,7 @@ module.exports = class RoleController extends Controller {
     ctx.success(result);
   }
 
-  // 删除角色
+  // 删除
   async destroy(ctx) {
     ctx.validate({
       id: 'string',
