@@ -206,3 +206,7 @@ export function getColor(str) {
     return colors[str.charCodeAt(0) % colors.length];
 }
 
+export const roleOptions = [
+    { value: 'master', label: '管理员', color: '#f50' },
+    { value: 'member', label: '普通成员', color: '#2db7f5' },
+];

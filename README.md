@@ -77,4 +77,6 @@ $ npm run deploy
 - [路由 egg-router-plus](https://github.com/eggjs/egg-router-plus)
 - [校验 egg-validate](https://github.com/eggjs/egg-validate)
 
+## TODO
+- [ ] 同一路由规则下，浏览器前进后退无效
 [egg]: https://eggjs.org

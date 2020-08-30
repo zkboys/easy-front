@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import config from 'src/commons/config-hoc';
-import { Tabs, Menu, Tooltip, Empty, Button, Input } from 'antd';
+import { Tabs, Menu, Tooltip, Empty, Button, Input, Modal } from 'antd';
 import {
     TeamOutlined,
     AppstoreAddOutlined,
@@ -35,6 +35,7 @@ export default config({
     const [ teamId, setTeamId ] = useState(params.teamId);
     const [ tabId, setTabId ] = useState(params.tabId === ':tabId' ? 'project' : params.tabId);
     const [ teams, setTeams ] = useState([]);
+    const [ team, setTeam ] = useState({});
     // const [ teams, setTeams ] = useState([ { id: '1', name: '测试团队', description: '测试团队描述' }, { id: '2', name: '研发中心', description: '描述' } ]);
     const [ projects, setProjects ] = useState([]);
     const [ members, setMembers ] = useState([]);
@@ -45,6 +46,7 @@ export default config({
     const [ isTeamEdit, setIsTeamEdit ] = useState(false);
 
     const [ teamsLoading, fetchTeams ] = useGet('/teams');
+    const [ teamLoading, fetchTeam ] = useGet('/teams/:id');
     const [ projectLoading, fetchProjects ] = useGet('/projects');
     const [ memberLoading, fetchMembers ] = useGet('/teams/:id/members');
     const [ addMemberLoading, addMembers ] = usePost('/teams/:id/members');
@@ -184,6 +186,12 @@ export default config({
         setHeight(height);
     }, 100);
 
+    const handlePopState = () => {
+        const [ , , teamId, tabId ] = window.location.pathname.split('/');
+        setTeamId(teamId);
+        setTabId(tabId);
+    };
+
     useEffect(() => {
         (async () => {
             const teams = await getTeams();
@@ -194,16 +202,54 @@ export default config({
         })();
 
         window.addEventListener('resize', handleWindowResize);
+        window.addEventListener('popstate', handlePopState);
         return () => {
             window.removeEventListener('resize', handleWindowResize);
+            window.removeEventListener('popstate', handlePopState);
         };
     }, []);
 
+    // teamId改变 获取 team详情
+    useEffect(() => {
+        (async () => {
+            if (!teamId || teamId === ':teamId') return;
+
+            try {
+                const team = await fetchTeam(teamId);
+                if (!team) {
+                    return Modal.info({
+                        title: '提示',
+                        content: '此团队已被删除！',
+                        okText: '返回首页',
+                        onOk: () => props.history.replace('/'),
+                    });
+                }
+                setTeam(team);
+            } catch (e) {
+                if (e?.response?.status === 403) {
+                    Modal.info({
+                        title: '提示',
+                        content: '您暂未加入此团队，请联系团队管理员将您加入！',
+                        okText: '返回首页',
+                        onOk: () => props.history.replace('/'),
+                    });
+                }
+            }
+        })();
+    }, [ teamId ]);
 
     // teamId 或者 tabId 改变 获取对应的资源
     useEffect(() => {
         (async () => {
-            if (!teamId || teamId === ':teamId' || !tabId || tabId === ':tabId') return;
+            if ((!teamId || teamId === ':teamId') && teams?.length) {
+                return handleMenuClick({ key: teams[0]?.id });
+            }
+
+            if (!tabId || tabId === ':tabId') {
+                return handleTabChange('project');
+            }
+
+            if (!teamId || teamId === ':teamId') return;
 
             if (tabId === 'project') await getProjects();
             if (tabId === 'member') await getMembers();
@@ -211,12 +257,12 @@ export default config({
         })();
     }, [ teamId, tabId ]);
 
-    const team = teams.find(item => item.id === teamId) || { name: '暂无团队' };
+
     const showProjects = projects.filter(item => !item._hide);
     const showTeams = teams.filter(item => !item._hide);
     const showMembers = members.filter(item => !item._hide);
 
-    const isTeamOwner = user.isAdmin || team?.users?.find(item => item.id === user.id && item.team_user?.role === 'owner');
+    const isTeamMaster = user.isAdmin || team?.users?.find(item => item.id === user.id && ([ 'owner', 'master' ].includes(item.team_user?.role)));
 
     return (
         <PageContent
@@ -236,10 +282,11 @@ export default config({
                         <div styleName="team-title">
                             <h1>{team.name}</h1>
 
-                            {/* TODO 只有管理员才可以修改 */}
-                            <Tooltip title="修改团队" placement="right">
-                                <FormOutlined styleName="team-operator" onClick={handleEditTeam}/>
-                            </Tooltip>
+                            {isTeamMaster ? (
+                                <Tooltip title="修改团队" placement="right">
+                                    <FormOutlined styleName="team-operator" onClick={handleEditTeam}/>
+                                </Tooltip>
+                            ) : null}
 
                             <Tooltip title="创建团队" placement="right">
                                 <UsergroupAddOutlined styleName="team-operator" onClick={handleCreateTeam}/>
@@ -329,14 +376,14 @@ export default config({
                                     placeholder="输入成员名称进行搜索"
                                     onChange={handleSearchMember}
                                 />
-                                {isTeamOwner ? <Button type="primary" onClick={handleAddMember}> <UserAddOutlined/> 添加成员</Button> : null}
+                                {isTeamMaster ? <Button type="primary" onClick={handleAddMember}> <UserAddOutlined/> 添加成员</Button> : null}
                             </div>
                             <div styleName="pan-content" style={{ height }}>
                                 {showMembers?.length ? (
                                     showMembers.map(member => {
                                         return (
                                             <MemberItem
-                                                isOwner={isTeamOwner}
+                                                isMaster={isTeamMaster}
                                                 data={member}
                                                 onRoleChange={handleMemberChange}
                                                 onDelete={handleMemberDelete}

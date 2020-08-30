@@ -1,6 +1,7 @@
 import React from 'react';
 import { Form } from 'antd';
 import { FormElement } from 'src/library/components';
+import { roleOptions } from 'src/commons';
 import config from 'src/commons/config-hoc';
 import { ModalContent } from 'src/library/components';
 import UserSelect from './UserSelect';
@@ -49,10 +50,7 @@ export default config({
                     label="角色"
                     name="role"
                     required
-                    options={[
-                        { value: 'master', label: '管理员' },
-                        { value: 'member', label: '普通成员' },
-                    ]}
+                    options={roleOptions}
                 />
             </Form>
         </ModalContent>

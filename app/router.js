@@ -62,20 +62,20 @@ module.exports = app => {
   api.get('/teams', team.index);
   api.get('/teams/:id', permission.team.member, team.show);
   api.post('/teams', team.create);
-  api.put('/teams/:id', permission.team.owner, team.update);
-  api.del('/teams/:id', permission.team.owner, team.destroy);
-  api.get('/teams/:id/members', permission.team.owner, team.members);
-  api.post('/teams/:id/members', permission.team.owner, team.addMembers);
-  api.put('/teams/:id/members/:memberId', permission.team.owner, team.updateMember);
-  api.del('/teams/:id/members/:memberId', permission.team.owner, team.deleteMember);
+  api.put('/teams/:id', permission.team.master, team.update);
+  api.del('/teams/:id', permission.team.master, team.destroy);
+  api.get('/teams/:id/members', permission.team.member, team.members);
+  api.post('/teams/:id/members', permission.team.master, team.addMembers);
+  api.put('/teams/:id/members/:memberId', permission.team.master, team.updateMember);
+  api.del('/teams/:id/members/:memberId', permission.team.master, team.deleteMember);
 
 
   // 项目 crud
   api.get('/projects', project.index);
   api.get('/projects/:id', permission.project.member, project.show);
   api.post('/projects', project.create);
-  api.put('/projects/:id', permission.project.owner, project.update);
-  api.del('/projects/:id', permission.project.owner, project.destroy);
+  api.put('/projects/:id', permission.project.master, project.update);
+  api.del('/projects/:id', permission.project.master, project.destroy);
 
   // 未捕获请求，返回404
   api.get('/*', async ctx => {

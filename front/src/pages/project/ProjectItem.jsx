@@ -4,16 +4,18 @@ import { Link } from 'react-router-dom';
 import { FormOutlined, TeamOutlined, StarOutlined, DeleteOutlined, LogoutOutlined } from '@ant-design/icons';
 import config from 'src/commons/config-hoc';
 import { getColor } from 'src/commons';
+import RoleTag from 'src/components/role-tag';
 import ProjectModal from './ProjectModal';
 import './style-item.less';
 
 export default config({})(props => {
-    const { data = {}, onEdit } = props;
+    const { data = {}, onEdit, user } = props;
     const [ visible, setVisible ] = useState(false);
 
-    const { id, name, description, team = {} } = data;
+    const { id, name, description, team = {}, users = [] } = data;
 
     const color = getColor(team.name);
+    const role = users.find(item => item.id === user.id)?.project_user?.role;
 
     return (
         <div styleName="root">
@@ -44,12 +46,11 @@ export default config({})(props => {
                 </div>
             </div>
 
-            <div styleName="footer" style={{
-                borderColor: color,
-            }}>
+            <div styleName="footer" style={{ borderColor: color }}>
                 <Link to={`/teams/${team.id}/project`}>
                     <TeamOutlined/>{team.name}
                 </Link>
+                <RoleTag role={role}/>
             </div>
             <ProjectModal
                 visible={visible}

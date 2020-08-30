@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Form } from 'antd';
+import { Form, Alert } from 'antd';
 import { FormElement } from 'src/library/components';
 import config from 'src/commons/config-hoc';
 import { ModalContent } from 'src/library/components';
@@ -53,6 +53,7 @@ export default config({
             onOk={() => form.submit()}
             onCancel={() => form.resetFields()}
         >
+            {!isEdit ? <Alert type="warning" style={{ marginBottom: 16 }} message="当前团队中所有成员将自动加入到此项目中"/> : null}
             <Form
                 form={form}
                 onFinish={handleSubmit}

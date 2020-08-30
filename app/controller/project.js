@@ -59,16 +59,39 @@ module.exports = class ProjectController extends Controller {
       description: 'string?',
     }, requestBody);
 
-    const { name } = requestBody;
+    const { name, teamId } = requestBody;
+    const { TeamUser, ProjectUser } = ctx.model;
 
+    // fixme 是否判断当前团队不重复即可？
     const foundProject = await Project.findOne({ where: { name } });
     if (foundProject) return ctx.fail('此项目名已存在');
 
-    const savedProject = await user.createProject({ ...requestBody }, {
-      through: { role: 'owner' },
-    });
+    // 事务处理
+    // 多次数据库操作，进行事务处理
+    let transaction;
+    try {
+      transaction = await ctx.model.transaction();
 
-    return ctx.success(savedProject);
+      const savedProject = await user.createProject({ ...requestBody }, {
+        transaction,
+        through: { role: 'owner' },
+      });
+
+      // 将团队中所有的成员，加入到项目中
+      const teamUsers = await TeamUser.findAll({ transaction, where: { teamId } });
+      const users = teamUsers
+        .filter(item => item.userId !== user.id) // 排除自身
+        .map(item => ({ projectId: savedProject.id, userId: item.userId, role: item.role }));
+
+      await ProjectUser.bulkCreate(users, { transaction });
+
+      await transaction.commit();
+      ctx.success(savedProject);
+    } catch (e) {
+      if (transaction) await transaction.rollback();
+
+      throw e;
+    }
   }
 
   // 更新

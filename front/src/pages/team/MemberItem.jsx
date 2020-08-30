@@ -5,12 +5,13 @@ import {
     LogoutOutlined,
 } from '@ant-design/icons';
 import config from 'src/commons/config-hoc';
+import {roleOptions} from 'src/commons';
 import { UserAvatar } from 'src/library/components';
 import './style-member.less';
 
 export default config({})(props => {
     const {
-        isOwner,
+        isMaster,
         user,
         data = {},
         onRoleChange,
@@ -41,20 +42,19 @@ export default config({})(props => {
             <div styleName="email">{email}</div>
             <div styleName="role">
                 {role === 'owner' ? '创建者' : (
-                    <Select
-                        value={role}
-                        onChange={handleRoleChange}
-                        style={{ width: 200 }}
-                        placeholder="请选择成员角色"
-                        options={[
-                            { value: 'master', label: '管理员' },
-                            { value: 'member', label: '普通成员' },
-                        ]}
-                    />
+                    isMaster ? (
+                        <Select
+                            value={role}
+                            onChange={handleRoleChange}
+                            style={{ width: 200 }}
+                            placeholder="请选择成员角色"
+                            options={roleOptions}
+                        />
+                    ) : roleOptions.find(item => item.value === role)?.label
                 )}
             </div>
             <div styleName="operator">
-                {isOwner && role !== 'owner' ? (
+                {isMaster && role !== 'owner' ? (
                     <Tooltip title="移除" placement="right">
                         <Popconfirm
                             okType="danger"
