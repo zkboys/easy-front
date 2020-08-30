@@ -1,6 +1,7 @@
 'use strict';
 const path = require('path');
 const fs = require('fs');
+const permission = require('./middleware/permission');
 
 module.exports = app => {
   const { router, controller } = app;
@@ -33,30 +34,43 @@ module.exports = app => {
   // api.put('/users', user.update);
   // // 删除用户
   // api.del('/users/:id', user.destroy);
-  api.resources('/users', user);
+  api.get('/users', user.index);
+  api.get('/users/:id', user.show);
+  api.post('/users', permission.admin, user.create);
+  api.put('/users/:id', permission.admin, user.update);
+  api.del('/users/:id', permission.admin, user.destroy);
+
   // 同步微信用户、组织架构
   api.post('/syncWeChat', user.syncWeChat);
   // 修改密码
   api.put('/updatePassword', user.updatePassword);
   // 关联角色
-  api.put('/relateUserRoles', user.relateUserRoles);
+  api.put('/relateUserRoles', permission.admin, user.relateUserRoles);
   // 获取当前登录用户菜单
   api.get('/sessionUserMenus', user.sessionUserMenus);
   api.post('/uploadUserAvatar', user.uploadUserAvatar);
 
   // 角色 crud
-  api.resources('/roles', role);
+  api.resources('/roles', permission.admin, role);
   // 关联菜单
-  api.put('/relateRoleMenus', role.relateRoleMenus);
+  api.put('/relateRoleMenus', permission.admin, role.relateRoleMenus);
 
   // 菜单 crud
-  api.resources('/menus', menu);
+  api.resources('/menus', permission.admin, menu);
 
   // 团队 crud
-  api.resources('/teams', team);
+  api.get('/teams', team.index);
+  api.get('/teams/:id', permission.team.member, team.show);
+  api.post('/teams', team.create);
+  api.put('/teams/:id', permission.team.owner, team.update);
+  api.del('/teams/:id', permission.team.owner, team.destroy);
 
   // 项目 crud
-  api.resources('/projects', project);
+  api.get('/projects', project.index);
+  api.get('/projects/:id', permission.project.member, project.show);
+  api.post('/projects', project.create);
+  api.put('/projects/:id', permission.project.owner, project.update);
+  api.del('/projects/:id', permission.project.owner, project.destroy);
 
   // 未捕获请求，返回404
   api.get('/*', async ctx => {

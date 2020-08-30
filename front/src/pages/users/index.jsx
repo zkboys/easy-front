@@ -58,6 +58,7 @@ export default config({
     };
 
     const columns = [
+        { title: '账号', dataIndex: 'account', width: 200 },
         {
             title: '用户名', dataIndex: 'name', width: 200,
             render: (name, record) => {

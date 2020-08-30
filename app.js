@@ -30,6 +30,7 @@ module.exports = app => {
         jobNumber: 'admin',
         password: defaultPassword,
         name: '管理员',
+        isAdmin: true,
         email: 'admin@qq.com',
       });
 

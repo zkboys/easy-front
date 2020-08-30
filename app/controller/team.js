@@ -5,14 +5,19 @@ const Controller = require('egg').Controller;
 module.exports = class TeamController extends Controller {
   // 查询
   async index(ctx) {
+    const user = ctx.user;
     const { name } = ctx.query;
-    const { Team } = ctx.model;
+    const { Team, User } = ctx.model;
 
     const options = {
       where: {
         [Op.and]: [
           name ? { name: { [Op.like]: `%${name.trim()}%` } } : undefined,
         ],
+      },
+      include: {
+        model: User,
+        where: user.isAdmin ? undefined : { id: user.id },
       },
       order: [
         [ 'updatedAt', 'DESC' ],
@@ -31,7 +36,7 @@ module.exports = class TeamController extends Controller {
     }, ctx.params);
 
     const { id } = ctx.params;
-    const { Team, Menu } = ctx.model;
+    const { Team } = ctx.model;
 
     const result = await Team.findByPk(id);
 
@@ -40,6 +45,7 @@ module.exports = class TeamController extends Controller {
 
   // 创建
   async create(ctx) {
+    const user = ctx.user;
     const requestBody = ctx.request.body;
     const Team = ctx.model.Team;
 
@@ -53,13 +59,16 @@ module.exports = class TeamController extends Controller {
     const foundTeam = await Team.findOne({ where: { name } });
     if (foundTeam) return ctx.fail('此团队名已存在');
 
-    const savedTeam = await Team.create({ ...requestBody });
+    const savedTeam = await user.createTeam({ ...requestBody }, {
+      through: { role: 'owner' },
+    });
 
     return ctx.success(savedTeam);
   }
 
   // 更新
   async update(ctx) {
+    const user = ctx.user;
     const requestBody = ctx.request.body;
 
     ctx.validate({
@@ -93,6 +102,7 @@ module.exports = class TeamController extends Controller {
 
     const { id } = ctx.params;
     const { Team } = ctx.model;
+
     const result = await Team.destroy({ where: { id } });
 
     ctx.success(result);

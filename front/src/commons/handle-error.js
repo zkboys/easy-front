@@ -16,7 +16,7 @@ function getErrorTip({ error, errorTip }) {
     if (error && error.response) {
         const { status, data } = error.response;
 
-        if (status === 403) return '您无权访问';
+        if (status === 403) return '您无权操作';
 
         if (status === 404) return '您访问的资源不存在';
 

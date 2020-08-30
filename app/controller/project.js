@@ -5,8 +5,9 @@ const Controller = require('egg').Controller;
 module.exports = class ProjectController extends Controller {
   // 查询
   async index(ctx) {
+    const user = ctx.user;
     const { name, teamId } = ctx.query;
-    const { Project, Team } = ctx.model;
+    const { Project, Team, User } = ctx.model;
 
     const options = {
       where: {
@@ -15,7 +16,13 @@ module.exports = class ProjectController extends Controller {
           teamId ? { teamId } : undefined,
         ],
       },
-      include: Team,
+      include: [
+        Team,
+        {
+          model: User,
+          where: user.isAdmin ? undefined : { id: user.id },
+        },
+      ],
       order: [
         [ 'updatedAt', 'DESC' ],
       ],
@@ -33,7 +40,7 @@ module.exports = class ProjectController extends Controller {
     }, ctx.params);
 
     const { id } = ctx.params;
-    const { Project, Menu } = ctx.model;
+    const { Project } = ctx.model;
 
     const result = await Project.findByPk(id);
 
@@ -42,6 +49,7 @@ module.exports = class ProjectController extends Controller {
 
   // 创建
   async create(ctx) {
+    const user = ctx.user;
     const requestBody = ctx.request.body;
     const Project = ctx.model.Project;
 
@@ -56,7 +64,9 @@ module.exports = class ProjectController extends Controller {
     const foundProject = await Project.findOne({ where: { name } });
     if (foundProject) return ctx.fail('此项目名已存在');
 
-    const savedProject = await Project.create({ ...requestBody });
+    const savedProject = await user.createProject({ ...requestBody }, {
+      through: { role: 'owner' },
+    });
 
     return ctx.success(savedProject);
   }
@@ -97,6 +107,7 @@ module.exports = class ProjectController extends Controller {
 
     const { id } = ctx.params;
     const { Project } = ctx.model;
+
     const result = await Project.destroy({ where: { id } });
 
     ctx.success(result);

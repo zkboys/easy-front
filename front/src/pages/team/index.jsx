@@ -59,6 +59,7 @@ export default config({
     async function getTeams() {
         const teams = await fetchTeams();
         setTeams(teams);
+        return teams;
     }
 
     async function getProjects() {
@@ -102,7 +103,7 @@ export default config({
             item._hide = !name?.includes(value);
         });
         setProjects([ ...projects ]);
-    }, 300);
+    }, 100);
 
     const handleSearchTeam = _.debounce((e) => {
         // 获取不到e.target
@@ -116,7 +117,7 @@ export default config({
             item._hide = !name?.includes(value);
         });
         setTeams([ ...teams ]);
-    }, 300);
+    }, 100);
 
 
     const handleWindowResize = _.debounce(() => {
@@ -129,7 +130,7 @@ export default config({
         (async () => {
             const teams = await getTeams();
 
-            if (teamId === ':teamId' && teams.length) {
+            if (teamId === ':teamId' && teams?.length) {
                 handleMenuClick({ key: teams[0].id });
             }
         })();
