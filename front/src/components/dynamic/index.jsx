@@ -44,6 +44,7 @@ export default config()(props => {
         <PageContent styleName="root" loading={loading}>
             {dataSource?.length ? dataSource.map(item => {
                 const { user = {}, title, createdAt } = item;
+                if (!user) return;
 
                 const time = createdAt;
                 return (
