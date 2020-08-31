@@ -71,23 +71,23 @@ export default config()(props => {
                 <>
                     <Timeline pending={loading ? '加载中。。。' : ''}>
                         {dataSource.map(item => {
-                            let { id, user = {}, title, createdAt, detail } = item;
+                            let { id, user = {}, summary, createdAt, detail } = item;
                             if (!user) return '';
 
                             const detailIsShown = showDetail[id];
 
-                            let titleJsx = [];
-                            const jsons = title.match(/{(?:(?!})[\s\S])*}/gi);
+                            let summaryJsx = [];
+                            const jsons = summary.match(/{(?:(?!})[\s\S])*}/gi);
                             if (jsons) {
                                 jsons.forEach(str => {
                                     const data = JSON.parse(str);
                                     const content = getContent(data);
-                                    const titles = title.split(str);
-                                    title = titles.pop();
+                                    const summarys = summary.split(str);
+                                    summary = summarys.pop();
 
-                                    titles.forEach(t => {
-                                        titleJsx.push(t);
-                                        titleJsx.push(content);
+                                    summarys.forEach(t => {
+                                        summaryJsx.push(t);
+                                        summaryJsx.push(content);
                                     });
                                 });
                             }
@@ -114,9 +114,9 @@ export default config()(props => {
                                                 </a>
                                             ) : null}
                                         </div>
-                                        <div styleName="title">
+                                        <div styleName="summary">
                                             <Link to={`/users/${user.id}`}>{user.name}</Link>
-                                            {titleJsx}
+                                            {summaryJsx}
                                             <div styleName="detail" style={{ display: detailIsShown ? 'block' : 'none' }}>
                                                 {getDetail(detail)}
                                             </div>

@@ -15,7 +15,7 @@ module.exports = app => {
     teamId: UUID,
     projectId: UUID,
 
-    title: TEXT,
+    summary: TEXT,
     detail: TEXT,
   });
 

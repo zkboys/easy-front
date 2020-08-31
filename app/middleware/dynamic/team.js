@@ -16,9 +16,9 @@ module.exports = {
 
     const { id, name } = ctx.body;
 
-    const title = `创建了团队${teamLink({ id, name })}`;
+    const summary = `创建了团队${teamLink({ id, name })}`;
 
-    await Dynamic.create({ teamId: id, title, userId: user.id });
+    await Dynamic.create({ teamId: id, summary, userId: user.id });
   },
 
   update: async (ctx, next) => {
@@ -30,13 +30,13 @@ module.exports = {
 
     const { id, name, description } = ctx.body;
 
-    const title = `更新了团队${teamLink({ id, name })}`;
+    const summary = `更新了团队${teamLink({ id, name })}`;
     const detail = [];
     if (prevTeam.name !== name) detail.push(`团队名称<<->>${prevTeam.name} -->> ${name}`);
     if (prevTeam.description !== description) detail.push(`团队描述<<->>${prevTeam.description} -->> ${description}`);
 
     if (detail.length) {
-      await Dynamic.create({ teamId: id, title, userId: user.id, detail: detail.join('\n') });
+      await Dynamic.create({ teamId: id, summary, userId: user.id, detail: detail.join('\n') });
     }
   },
 };
