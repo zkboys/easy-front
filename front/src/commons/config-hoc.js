@@ -16,7 +16,7 @@ import { getLoginUser } from 'src/commons';
  * @param options
  * @returns {function(*): WithConfig}
  */
-export default (options) => {
+export default (options = {}) => {
     return WrappedComponent => {
         const {
             // path = void 0,       // 页面路由地址，如果存在path配置，会通过脚本抓取，当前组件将会作为路由页面，path将作为路由地址

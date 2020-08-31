@@ -20,6 +20,7 @@ import ProjectItem from 'src/pages/project/ProjectItem';
 import MemberItem from 'src/pages/team/MemberItem';
 import UserSelectModal from 'src/pages/users/UserSelectModal';
 import RoleTag from 'src/components/role-tag';
+import Dynamic from 'src/components/dynamic';
 
 import './style.less';
 
@@ -448,8 +449,12 @@ export default config({
                             </div>
                         </TabPane>
                         <TabPane tab={<span><SolutionOutlined/> 团队动态</span>} key="dynamic">
-                            <div styleName="pan-content" style={{ height }}>
-                                这里是团队动态
+                            <div styleName="pan-content" style={{ height: height + 50 }}>
+                                <Dynamic
+                                    url={`/teams/${teamId}/dynamics`}
+                                    id={teamId}
+                                    active={tabId === 'dynamic'}
+                                />
                             </div>
                         </TabPane>
                     </Tabs>

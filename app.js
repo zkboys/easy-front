@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 
 module.exports = app => {
   /** 同步数据库 */
-    const isSync = false;
+  const isSync = false;
   // const isSync = app.config.env === 'local' || app.config.env === 'unittest';
   if (isSync) {
     app.beforeStart(async () => {
@@ -32,6 +32,7 @@ module.exports = app => {
         name: '管理员',
         isAdmin: true,
         email: 'admin@qq.com',
+        avatar: 'http://wework.qpic.cn/bizmail/Qia94iavsCiagdfPzKQG5OK2Ek4c92J27vhbHLDRibIuUdS1eF2AzsPuiaw/0',
       });
 
       // 创建一个游客
@@ -40,6 +41,8 @@ module.exports = app => {
         jobNumber: 'test',
         password: defaultPassword,
         name: '游客',
+        email: 'tourist@qq.com',
+        avatar: 'http://wework.qpic.cn/bizmail/TaYPtwyovGuvgPwm6wfnf2rXZdVib27SuGaEh1rxyKncyEB46dKF47A/0',
       });
 
       // 初始化菜单 与超级管理员关联

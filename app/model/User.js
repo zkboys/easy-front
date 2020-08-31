@@ -48,6 +48,9 @@ module.exports = app => {
     app.model.User.belongsToMany(app.model.Project, {
       through: app.model.ProjectUser,
     });
+
+    // 与Dynamic一对多关系
+    app.model.User.hasMany(app.model.Dynamic);
   };
 
   return User;

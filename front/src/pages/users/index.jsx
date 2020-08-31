@@ -160,7 +160,7 @@ export default config({
 
         Modal.confirm({
             title: '提示',
-            content: '您确定同步微信用户以及组织架构吗？当前数据会被覆盖，请谨慎操作！',
+            content: '您确定同步微信用户以及组织架构吗？',
             onOk: () => {
                 (async () => {
                     await syncWeChatUsers();
@@ -211,8 +211,9 @@ export default config({
                     <FormRow>
                         <FormElement
                             {...formProps}
-                            label="名称"
-                            name="name"
+                            width={300}
+                            label="名称/账号/邮箱"
+                            name="keyWord"
                         />
                         <FormElement
                             {...formProps}

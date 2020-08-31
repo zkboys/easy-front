@@ -2,6 +2,7 @@
 const path = require('path');
 const fs = require('fs');
 const permission = require('./middleware/permission');
+const dynamic = require('./middleware/dynamic');
 
 module.exports = app => {
   const { router, controller } = app;
@@ -61,13 +62,14 @@ module.exports = app => {
   // 团队 crud
   api.get('/teams', team.index);
   api.get('/teams/:id', permission.team.member, team.show);
-  api.post('/teams', team.create);
-  api.put('/teams/:id', permission.team.master, team.update);
+  api.post('/teams', dynamic.team.add, team.create);
+  api.put('/teams/:id', permission.team.master, dynamic.team.update, team.update);
   api.del('/teams/:id', permission.team.master, team.destroy);
   api.get('/teams/:id/members', permission.team.member, team.members);
   api.post('/teams/:id/members', permission.team.master, team.addMembers);
   api.put('/teams/:id/members/:memberId', permission.team.master, team.updateMember);
   api.del('/teams/:id/members/:memberId', permission.team.master, team.deleteMember);
+  api.get('/teams/:id/dynamics', permission.team.member, team.dynamics);
 
 
   // 项目 crud

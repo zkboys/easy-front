@@ -83,13 +83,21 @@ module.exports = class UserController extends Controller {
 
   // 获取所有用户
   async index(ctx) {
-    const { pageNum = 1, pageSize = 10, name, roleId } = ctx.query;
+    const { pageNum = 1, pageSize = 10, keyWord, roleId } = ctx.query;
 
     const { User, Role, Permission } = ctx.model;
 
     const page = 'pageNum' in ctx.query ? {
       offset: (pageNum - 1) * pageSize,
       limit: +pageSize,
+    } : undefined;
+
+    const where = keyWord ? {
+      [Op.or]: [
+        { name: { [Op.like]: `%${keyWord.trim()}%` } },
+        { account: { [Op.like]: `%${keyWord.trim()}%` } },
+        { email: { [Op.like]: `%${keyWord.trim()}%` } },
+      ],
     } : undefined;
 
     const options = {
@@ -100,11 +108,7 @@ module.exports = class UserController extends Controller {
         left: true,
         include: Permission,
       },
-      where: {
-        [Op.and]: [
-          name ? { name: { [Op.like]: `%${name.trim()}%` } } : undefined,
-        ],
-      },
+      where,
       order: [
         [ 'jobNumber', 'ASC' ],
       ],
@@ -220,30 +224,10 @@ module.exports = class UserController extends Controller {
   // 同步微信用户
   async syncWeChat(ctx) {
     const data = await getWeChatUsers();
-    const { Department, User, DepartmentUser, Role, RoleUser } = ctx.model;
-    const { user: userService } = ctx.service;
+    const { Department, User, DepartmentUser } = ctx.model;
 
-    // 删除所有用户 以及 部门
-    // const admin = await User.findOne({ where: { account: 'admin' } });
-    // const adminId = admin ? admin.id : undefined;
-
-
-    await User.destroy({
-      where: {
-        account: {
-          [Op.not]: 'admin',
-        },
-      },
-    });
-    await Department.destroy({
-      where: {},
-    });
-    await DepartmentUser.destroy({
-      where: {},
-    });
-
-    const users = [];
-    const departs = [];
+    const users = []; // 所有用户
+    const departs = []; // 所有部门
     data.forEach(item => {
       const {
         type,
@@ -277,9 +261,9 @@ module.exports = class UserController extends Controller {
         users.push({
           id,
 
-          department,
-          order,
-          is_leader_in_dept,
+          department, // 数组 多个 部门
+          is_leader_in_dept, // 多个 是否是leader
+          order, // 多个
 
           name,
           jobNumber: alias,
@@ -297,63 +281,63 @@ module.exports = class UserController extends Controller {
       }
     });
 
-    for (const d of departs) {
-      const dId = +d.id;
-      const duss = users.filter(u => u.department.includes(dId));
+    // 多次数据库操作，进行事务处理
+    let transaction;
+    try {
+      transaction = await ctx.model.transaction();
 
-      // 去重
-      const dus = [];
-      duss.forEach(item => {
-        if (!dus.find(it => it.id === item.id)) dus.push(item);
-      });
+      // 处理部门
+      for (const depart of departs) {
+        const { id } = depart;
+        const dep = await Department.findByPk(id, { transaction });
 
-      // 创建组织架构
-      const department = await Department.create(d);
-
-      // 创建组织架构对应的用户
-      for (const du of dus) {
-        const index = du.department.indexOf(dId);
-
-        const isLeader = du.is_leader_in_dept[index];
-        const order = du.order[index];
-
-        const existUser = await User.findByPk(du.id);
-
-        if (existUser) {
-          DepartmentUser.create({
-            userId: du.id,
-            departmentId: department.id,
-            isLeader,
-            order,
-          });
+        // 微信新增了部门
+        if (!dep) {
+          await Department.create(depart, { transaction });
         } else {
-          du.password = userService.encryptPassword(du.password);
-          await department.createUser(du, {
-            through: {
-              isLeader,
-              order,
-            },
-          });
 
-          // 关联角色
-          const role = await Role.findOne({ where: { name: '游客' } });
-          if (role) {
-            const { id: roleId } = role;
-            await RoleUser.create({ userId: du.id, roleId });
+          // 部门存在，进行更新
+          await dep.update(depart, { transaction });
+        }
+      }
+
+      // 处理用户
+      for (const user of users) {
+        const { id, department, is_leader_in_dept, order } = user;
+        const u = await User.findByPk(id, { transaction });
+
+        // 微信新增了用户
+        let newUser;
+        if (!u) {
+          newUser = await User.create(user, { transaction });
+        } else {
+          newUser = await u.update(user, { transaction });
+        }
+
+        // 更新人员 与 部门关系
+        await DepartmentUser.destroy({ where: { userId: newUser.id }, transaction });
+
+        if (department && department.length) {
+          for (let i = 0; i < department.length; i++) {
+            const depId = department[i];
+
+            await DepartmentUser.create({
+              userId: newUser.id,
+              departmentId: depId,
+              isLeader: is_leader_in_dept[i],
+              order: order[i],
+            }, { transaction });
           }
         }
       }
+
+      await transaction.commit();
+      ctx.success();
+    } catch (e) {
+      if (transaction) await transaction.rollback();
+
+      throw e;
     }
-
-    // 创建一个管理员
-    // await User.create({
-    //   id: adminId,
-    //   account: 'admin',
-    //   jobNumber: 'admin',
-    //   password: userService.encryptPassword('123456'),
-    //   name: '管理员',
-    // });
-
     ctx.success(true);
   }
 
