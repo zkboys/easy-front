@@ -36,9 +36,9 @@ module.exports = class TeamController extends Controller {
     }, ctx.params);
 
     const { id } = ctx.params;
-    const { Team } = ctx.model;
+    const { Team, User } = ctx.model;
 
-    const result = await Team.findByPk(id);
+    const result = await Team.findByPk(id, { include: User });
 
     ctx.success(result);
   }
@@ -101,11 +101,26 @@ module.exports = class TeamController extends Controller {
     }, ctx.params);
 
     const { id } = ctx.params;
-    const { Team } = ctx.model;
+    const { Team, Project } = ctx.model;
 
-    const result = await Team.destroy({ where: { id } });
+    // 多次数据库操作，进行事务处理
+    let transaction;
+    try {
+      transaction = await ctx.model.transaction();
 
-    ctx.success(result);
+      // 删除所有关联项目
+      await Project.destroy({ where: { teamId: id }, transaction });
+
+      // 删除当前团队
+      const result = await Team.destroy({ where: { id }, transaction });
+
+      await transaction.commit();
+      ctx.success(result);
+    } catch (e) {
+      if (transaction) await transaction.rollback();
+
+      throw e;
+    }
   }
 
   // 查询成员

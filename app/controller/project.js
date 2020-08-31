@@ -62,11 +62,10 @@ module.exports = class ProjectController extends Controller {
     const { name, teamId } = requestBody;
     const { TeamUser, ProjectUser } = ctx.model;
 
-    // fixme 是否判断当前团队不重复即可？
-    const foundProject = await Project.findOne({ where: { name } });
-    if (foundProject) return ctx.fail('此项目名已存在');
+    // 团队中不重名即可
+    const foundProject = await Project.findOne({ where: { name, teamId } });
+    if (foundProject) return ctx.fail('此项目名在团队中已存在');
 
-    // 事务处理
     // 多次数据库操作，进行事务处理
     let transaction;
     try {
@@ -81,7 +80,7 @@ module.exports = class ProjectController extends Controller {
       const teamUsers = await TeamUser.findAll({ transaction, where: { teamId } });
       const users = teamUsers
         .filter(item => item.userId !== user.id) // 排除自身
-        .map(item => ({ projectId: savedProject.id, userId: item.userId, role: item.role }));
+        .map(item => ({ projectId: savedProject.id, userId: item.userId, role: item.role === 'owner' ? 'master' : item.role }));
 
       await ProjectUser.bulkCreate(users, { transaction });
 

@@ -13,21 +13,24 @@ export default config({})(props => {
     const [ visible, setVisible ] = useState(false);
 
     const { id, name, description, team = {}, users = [] } = data;
-
     const color = getColor(team.name);
     const role = users.find(item => item.id === user.id)?.project_user?.role;
+    const isMaster = user.isAdmin || [ 'owner', 'master' ].includes(role);
 
     return (
         <div styleName="root">
             <div styleName="content" style={{ backgroundColor: color }}>
                 <div styleName="operator">
-                    <Tooltip title="修改项目">
-                        <FormOutlined onClick={() => setVisible(true)}/>
-                    </Tooltip>
-
-                    <Tooltip title="删除项目">
-                        <DeleteOutlined/>
-                    </Tooltip>
+                    {isMaster ? (
+                        <>
+                            <Tooltip title="修改项目">
+                                <FormOutlined onClick={() => setVisible(true)}/>
+                            </Tooltip>
+                            <Tooltip title="删除项目">
+                                <DeleteOutlined/>
+                            </Tooltip>
+                        </>
+                    ) : null}
 
                     <Tooltip title="收藏项目">
                         <StarOutlined/>

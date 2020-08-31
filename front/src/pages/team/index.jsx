@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import config from 'src/commons/config-hoc';
-import { Tabs, Menu, Tooltip, Empty, Button, Input, Modal } from 'antd';
+import { Tabs, Menu, Tooltip, Empty, Button, Input, Modal, Popconfirm } from 'antd';
 import {
     TeamOutlined,
     AppstoreAddOutlined,
@@ -9,6 +9,7 @@ import {
     AppstoreOutlined,
     SolutionOutlined,
     UserAddOutlined,
+    DeleteOutlined,
 } from '@ant-design/icons';
 import _ from 'lodash';
 import PageContent from 'src/layouts/page-content';
@@ -18,6 +19,7 @@ import ProjectModal from 'src/pages/project/ProjectModal';
 import ProjectItem from 'src/pages/project/ProjectItem';
 import MemberItem from 'src/pages/team/MemberItem';
 import UserSelectModal from 'src/pages/users/UserSelectModal';
+import RoleTag from 'src/components/role-tag';
 
 import './style.less';
 
@@ -33,7 +35,7 @@ export default config({
     const { params } = props.match;
     const [ height, setHeight ] = useState(document.documentElement.clientHeight - otherHeight);
     const [ teamId, setTeamId ] = useState(params.teamId);
-    const [ tabId, setTabId ] = useState(params.tabId === ':tabId' ? 'project' : params.tabId);
+    const [ tabId, setTabId ] = useState(params.tabId);
     const [ teams, setTeams ] = useState([]);
     const [ team, setTeam ] = useState({});
     // const [ teams, setTeams ] = useState([ { id: '1', name: '测试团队', description: '测试团队描述' }, { id: '2', name: '研发中心', description: '描述' } ]);
@@ -47,6 +49,7 @@ export default config({
 
     const [ teamsLoading, fetchTeams ] = useGet('/teams');
     const [ teamLoading, fetchTeam ] = useGet('/teams/:id');
+    const [ teamDeleteLoading, deleteTeam ] = useDel('/teams/:id');
     const [ projectLoading, fetchProjects ] = useGet('/projects');
     const [ memberLoading, fetchMembers ] = useGet('/teams/:id/members');
     const [ addMemberLoading, addMembers ] = usePost('/teams/:id/members');
@@ -54,17 +57,6 @@ export default config({
     const [ deleteMemberLoading, deleteMember ] = useDel('/teams/:id/members/:memberId');
     const [ dynamicLoading, fetchDynamics ] = useGet('/teams/:id/dynamics');
 
-
-    function handleTabChange(key) {
-        setTabId(key);
-        props.history.push(`/teams/${teamId}/${key}`);
-    }
-
-    function handleMenuClick(info) {
-        const { key } = info;
-        setTeamId(key);
-        props.history.push(`/teams/${key}/${tabId}`);
-    }
 
     async function getTeams() {
         const teams = await fetchTeams();
@@ -97,16 +89,22 @@ export default config({
         setIsTeamEdit(true);
     }
 
-    function handleCreateProject() {
-        setProjectVisible(true);
-    }
+    async function handleDeleteTeam() {
+        if (teamDeleteLoading) return;
+        await deleteTeam(teamId, { successTip: '删除成功！' });
+        const teams = await getTeams();
 
-    function handleAddMember() {
-        setMemberVisible(true);
+        // 还有团队
+        if (teams?.length) {
+            setTeamId(teams[0].id);
+        } else {
+            // 已经没有团队了 跳转首页
+            props.history.replace('/');
+        }
     }
 
     // 添加成员
-    async function handleAddMemberSubmit(values) {
+    async function handleAddMember(values) {
         const { userId, role } = values;
 
         await addMembers({ id: teamId, userIds: userId, role }, { successTip: '添加成员成功！' });
@@ -131,40 +129,14 @@ export default config({
         await getTeams();
     }
 
+    // 离开团队
     async function handleMemberLeave(memberId) {
         await deleteMember({ id: teamId, memberId }, { successTip: '离开成功！' });
 
         props.history.replace('/');
     }
 
-    const handleSearchProject = _.debounce((e) => {
-        // 获取不到e.target
-        const input = document.getElementById('search-project');
-        const value = input.value;
-        projects.forEach(item => {
-            const { name } = item;
-
-            if (!value) return item._hide = false;
-
-            item._hide = !name?.includes(value);
-        });
-        setProjects([ ...projects ]);
-    }, 100);
-
-    const handleSearchMember = _.debounce((e) => {
-        // 获取不到e.target
-        const input = document.getElementById('search-member');
-        const value = input.value;
-        members.forEach(item => {
-            const { name, account } = item;
-
-            if (!value) return item._hide = false;
-
-            item._hide = !name?.includes(value) && !account?.includes(value);
-        });
-        setProjects([ ...members ]);
-    }, 100);
-
+    // 搜索团队
     const handleSearchTeam = _.debounce((e) => {
         // 获取不到e.target
         const input = document.getElementById('search-team');
@@ -179,7 +151,37 @@ export default config({
         setTeams([ ...teams ]);
     }, 100);
 
+    // 搜索项目
+    const handleSearchProject = _.debounce((e) => {
+        // 获取不到e.target
+        const input = document.getElementById('search-project');
+        const value = input.value;
+        projects.forEach(item => {
+            const { name } = item;
 
+            if (!value) return item._hide = false;
+
+            item._hide = !name?.includes(value);
+        });
+        setProjects([ ...projects ]);
+    }, 100);
+
+    // 搜索成员
+    const handleSearchMember = _.debounce((e) => {
+        // 获取不到e.target
+        const input = document.getElementById('search-member');
+        const value = input.value;
+        members.forEach(item => {
+            const { name, account } = item;
+
+            if (!value) return item._hide = false;
+
+            item._hide = !name?.includes(value) && !account?.includes(value);
+        });
+        setProjects([ ...members ]);
+    }, 100);
+
+    // 窗口大小改变事件
     const handleWindowResize = _.debounce(() => {
         const windowHeight = document.documentElement.clientHeight;
         const height = windowHeight - otherHeight;
@@ -192,20 +194,28 @@ export default config({
         setTabId(tabId);
     };
 
+    // 组件加载完成
     useEffect(() => {
         (async () => {
             const teams = await getTeams();
 
-            if (teamId === ':teamId' && teams?.length) {
-                handleMenuClick({ key: teams[0].id });
+            if ((!teamId || teamId === ':teamId') && teams?.length) {
+                setTeamId(teams[0].id);
             }
-        })();
 
+            if (!tabId || tabId === ':tabId') setTabId('project');
+
+        })();
         window.addEventListener('resize', handleWindowResize);
         window.addEventListener('popstate', handlePopState);
+
+        const prevOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
         return () => {
             window.removeEventListener('resize', handleWindowResize);
             window.removeEventListener('popstate', handlePopState);
+
+            document.body.style.overflow = prevOverflow;
         };
     }, []);
 
@@ -224,7 +234,22 @@ export default config({
                         onOk: () => props.history.replace('/'),
                     });
                 }
+
                 setTeam(team);
+
+                // tabId不存在 设置默认 tabId，触发effect
+                if (tabId === ':tabId') {
+                    setTabId('project');
+                    return;
+                }
+
+                // 获取对应tab资源
+                if (tabId === 'project') await getProjects();
+                if (tabId === 'member') await getMembers();
+                if (tabId === 'dynamic') await getDynamics();
+
+                // 改变浏览器地址
+                props.history.push(`/teams/${teamId}/${tabId}`);
             } catch (e) {
                 if (e?.response?.status === 403) {
                     Modal.info({
@@ -241,34 +266,37 @@ export default config({
     // teamId 或者 tabId 改变 获取对应的资源
     useEffect(() => {
         (async () => {
-            if ((!teamId || teamId === ':teamId') && teams?.length) {
-                return handleMenuClick({ key: teams[0]?.id });
-            }
-
-            if (!tabId || tabId === ':tabId') {
-                return handleTabChange('project');
-            }
-
+            // team不存在，直接返回
             if (!teamId || teamId === ':teamId') return;
 
+            // tabId不存在，直接返回
+            if (!tabId || tabId === ':tabId') return;
+
+            props.history.push(`/teams/${teamId}/${tabId}`);
+
+            // 获取tab对应的资源
             if (tabId === 'project') await getProjects();
             if (tabId === 'member') await getMembers();
             if (tabId === 'dynamic') await getDynamics();
         })();
-    }, [ teamId, tabId ]);
+    }, [ tabId ]);
 
 
     const showProjects = projects.filter(item => !item._hide);
     const showTeams = teams.filter(item => !item._hide);
     const showMembers = members.filter(item => !item._hide);
-
-    const isTeamMaster = user.isAdmin || team?.users?.find(item => item.id === user.id && ([ 'owner', 'master' ].includes(item.team_user?.role)));
+    const userTeamRole = team?.users?.find(item => item.id === user.id)?.team_user.role;
+    const isTeamMaster = user.isAdmin || [ 'owner', 'master' ].includes(userTeamRole);
+    const isTeamOwner = user.isAdmin || [ 'owner' ].includes(userTeamRole);
+    const hasTeam = !!team?.name;
 
     return (
         <PageContent
             styleName="root"
             loading={
                 teamsLoading ||
+                teamLoading ||
+                teamDeleteLoading ||
                 projectLoading ||
                 memberLoading ||
                 updateMemberLoading ||
@@ -280,20 +308,38 @@ export default config({
                 <div styleName="list" style={{ height: height + 94 }}>
                     <div styleName="top">
                         <div styleName="team-title">
-                            <h1>{team.name}</h1>
+                            {hasTeam ? <RoleTag role={userTeamRole}/> : null}
 
-                            {isTeamMaster ? (
-                                <Tooltip title="修改团队" placement="right">
+                            {hasTeam ? <h1>{team.name}</h1> : <h1>没有任何团队，请点击图标创建 --></h1>}
+
+                            {hasTeam && isTeamMaster ? (
+                                <Tooltip title="修改团队">
                                     <FormOutlined styleName="team-operator" onClick={handleEditTeam}/>
                                 </Tooltip>
                             ) : null}
+                            {hasTeam && isTeamOwner ? (
+                                <Tooltip title="删除团队">
+                                    <Popconfirm
+                                        okType="danger"
+                                        title={(
+                                            <>
+                                                <div>您确定要删除此团队吗?</div>
+                                                <div style={{ marginTop: 8, fontSize: 14, color: 'red' }}>团队下的所有项目、成员等信息也将被删除，请谨慎操作！</div>
+                                            </>
+                                        )}
+                                        onConfirm={handleDeleteTeam}
+                                    >
+                                        <DeleteOutlined styleName="team-operator"/>
+                                    </Popconfirm>
+                                </Tooltip>
+                            ) : null}
 
-                            <Tooltip title="创建团队" placement="right">
+                            <Tooltip title="创建团队">
                                 <UsergroupAddOutlined styleName="team-operator" onClick={handleCreateTeam}/>
                             </Tooltip>
                         </div>
                         <div styleName="team-description">
-                            {team.description}
+                            {hasTeam ? team.description : '点击创建自己的团队或者联系管理员将您加入相关团队'}
                         </div>
                         <Input
                             id="search-team"
@@ -305,7 +351,7 @@ export default config({
                     <div styleName="menu">
                         {showTeams?.length ? (
                             <Menu
-                                onClick={handleMenuClick}
+                                onClick={info => setTeamId(info.key)}
                                 style={{ width: '100%' }}
                                 selectedKeys={[ teamId ]}
                                 mode="inline"
@@ -323,7 +369,7 @@ export default config({
                     </div>
                 </div>
                 <div styleName="detail">
-                    <Tabs onChange={handleTabChange} activeKey={tabId} type="card">
+                    <Tabs onChange={key => setTabId(key)} activeKey={tabId} type="card">
                         <TabPane tab={<span><AppstoreOutlined/> 项目列表</span>} key="project">
                             <div styleName="pan-operator">
                                 <span style={{ flex: 1, marginLeft: 0 }}>
@@ -336,7 +382,7 @@ export default config({
                                     placeholder="输入项目名称进行搜索"
                                     onChange={handleSearchProject}
                                 />
-                                <Button type="primary" onClick={handleCreateProject}> <AppstoreAddOutlined/> 创建项目</Button>
+                                <Button type="primary" onClick={() => setProjectVisible(true)}> <AppstoreAddOutlined/> 创建项目</Button>
                             </div>
                             <div styleName="pan-content" style={{ height }}>
                                 {showProjects?.length ? (
@@ -359,7 +405,7 @@ export default config({
                                         styleName="empty"
                                         description={projects?.length ? '无匹配项目' : '您未加入任何团队项目'}
                                     >
-                                        {projects?.length ? null : <Button type="primary" onClick={handleCreateProject}> <AppstoreAddOutlined/> 创建项目</Button>}
+                                        {projects?.length ? null : <Button type="primary" onClick={() => setProjectVisible(true)}> <AppstoreAddOutlined/> 创建项目</Button>}
                                     </Empty>
                                 )}
                             </div>
@@ -376,7 +422,7 @@ export default config({
                                     placeholder="输入成员名称进行搜索"
                                     onChange={handleSearchMember}
                                 />
-                                {isTeamMaster ? <Button type="primary" onClick={handleAddMember}> <UserAddOutlined/> 添加成员</Button> : null}
+                                {isTeamMaster ? <Button type="primary" onClick={() => setMemberVisible(true)}> <UserAddOutlined/> 添加成员</Button> : null}
                             </div>
                             <div styleName="pan-content" style={{ height }}>
                                 {showMembers?.length ? (
@@ -414,13 +460,25 @@ export default config({
                 isEdit={isTeamEdit}
                 id={teamId}
                 onOk={async (data) => {
-                    const { id: teamId } = data;
+                    // 添加或修改成功
 
-                    await getTeams();
-                    await getProjects();
-
-                    handleMenuClick({ key: teamId });
+                    // 关闭弹框
                     setTeamVisible(false);
+
+                    // 重新获取团队列表
+                    await getTeams();
+
+                    const { id } = data;
+
+                    // 修改团队 重新获取团队详情
+                    if (isTeamEdit) {
+                        const team = await fetchTeam(id);
+                        setTeam(team);
+                        return;
+                    }
+
+                    // 添加 定位到最新添加的团队
+                    setTeamId(id);
                 }}
                 onCancel={() => setTeamVisible(false)}
             />
@@ -441,9 +499,9 @@ export default config({
             <UserSelectModal
                 loading={addMemberLoading}
                 multiple
-                exclude={team?.users?.map(item => item.id)}
+                exclude={members?.map(item => item.id)}
                 visible={memberVisible}
-                onOk={handleAddMemberSubmit}
+                onOk={handleAddMember}
                 onCancel={() => setMemberVisible(false)}
             />
         </PageContent>

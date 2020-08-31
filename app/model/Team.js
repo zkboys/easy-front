@@ -17,7 +17,7 @@ module.exports = app => {
 
   // Team.sync({ force: true });
   Team.associate = function() {
-    // 与Team一对多关系
+    // 与Project一对多关系
     app.model.Team.hasMany(app.model.Project);
 
     // 与User表是多对多关系

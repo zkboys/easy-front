@@ -12,7 +12,7 @@ export default props => {
     }
 
     if (!role) {
-        label = '暂未加入';
+        label = '未加入';
         color = '#999';
     }
 

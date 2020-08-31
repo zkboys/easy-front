@@ -5,7 +5,7 @@ import {
     LogoutOutlined,
 } from '@ant-design/icons';
 import config from 'src/commons/config-hoc';
-import {roleOptions} from 'src/commons';
+import { roleOptions } from 'src/commons';
 import { UserAvatar } from 'src/library/components';
 import './style-member.less';
 
