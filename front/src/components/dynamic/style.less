@@ -1,19 +1,78 @@
 .root {
-
+    padding-left: 100px;
 }
 
 .empty {
     margin-top: 100px;
 }
 
-.time {
-
+.dot {
+    position: relative;
 }
 
-.avatar {
-
+.time {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 100px;
+    left: -100px;
+    padding-right: 10px;
+    text-align: right;
+    color: rgba(0, 0, 0, 0.65);
 }
 
 .box {
-
+    margin-left: 8px;
+    border: 1px solid #e8e8e8;
+    border-radius: 5px;
 }
+
+.real-time {
+    padding: 8px;
+    background: #e8e8e8;
+}
+
+.title {
+    padding: 8px;
+
+    & > a {
+        padding: 0 8px;
+    }
+}
+
+.detail-extend {
+    margin-left: 16px;
+}
+
+.detail {
+    display: block;
+    padding: 16px 16px 0 32px;
+
+    & > div {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+
+        & > * {
+            margin-right: 8px;
+        }
+    }
+
+    .label {
+
+    }
+
+    .prev {
+        color: red;
+        text-decoration: line-through;
+    }
+
+    .next {
+        color: green;
+    }
+}
+
+.more {
+    margin-left: 35px;
+}
+

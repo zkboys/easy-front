@@ -232,6 +232,9 @@ module.exports = class TeamController extends Controller {
       ...page,
       where: { teamId: id },
       include: User,
+      order: [
+        [ 'updatedAt', 'DESC' ],
+      ],
     });
 
     ctx.success(result);

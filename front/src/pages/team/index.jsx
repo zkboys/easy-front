@@ -39,14 +39,13 @@ export default config({
     const [ tabId, setTabId ] = useState(params.tabId);
     const [ teams, setTeams ] = useState([]);
     const [ team, setTeam ] = useState({});
-    // const [ teams, setTeams ] = useState([ { id: '1', name: '测试团队', description: '测试团队描述' }, { id: '2', name: '研发中心', description: '描述' } ]);
     const [ projects, setProjects ] = useState([]);
     const [ members, setMembers ] = useState([]);
-    const [ dynamics, setDynamics ] = useState([]);
     const [ teamVisible, setTeamVisible ] = useState(false);
     const [ projectVisible, setProjectVisible ] = useState(false);
     const [ memberVisible, setMemberVisible ] = useState(false);
     const [ isTeamEdit, setIsTeamEdit ] = useState(false);
+    const [ refreshDynamic, setRefreshDynamic ] = useState(1);
 
     const [ teamsLoading, fetchTeams ] = useGet('/teams');
     const [ teamLoading, fetchTeam ] = useGet('/teams/:id');
@@ -56,7 +55,6 @@ export default config({
     const [ addMemberLoading, addMembers ] = usePost('/teams/:id/members');
     const [ updateMemberLoading, updateMember ] = usePut('/teams/:id/members/:memberId');
     const [ deleteMemberLoading, deleteMember ] = useDel('/teams/:id/members/:memberId');
-    const [ dynamicLoading, fetchDynamics ] = useGet('/teams/:id/dynamics');
 
 
     async function getTeams() {
@@ -73,11 +71,6 @@ export default config({
     async function getMembers() {
         const members = await fetchMembers(teamId);
         setMembers(members);
-    }
-
-    async function getDynamics() {
-        const dynamics = await fetchDynamics(teamId);
-        setDynamics(dynamics);
     }
 
     function handleCreateTeam() {
@@ -247,7 +240,6 @@ export default config({
                 // 获取对应tab资源
                 if (tabId === 'project') await getProjects();
                 if (tabId === 'member') await getMembers();
-                if (tabId === 'dynamic') await getDynamics();
 
                 // 改变浏览器地址
                 props.history.push(`/teams/${teamId}/${tabId}`);
@@ -278,7 +270,6 @@ export default config({
             // 获取tab对应的资源
             if (tabId === 'project') await getProjects();
             if (tabId === 'member') await getMembers();
-            if (tabId === 'dynamic') await getDynamics();
         })();
     }, [ tabId ]);
 
@@ -301,8 +292,7 @@ export default config({
                 projectLoading ||
                 memberLoading ||
                 updateMemberLoading ||
-                deleteMemberLoading ||
-                dynamicLoading
+                deleteMemberLoading
             }
         >
             <div styleName="team-root">
@@ -383,7 +373,7 @@ export default config({
                                     placeholder="输入项目名称进行搜索"
                                     onChange={handleSearchProject}
                                 />
-                                <Button type="primary" onClick={() => setProjectVisible(true)}> <AppstoreAddOutlined/> 创建项目</Button>
+                                {teams?.length ? <Button type="primary" onClick={() => setProjectVisible(true)}> <AppstoreAddOutlined/> 创建项目</Button> : null}
                             </div>
                             <div styleName="pan-content" style={{ height }}>
                                 {showProjects?.length ? (
@@ -406,7 +396,7 @@ export default config({
                                         styleName="empty"
                                         description={projects?.length ? '无匹配项目' : '您未加入任何团队项目'}
                                     >
-                                        {projects?.length ? null : <Button type="primary" onClick={() => setProjectVisible(true)}> <AppstoreAddOutlined/> 创建项目</Button>}
+                                        {projects?.length || !teams?.length ? null : <Button type="primary" onClick={() => setProjectVisible(true)}> <AppstoreAddOutlined/> 创建项目</Button>}
                                     </Empty>
                                 )}
                             </div>
@@ -423,7 +413,7 @@ export default config({
                                     placeholder="输入成员名称进行搜索"
                                     onChange={handleSearchMember}
                                 />
-                                {isTeamMaster ? <Button type="primary" onClick={() => setMemberVisible(true)}> <UserAddOutlined/> 添加成员</Button> : null}
+                                {isTeamMaster && teams?.length ? <Button type="primary" onClick={() => setMemberVisible(true)}> <UserAddOutlined/> 添加成员</Button> : null}
                             </div>
                             <div styleName="pan-content" style={{ height }}>
                                 {showMembers?.length ? (
@@ -443,7 +433,7 @@ export default config({
                                         styleName="empty"
                                         description={members?.length ? '无匹配成员' : '此团队还没有成员'}
                                     >
-                                        {members?.length ? null : <Button type="primary" onClick={UserAddOutlined}> <AppstoreAddOutlined/> 添加成员</Button>}
+                                        {members?.length || !teams?.length ? null : <Button type="primary" onClick={UserAddOutlined}> <AppstoreAddOutlined/> 添加成员</Button>}
                                     </Empty>
                                 )}
                             </div>
@@ -451,9 +441,10 @@ export default config({
                         <TabPane tab={<span><SolutionOutlined/> 团队动态</span>} key="dynamic">
                             <div styleName="pan-content" style={{ height: height + 50 }}>
                                 <Dynamic
+                                    key={teamId + refreshDynamic}
                                     url={`/teams/${teamId}/dynamics`}
                                     id={teamId}
-                                    active={tabId === 'dynamic'}
+                                    refresh={refreshDynamic}
                                 />
                             </div>
                         </TabPane>
@@ -479,6 +470,7 @@ export default config({
                     if (isTeamEdit) {
                         const team = await fetchTeam(id);
                         setTeam(team);
+                        setRefreshDynamic(Date.now());
                         return;
                     }
 
