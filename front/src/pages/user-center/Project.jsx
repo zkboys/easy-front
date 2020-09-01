@@ -15,7 +15,6 @@ export default config()(props => {
             </div>
             <div className="pan-content">
                 底部内容
-                <div style={{ height: 1000, width: 100, background: 'yellow' }}/>
             </div>
         </>
     );

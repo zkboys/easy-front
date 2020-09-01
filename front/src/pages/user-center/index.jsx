@@ -155,8 +155,6 @@ export default config({
                             {user.position}
                         </div>
                     </div>
-
-                    <div style={{ height: 1000, width: 100, background: 'green' }}/>
                 </div>
             )}
         >
