@@ -23,7 +23,8 @@
     "test-watch": "EGG_SERVER_ENV=unittest egg-bin test --watch",
     "cov": "egg-bin cov",
     "lint": "eslint .",
-    "ci": "npm run cov",
+    "ci": "",
+    "ci2": "npm run cov",
     "autod": "autod"
   },
   "dependencies": {
