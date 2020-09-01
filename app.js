@@ -4,9 +4,10 @@ const bcrypt = require('bcryptjs');
 
 module.exports = app => {
   /** 同步数据库 */
-  const isSync = false;
+    // const isSync = false;
+  const isSync = app.config.env === 'local' || app.config.env === 'unittest';
 
-  // const isSync = app.config.env === 'local' || app.config.env === 'unittest';
+
   if (isSync) {
     app.beforeStart(async () => {
       await app.model.sync({ force: true });
