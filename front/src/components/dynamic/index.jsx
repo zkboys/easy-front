@@ -46,7 +46,7 @@ function changeLog(str) {
 }
 
 export default config()(props => {
-    const { url, pageSize = 10 } = props;
+    const { url, pageSize = 10, team } = props;
     const [ pageNum, setPageNum ] = useState(1);
     const [ dataSource, setDataSource ] = useState([]);
     const [ noMore, setNoMore ] = useState(false);
@@ -58,6 +58,11 @@ export default config()(props => {
         showDetail[id] = !showDetail[id];
         setShowDetail({ ...showDetail });
     }
+
+    // url 改变，查询新的内容
+    useEffect(() => {
+        setPageNum(1);
+    }, [ url, team ]);
 
     useEffect(() => {
         (async () => {
@@ -71,9 +76,8 @@ export default config()(props => {
                 setDataSource([ ...dataSource, ...rows ]);
             }
         })();
-    }, [ pageNum ]);
+    }, [ pageNum, url, team ]);
 
-    console.log(dataSource);
     return (
         <PageContent styleName="root" loading={loading}>
             {dataSource?.length ? (
@@ -99,6 +103,8 @@ export default config()(props => {
                                         summaryJsx.push(content);
                                     });
                                 });
+                            } else {
+                                summaryJsx.push(summary);
                             }
 
                             return (

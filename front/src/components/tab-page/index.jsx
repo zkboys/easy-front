@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import config from 'src/commons/config-hoc';
 import { Tabs } from 'antd';
@@ -7,7 +7,6 @@ import PageContent from 'src/layouts/page-content';
 
 import './style.less';
 
-const { TabPane } = Tabs;
 const otherHeight = 176;
 
 const TabPage = config({
@@ -21,9 +20,10 @@ const TabPage = config({
         detail,
         detailStyle,
         list,
-        tabs,
     } = props;
+
     const [ height, setHeight ] = useState(document.documentElement.clientHeight - otherHeight);
+    const tabWrap = useRef();
 
     // 窗口大小改变事件
     const handleWindowResize = _.debounce(() => {
@@ -31,6 +31,17 @@ const TabPage = config({
         const height = windowHeight - otherHeight;
         setHeight(height);
     }, 100);
+
+
+    // height 改变，处理pan-content 高度
+    useEffect(() => {
+        const tab = tabWrap.current.querySelector('.ant-tabs-tabpane-active');
+
+        const operator = tab.querySelector('.pan-operator');
+        const content = tab.querySelector('.pan-content');
+
+        content.style.height = operator ? `${height}px` : `${height + 50}px`;
+    }, [ height ]);
 
     // 组件加载完成
     useEffect(() => {
@@ -59,32 +70,9 @@ const TabPage = config({
                         {list}
                     </div>
                 </div>
-                <div styleName="tabs-wrap">
+                <div styleName="tabs-wrap" ref={tabWrap}>
                     <Tabs onChange={key => onChange(key)} activeKey={activeKey} type="card">
-                        {tabs.map(item => {
-                            const { key, title, content: Content } = item;
-
-                            const isActive = activeKey === key;
-
-                            return (
-                                <TabPane tab={title} key={key}>
-                                    {isActive ? <Content height={height}/> : null}
-
-                                    {/*{isActive ? (*/}
-                                    {/*    <>*/}
-                                    {/*        {operator ? (*/}
-                                    {/*            <div styleName="pan-operator">*/}
-                                    {/*                {operator}*/}
-                                    {/*            </div>*/}
-                                    {/*        ) : null}*/}
-                                    {/*        <div styleName="pan-content" style={{ height: contentHeight }}>*/}
-                                    {/*            {content}*/}
-                                    {/*        </div>*/}
-                                    {/*    </>*/}
-                                    {/*) : null}*/}
-                                </TabPane>
-                            );
-                        })}
+                        {props.children}
                     </Tabs>
                 </div>
             </div>
@@ -99,7 +87,6 @@ TabPage.propTypes = {
     detail: PropTypes.any,
     detailStyle: PropTypes.object,
     list: PropTypes.any,
-    tabs: PropTypes.array,
 };
 
 export default TabPage;
