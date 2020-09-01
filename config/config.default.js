@@ -69,6 +69,7 @@ module.exports = appInfo => {
 
   exports.logger = {
     consoleLevel: 'DEBUG',
+    // consoleLevel: 'NONE',
     dir: path.join(appInfo.baseDir, 'logs'),
   };
 

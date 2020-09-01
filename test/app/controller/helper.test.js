@@ -1,7 +1,19 @@
 'use strict';
-const {app, assert} = require('egg-mock/bootstrap');
+const mock = require('egg-mock');
+const assert = require('assert');
+
+// watch模式下，每次app都重新启动，获取最新待测试代码
+const isWatch = process.argv.includes('--watch');
+const app = isWatch ? mock.app() : require('egg-mock/bootstrap').app;
 
 describe('money()', () => {
+  before(async () => {
+    isWatch && await app.ready();
+  });
+  after(async () => {
+    isWatch && await app && app.close();
+  });
+
   it('should RMB', () => {
     const ctx = app.mockContext({
       // 模拟 ctx 的 headers
@@ -17,3 +29,4 @@ describe('money()', () => {
     assert(ctx.helper.money(100) === '$ 100');
   });
 });
+
