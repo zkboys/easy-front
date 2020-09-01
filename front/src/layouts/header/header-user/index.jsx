@@ -45,7 +45,7 @@ export default class HeaderUser extends Component {
         const menu = (
             <Menu styleName="menu" theme={theme} selectedKeys={[]} onClick={this.handleMenuClick}>
                 <Item key="modifyPassword"><EditOutlined/>修改密码</Item>
-                <Item><Link to={`/users/${id}`}><UserOutlined/>个人中心</Link></Item>
+                <Item><Link to={`/users/${id}/:tabId`}><UserOutlined/>个人中心</Link></Item>
                 <Menu.Divider/>
                 <Item key="logout"><LogoutOutlined/>退出登录</Item>
             </Menu>

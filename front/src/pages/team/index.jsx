@@ -3,22 +3,15 @@ import config from 'src/commons/config-hoc';
 import { Tabs, Menu, Tooltip, Empty, Button, Input, Modal, Popconfirm } from 'antd';
 import {
     TeamOutlined,
-    AppstoreAddOutlined,
     UsergroupAddOutlined,
     FormOutlined,
     AppstoreOutlined,
     SolutionOutlined,
-    UserAddOutlined,
     DeleteOutlined,
 } from '@ant-design/icons';
 import _ from 'lodash';
-import PageContent from 'src/layouts/page-content';
-import { useGet, usePost, usePut, useDel } from 'src/commons/ajax';
+import { useGet, useDel } from 'src/commons/ajax';
 import TeamModal from './TeamModal';
-import ProjectModal from 'src/pages/project/ProjectModal';
-import ProjectItem from 'src/pages/project/ProjectItem';
-import MemberItem from 'src/pages/team/MemberItem';
-import UserSelectModal from 'src/pages/users/UserSelectModal';
 import RoleTag from 'src/components/role-tag';
 import TabPage from 'src/components/tab-page';
 import Dynamic from 'src/components/dynamic';
@@ -36,7 +29,7 @@ export default config({
 })(props => {
     const { user, match: { params } } = props;
 
-    const [ activeKey, setActiveKey ] = useState('dynamic');
+    const [ activeKey, setActiveKey ] = useState(params.tabId !== ':tabId' ? params.tabId : 'project');
     const [ teamId, setTeamId ] = useState(params.teamId);
     const [ teams, setTeams ] = useState([]);
     const [ team, setTeam ] = useState({});
@@ -49,21 +42,36 @@ export default config({
 
 
     // 只用teamId 更新之后，Project才重新渲染
-    const projectComponent = useMemo(() => <Project teamId={teamId}/>, [ teamId ]);
+    const projectComponent = useMemo(() => (
+        <Project
+            teamId={teamId}
+            teams={teams}
+        />
+    ), [ teamId, teams ]);
 
     // 只用teamId 更新之后，Member才重新渲染
-    const memberComponent = useMemo(() => <Member teamId={teamId}/>, [ teamId ]);
+    const memberComponent = useMemo(() => (
+        <Member
+            teamId={teamId}
+            team={team}
+            teams={teams}
+            onChange={async (data, type) => {
+                // 团队成员的改变，间接的也是团队的改变，重新设置team，出发动态组件更新
+                setTeam({ ...team });
+                if (type === 'updateSelf') {
+                    const team = await fetchTeam(teamId);
+                    setTeam(team);
+                }
+            }}
+        />
+    ), [ teamId, team, teams ]);
 
     // 只用teamId, team 更新之后，Dynamic才重新渲染
-    const dynamicComponent = useMemo(() => {
-        return (
-            <div
-                className="pan-content"
-            >
-                <Dynamic url={`/teams/${teamId}/dynamics`} team={team}/>
-            </div>
-        );
-    }, [ teamId, team ]);
+    const dynamicComponent = useMemo(() => (
+        <div className="pan-content">
+            <Dynamic url={`/teams/${teamId}/dynamics`} team={team}/>
+        </div>
+    ), [ teamId, team ]);
 
     async function getTeams() {
         const teams = await fetchTeams();
@@ -71,7 +79,6 @@ export default config({
 
         return teams;
     }
-
 
     async function handleDeleteTeam() {
         if (teamDeleteLoading) return;
@@ -102,11 +109,21 @@ export default config({
         setTeams([ ...teams ]);
     }, 100);
 
+    // 组件加载完成
     useEffect(() => {
         (async () => {
-            await getTeams();
+            const teams = await getTeams();
+            if ((!teamId || teamId === ':teamId') && teams?.length) {
+                const teamId = teams[0].id;
+                setTeamId(teamId);
+            }
         })();
     }, []);
+
+    // 改变浏览器地址
+    useEffect(() => {
+        props.history.replace(`/teams/${teamId}/${activeKey}`);
+    }, [ teamId, activeKey ]);
 
     // teamId改变 获取 team详情
     useEffect(() => {
@@ -125,9 +142,6 @@ export default config({
                 }
 
                 setTeam(team);
-
-                // 改变浏览器地址
-                props.history.push(`/teams/${teamId}/${activeKey}`);
             } catch (e) {
                 if (e?.response?.status === 403) {
                     Modal.info({
@@ -140,7 +154,6 @@ export default config({
             }
         })();
     }, [ teamId ]);
-
 
     const userTeamRole = team?.users?.find(item => item.id === user.id)?.team_user.role;
     const isTeamMaster = user.isAdmin || [ 'owner', 'master' ].includes(userTeamRole);
@@ -230,7 +243,7 @@ export default config({
                     </Menu>
                 ) : (
                     <Empty
-                        styleName="empty"
+                        style={{ marginTop: 100 }}
                         description={teams?.length ? '无匹配团队' : '您未创建、未加入任何团队'}
                     >
                         {teams?.length ? null : (
@@ -246,28 +259,6 @@ export default config({
                         )}
                     </Empty>
                 )}
-                tabs={[
-                    // {
-                    //     key: 'project',
-                    //     title: <span><AppstoreOutlined/> 项目列表</span>,
-                    //     content: props => (
-                    //         <Project teamId={teamId} {...props}/>
-                    //     ),
-                    // },
-                    //
-                    // {
-                    //     key: 'member',
-                    //     title: <span><TeamOutlined/> 团队成员</span>,
-                    //     content: props => (
-                    //         <Project teamId={teamId} {...props}/>
-                    //     ),
-                    // },
-                    {
-                        key: 'dynamic',
-                        title: <span><SolutionOutlined/> 团队动态</span>,
-                        content: dynamicComponent,
-                    },
-                ]}
             >
                 <TabPane tab={<span><AppstoreOutlined/> 项目列表</span>} key="project">
                     {projectComponent}

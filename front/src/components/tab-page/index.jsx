@@ -33,15 +33,16 @@ const TabPage = config({
     }, 100);
 
 
-    // height 改变，处理pan-content 高度
+    // height activeKey 改变，处理pan-content 高度
     useEffect(() => {
         const tab = tabWrap.current.querySelector('.ant-tabs-tabpane-active');
+        if (!tab) return;
 
         const operator = tab.querySelector('.pan-operator');
         const content = tab.querySelector('.pan-content');
 
         content.style.height = operator ? `${height}px` : `${height + 50}px`;
-    }, [ height ]);
+    }, [ height, activeKey ]);
 
     // 组件加载完成
     useEffect(() => {

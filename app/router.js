@@ -14,6 +14,7 @@ module.exports = app => {
     menu,
     team,
     project,
+    dynamic: dynamicController,
   } = controller;
 
   // 登录
@@ -40,6 +41,7 @@ module.exports = app => {
   api.post('/users', permission.admin, user.create);
   api.put('/users/:id', permission.admin, user.update);
   api.del('/users/:id', permission.admin, user.destroy);
+  api.get('/users/:id/dynamics', dynamicController.index);
 
   // 同步微信用户、组织架构
   api.post('/syncWeChat', permission.admin, user.syncWeChat);
@@ -69,7 +71,7 @@ module.exports = app => {
   api.post('/teams/:id/members', dynamic.team.addMember, permission.team.master, team.addMembers);
   api.put('/teams/:id/members/:memberId', dynamic.team.updateMember, permission.team.master, team.updateMember);
   api.del('/teams/:id/members/:memberId', dynamic.team.deleteMember, permission.team.master, team.deleteMember);
-  api.get('/teams/:id/dynamics', permission.team.member, team.dynamics);
+  api.get('/teams/:id/dynamics', permission.team.member, dynamicController.index);
 
   // 项目 crud
   api.get('/projects', project.index);
@@ -77,6 +79,7 @@ module.exports = app => {
   api.post('/projects', project.create);
   api.put('/projects/:id', permission.project.master, project.update);
   api.del('/projects/:id', permission.project.master, project.destroy);
+  api.get('/projects/:id/dynamics', dynamicController.index);
 
   // 未捕获请求，返回404
   api.get('/*', async ctx => {

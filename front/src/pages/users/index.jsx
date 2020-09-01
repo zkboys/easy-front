@@ -66,7 +66,7 @@ export default config({
                 let { id, avatar } = record;
 
                 return (
-                    <Link to={`/users/${id}`}>
+                    <Link to={`/users/${id}/:tabId`}>
                         <UserAvatar
                             src={avatar}
                             name={name}

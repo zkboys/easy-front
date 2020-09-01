@@ -11,8 +11,9 @@ import './style.less';
 
 function getContent(data) {
     const { type, id, name, role } = data;
-    if (type === 'userLink') return <Link to={`/users/${id}`}>{name}</Link>;
     if (type === 'teamLink') return <Link to={`/teams/${id}/project`}>{name}</Link>;
+    if (type === 'projectLink') return <Link to={`/projects/${id}/:tabId`}>{name}</Link>;
+    if (type === 'userLink') return <Link to={`/users/${id}/:tabId`}>{name}</Link>;
     if (type === 'roleTag') return <RoleTag role={role}/>;
 }
 
@@ -46,7 +47,7 @@ function changeLog(str) {
 }
 
 export default config()(props => {
-    const { url, pageSize = 10, team } = props;
+    const { url, pageSize = 10, team, project, showTeamProject } = props;
     const [ pageNum, setPageNum ] = useState(1);
     const [ dataSource, setDataSource ] = useState([]);
     const [ noMore, setNoMore ] = useState(false);
@@ -62,7 +63,7 @@ export default config()(props => {
     // url 改变，查询新的内容
     useEffect(() => {
         setPageNum(1);
-    }, [ url, team ]);
+    }, [ url, team, project ]);
 
     useEffect(() => {
         (async () => {
@@ -76,7 +77,7 @@ export default config()(props => {
                 setDataSource([ ...dataSource, ...rows ]);
             }
         })();
-    }, [ pageNum, url, team ]);
+    }, [ pageNum, url, team, project ]);
 
     return (
         <PageContent styleName="root" loading={loading}>
@@ -84,7 +85,7 @@ export default config()(props => {
                 <>
                     <Timeline pending={loading ? '加载中。。。' : ''}>
                         {dataSource.map(item => {
-                            let { id, title, user = {}, summary, createdAt, detail } = item;
+                            let { id, title, user = {}, team, project, summary, createdAt, detail } = item;
                             if (!user) return '';
 
                             const detailIsShown = showDetail[id];
@@ -122,7 +123,9 @@ export default config()(props => {
                                             {moment(createdAt).format('YYYY年MM月DD日 HH:mm')}
                                         </div>
                                         <div styleName="summary">
-                                            <Link to={`/users/${user.id}`}>{user.name}</Link>
+                                            <Link to={`/users/${user.id}/:tabId`}>{user.name}</Link>
+                                            {showTeamProject && team ? `在团队${getContent({ ...team, type: 'teamLink' })}中：` : ''}
+                                            {showTeamProject && project ? `在项目${getContent({ ...project, type: 'projectLink' })}中：` : ''}
                                             {summaryJsx}
                                             {detail ? (
                                                 <Button

@@ -1,13 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { Upload, message, Tooltip, notification, Button } from 'antd';
+import { Upload, message, Tooltip, notification, Tabs, Empty } from 'antd';
+import { AppstoreOutlined, SolutionOutlined } from '@ant-design/icons';
 import config from 'src/commons/config-hoc';
-import './style.less';
 import { useGet } from 'src/commons/ajax';
 import TabPage from 'src/components/tab-page';
 import defaultAvatar from './default_avatar.jpeg';
-import { getColor } from '@/commons';
-import Dynamic from './Dynamic';
+import { getColor } from 'src/commons';
 import Project from './Project';
+import Dynamic from 'src/components/dynamic';
+
+import './style.less';
+
+const { TabPane } = Tabs;
 
 function beforeUpload(file) {
     const isJpgOrPng = file.type === 'image/jpg' || file.type === 'image/jpeg' || file.type === 'image/png';
@@ -22,7 +26,7 @@ function beforeUpload(file) {
 }
 
 export default config({
-    path: '/users/:id',
+    path: '/users/:id/:tabId',
     title: { text: '个人中心', icon: 'user' },
     breadcrumbs: [
         {
@@ -39,12 +43,13 @@ export default config({
         },
     ],
 })(props => {
+    const { params } = props.match;
     const [ loading, fetchUser ] = useGet('/users/:id');
-    const [ activeKey, setActiveKey ] = useState('dynamic');
+    const [ activeKey, setActiveKey ] = useState(params.tabId === ':tabId' ? 'project' : params.tabId);
     const [ user, setUser ] = useState({});
     const [ uploading, setUploading ] = useState(false);
 
-    const { id: userId } = props.match.params;
+    const { id: userId } = params;
     const isSelf = userId === props.user.id;
 
     const getUser = async () => {
@@ -71,15 +76,28 @@ export default config({
         }
     };
 
+    // 组件加载完成
     useEffect(() => {
         (async () => {
             await getUser();
         })();
     }, []);
 
+    // 改变浏览器地址
+    useEffect((aaa) => {
+        props.history.replace(`/users/${userId}/${activeKey}`);
+    }, [ userId, activeKey ]);
+
+    // teamId改变 获取 team详情
     const avatar = user.avatar || defaultAvatar;
 
     const color = getColor(user.name);
+    if (!user.id) return (
+        <Empty
+            style={{ marginTop: 100 }}
+            description="此人员不存在或已被删除"
+        />
+    );
     return (
         <TabPage
             loading={loading || uploading}
@@ -141,16 +159,15 @@ export default config({
                     <div style={{ height: 1000, width: 100, background: 'green' }}/>
                 </div>
             )}
-            tabs={[
-                {
-                    key: 'dynamic', title: '动态',
-                    content: props => <Dynamic userId={userId} {...props}/>,
-                },
-                {
-                    key: 'project', title: '我的项目',
-                    content: props => <Project userId={userId} {...props}/>,
-                },
-            ]}
-        />
+        >
+            <TabPane tab={<span><AppstoreOutlined/> 个人项目</span>} key="project">
+                <Project userId={userId}/>
+            </TabPane>
+            <TabPane tab={<span><SolutionOutlined/> 个人动态</span>} key="dynamic">
+                <div className="pan-content">
+                    <Dynamic showTeamProject url={`/users/${userId}/dynamics`}/>
+                </div>
+            </TabPane>
+        </TabPage>
     );
 });

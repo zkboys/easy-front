@@ -7,7 +7,6 @@ module.exports = app => {
     const isSync = false;
   // const isSync = app.config.env === 'local' || app.config.env === 'unittest';
 
-
   if (isSync) {
     app.beforeStart(async () => {
       await app.model.sync({ force: true });

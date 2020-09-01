@@ -214,29 +214,4 @@ module.exports = class TeamController extends Controller {
 
     ctx.success(result);
   }
-
-  async dynamics(ctx) {
-    ctx.validate({
-      id: 'string',
-    }, ctx.params);
-    const { id } = ctx.params;
-    const { pageNum = 1, pageSize = 10 } = ctx.query;
-    const { Dynamic, User, Team, Project } = ctx.model;
-
-    const page = 'pageNum' in ctx.query ? {
-      offset: (pageNum - 1) * pageSize,
-      limit: +pageSize,
-    } : undefined;
-
-    const result = await Dynamic.findAndCountAll({
-      ...page,
-      where: { teamId: id },
-      include: [ User, Team, Project ],
-      order: [
-        [ 'updatedAt', 'DESC' ],
-      ],
-    });
-
-    ctx.success(result);
-  }
 };
