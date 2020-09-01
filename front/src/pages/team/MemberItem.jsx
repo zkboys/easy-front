@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Tooltip, Select, Popconfirm } from 'antd';
 import {
     DeleteOutlined,
@@ -36,8 +37,10 @@ export default config({})(props => {
     return (
         <div styleName="root">
             <div styleName="name">
-                <UserAvatar styleName="avatar" src={avatar} name={name} alt="头像"/>
-                {name}
+                <Link to={`/users/${id}`}>
+                    <UserAvatar styleName="avatar" src={avatar} name={name} alt="头像"/>
+                    {name}
+                </Link>
             </div>
             <div styleName="email">{email}</div>
             <div styleName="role">

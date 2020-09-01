@@ -3,10 +3,10 @@ import {
     CaretDownOutlined,
     EditOutlined,
     LogoutOutlined,
-    // UserOutlined,
+    UserOutlined,
 } from '@ant-design/icons';
 import { Menu, Dropdown } from 'antd';
-// import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { toLogin, getLoginUser } from 'src/commons';
 import ModifyPassword from './ModifyPassword';
 import config from 'src/commons/config-hoc';
@@ -38,14 +38,14 @@ export default class HeaderUser extends Component {
 
     render() {
         const user = getLoginUser() || {};
-        let { name, avatar } = user;
+        let { id, name, avatar } = user;
 
         const { className, theme } = this.props;
 
         const menu = (
             <Menu styleName="menu" theme={theme} selectedKeys={[]} onClick={this.handleMenuClick}>
                 <Item key="modifyPassword"><EditOutlined/>修改密码</Item>
-                {/*<Item><Link to="/user-center"><UserOutlined/>个人中心</Link></Item>*/}
+                <Item><Link to={`/users/${id}`}><UserOutlined/>个人中心</Link></Item>
                 <Menu.Divider/>
                 <Item key="logout"><LogoutOutlined/>退出登录</Item>
             </Menu>

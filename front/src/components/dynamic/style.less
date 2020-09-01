@@ -23,20 +23,32 @@
 
 .box {
     margin-left: 8px;
-    border: 1px solid #e8e8e8;
+    border: 1px solid #eceef1;
     border-radius: 5px;
+    background: #fafafa;
+}
+
+.title {
+    display: inline-block;
+    margin-right: 10px;
 }
 
 .real-time {
-    padding: 8px;
-    background: #e8e8e8;
+    padding: 10px 16px;
+    background: #eceef1;
 }
 
 .summary {
-    padding: 8px;
+    padding: 16px 8px;
 
     & > a {
-        padding: 0 8px;
+        padding: 0 4px;
+    }
+
+    :global {
+        .ant-tag {
+            margin: 0 4px;
+        }
     }
 }
 
@@ -46,7 +58,7 @@
 
 .detail {
     display: block;
-    padding: 16px 16px 0 32px;
+    padding: 24px 16px 0 32px;
 
     & > div {
         display: flex;

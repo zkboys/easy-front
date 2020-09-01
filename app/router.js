@@ -66,11 +66,10 @@ module.exports = app => {
   api.put('/teams/:id', permission.team.master, dynamic.team.update, team.update);
   api.del('/teams/:id', permission.team.master, team.destroy);
   api.get('/teams/:id/members', permission.team.member, team.members);
-  api.post('/teams/:id/members', permission.team.master, team.addMembers);
-  api.put('/teams/:id/members/:memberId', permission.team.master, team.updateMember);
-  api.del('/teams/:id/members/:memberId', permission.team.master, team.deleteMember);
+  api.post('/teams/:id/members', dynamic.team.addMember, permission.team.master, team.addMembers);
+  api.put('/teams/:id/members/:memberId', dynamic.team.updateMember, permission.team.master, team.updateMember);
+  api.del('/teams/:id/members/:memberId', dynamic.team.deleteMember, permission.team.master, team.deleteMember);
   api.get('/teams/:id/dynamics', permission.team.member, team.dynamics);
-
 
   // 项目 crud
   api.get('/projects', project.index);

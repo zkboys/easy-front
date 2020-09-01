@@ -1,0 +1,70 @@
+.root {
+    display: flex;
+    background: none;
+
+    :global {
+        .ant-tabs-nav .ant-tabs-tab .anticon {
+            margin-right: 0;
+            font-size: 14px;
+        }
+    }
+}
+
+.root-wrap {
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+}
+
+.detail-wrap {
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 350px;
+    background: #fff;
+
+    .top {
+        //flex: 0 0 160px;
+        flex: 0;
+        background-color: darken(@primary-color, 20);
+        color: #fff;
+        padding: 16px;
+    }
+
+    .list {
+        flex: 1;
+        overflow-y: auto;
+    }
+}
+
+.tabs-wrap {
+    margin-left: 16px;
+    flex: 1;
+
+    :global {
+        .ant-tabs-bar {
+            margin: 0;
+        }
+
+        .ant-tabs-tabpane {
+            padding-left: 1px;
+        }
+
+
+        .pan-operator {
+            display: flex;
+            align-items: center;
+            height: 50px;
+            background: #fff;
+            border-bottom: 1px solid #e8e8e8;
+            padding: 0 16px;
+        }
+
+        .pan-content {
+            height: 100%;
+            background: #fff;
+            overflow-y: auto;
+            padding: 16px;
+        }
+    }
+}
+

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Button, Form, Modal, Select } from 'antd';
 
 import PageContent from 'src/layouts/page-content';
@@ -62,11 +63,10 @@ export default config({
         {
             title: '用户名', dataIndex: 'name', width: 200,
             render: (name, record) => {
-                let { avatar } = record;
-
+                let { id, avatar } = record;
 
                 return (
-                    <>
+                    <Link to={`/users/${id}`}>
                         <UserAvatar
                             src={avatar}
                             name={name}
@@ -75,7 +75,7 @@ export default config({
                             }}
                         />
                         {name}
-                    </>
+                    </Link>
                 );
             },
         },

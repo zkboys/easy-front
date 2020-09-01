@@ -221,7 +221,7 @@ module.exports = class TeamController extends Controller {
     }, ctx.params);
     const { id } = ctx.params;
     const { pageNum = 1, pageSize = 10 } = ctx.query;
-    const { Dynamic, User } = ctx.model;
+    const { Dynamic, User, Team, Project } = ctx.model;
 
     const page = 'pageNum' in ctx.query ? {
       offset: (pageNum - 1) * pageSize,
@@ -231,7 +231,7 @@ module.exports = class TeamController extends Controller {
     const result = await Dynamic.findAndCountAll({
       ...page,
       where: { teamId: id },
-      include: User,
+      include: [ User, Team, Project ],
       order: [
         [ 'updatedAt', 'DESC' ],
       ],

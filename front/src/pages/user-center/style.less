@@ -5,16 +5,30 @@
 }
 
 .content {
-    width: 60%;
-    padding-top: 100px;
+    display: flex;
+    align-items: center;
+}
+
+.avatar-box {
+    flex: 0;
 }
 
 .avatar {
-    width: 100px;
-    height: 100px;
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
     box-shadow: 0 4px 6px rgba(50, 50, 93, .31), 0 1px 3px rgba(0, 0, 0, .08);
     cursor: pointer;
+}
+
+.detail-box {
+    flex: 1;
+
+    h1 {
+        padding: 0 0 0 34px;
+        margin: 0;
+        color: #fff;
+    }
 }
 
 .item {
@@ -24,8 +38,7 @@
 
 .label {
     text-align: right;
-    flex: 0 0 100px;
-    padding-right: 10px;
+    flex: 0 0 70px;
 }
 
 .value {

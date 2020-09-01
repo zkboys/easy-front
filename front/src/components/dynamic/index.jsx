@@ -6,34 +6,43 @@ import { UserAvatar } from 'src/library/components';
 import config from 'src/commons/config-hoc';
 import { useGet } from 'src/commons/ajax';
 import PageContent from 'src/layouts/page-content';
+import RoleTag from '../role-tag';
 import './style.less';
 
 function getContent(data) {
-    const { type, id, name } = data;
+    const { type, id, name, role } = data;
     if (type === 'userLink') return <Link to={`/users/${id}`}>{name}</Link>;
     if (type === 'teamLink') return <Link to={`/teams/${id}/project`}>{name}</Link>;
+    if (type === 'roleTag') return <RoleTag role={role}/>;
 }
 
 function getDetail(detail) {
     if (!detail) return;
     return detail.split('\n').map(item => {
-        const strs = item.split('<<->>');
-        const label = strs[0];
-        const content = strs[1];
-        let prev = '';
-        let next = '';
-        if (content) {
-            [ prev, next ] = content.split('-->>');
-        }
 
-        return (
-            <div>
-                <div styleName="label">{label}{label ? '：' : ''}</div>
-                <div styleName="prev">{prev}</div>
-                <div styleName="next">{next}</div>
-            </div>
-        );
+        if (item.includes('<<->>') && item.includes('-->>')) return changeLog(item);
+
+        return <div>{item}</div>;
     });
+}
+
+function changeLog(str) {
+    const strArr = str.split('<<->>');
+    const label = strArr[0];
+    const content = strArr[1];
+    let prev = '';
+    let next = '';
+    if (content) {
+        [ prev, next ] = content.split('-->>');
+    }
+
+    return (
+        <div>
+            <div styleName="label">{label}{label ? '：' : ''}</div>
+            <div styleName="prev">{prev}</div>
+            <div styleName="next">{next}</div>
+        </div>
+    );
 }
 
 export default config()(props => {
@@ -71,7 +80,7 @@ export default config()(props => {
                 <>
                     <Timeline pending={loading ? '加载中。。。' : ''}>
                         {dataSource.map(item => {
-                            let { id, user = {}, summary, createdAt, detail } = item;
+                            let { id, title, user = {}, summary, createdAt, detail } = item;
                             if (!user) return '';
 
                             const detailIsShown = showDetail[id];
@@ -103,20 +112,23 @@ export default config()(props => {
                                 >
                                     <div styleName="box">
                                         <div styleName="real-time">
+                                            <div styleName="title">{title}</div>
                                             {moment(createdAt).format('YYYY年MM月DD日 HH:mm')}
-
-                                            {detail ? (
-                                                <a
-                                                    styleName="detail-extend"
-                                                    onClick={() => handleToggleDetail(id)}
-                                                >
-                                                    {detailIsShown ? '收起详情' : '显示详情'}
-                                                </a>
-                                            ) : null}
                                         </div>
                                         <div styleName="summary">
                                             <Link to={`/users/${user.id}`}>{user.name}</Link>
                                             {summaryJsx}
+                                            {detail ? (
+                                                <Button
+                                                    size="small"
+                                                    type="primary"
+                                                    ghost
+                                                    styleName="detail-extend"
+                                                    onClick={() => handleToggleDetail(id)}
+                                                >
+                                                    {detailIsShown ? '收起详情' : '显示详情'}
+                                                </Button>
+                                            ) : null}
                                             <div styleName="detail" style={{ display: detailIsShown ? 'block' : 'none' }}>
                                                 {getDetail(detail)}
                                             </div>

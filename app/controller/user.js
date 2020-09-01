@@ -140,9 +140,9 @@ module.exports = class UserController extends Controller {
 
     const { id } = ctx.params;
 
-    const { User } = ctx.model;
+    const { User, Department } = ctx.model;
 
-    const result = await User.findByPk(id);
+    const result = await User.findByPk(id, { include: Department });
 
     ctx.success(result);
   }

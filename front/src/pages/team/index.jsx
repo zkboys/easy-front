@@ -114,6 +114,12 @@ export default config({
         await updateMember({ id: teamId, memberId, role }, { successTip: '角色修改成功！' });
 
         await getMembers();
+
+        // 有可能修改的是自己，从新获取一下team
+        if (memberId === user.id) {
+            const team = await fetchTeam(teamId);
+            setTeam(team);
+        }
     }
 
     // 删除成员
@@ -270,6 +276,7 @@ export default config({
             // 获取tab对应的资源
             if (tabId === 'project') await getProjects();
             if (tabId === 'member') await getMembers();
+            if (tabId === 'dynamic') setRefreshDynamic(Date.now());
         })();
     }, [ tabId ]);
 
