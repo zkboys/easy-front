@@ -76,6 +76,7 @@ $ npm run deploy
 - [数据库 egg-sequelize](https://github.com/eggjs/egg-sequelize)
 - [路由 egg-router-plus](https://github.com/eggjs/egg-router-plus)
 - [校验 egg-validate](https://github.com/eggjs/egg-validate)
+- [测试 mochajs](https://mochajs.org/)
 
 ## TODO
 - [x] 同一路由规则下，浏览器前进后退无效
