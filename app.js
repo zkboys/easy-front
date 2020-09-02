@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 
 module.exports = app => {
   /** 同步数据库 */
-    const isSync = false;
+  const isSync = false;
   // const isSync = app.config.env === 'local' || app.config.env === 'unittest';
 
   if (isSync) {
@@ -14,13 +14,15 @@ module.exports = app => {
       const { Role } = app.model;
 
       const adminRole = await Role.create({
-        name: '超级管理员',
+        name: '管理员',
         description: '管理员拥有所有系统权限',
+        frozen: true,
       });
 
       const touristRole = await Role.create({
-        name: '游客',
-        description: '游客没有权限',
+        name: '员工',
+        description: '普通员工',
+        frozen: true,
       });
 
       const defaultPassword = bcrypt.hashSync('123456', 8);
@@ -30,8 +32,9 @@ module.exports = app => {
         account: 'admin',
         jobNumber: 'admin',
         password: defaultPassword,
-        name: '管理员',
+        name: '超级管理员',
         isAdmin: true,
+        frozen: true,
         email: 'admin@qq.com',
         avatar: 'http://wework.qpic.cn/bizmail/Qia94iavsCiagdfPzKQG5OK2Ek4c92J27vhbHLDRibIuUdS1eF2AzsPuiaw/0',
       });
@@ -41,7 +44,7 @@ module.exports = app => {
         account: 'test',
         jobNumber: 'test',
         password: defaultPassword,
-        name: '游客',
+        name: '员工',
         email: 'tourist@qq.com',
         avatar: 'http://wework.qpic.cn/bizmail/TaYPtwyovGuvgPwm6wfnf2rXZdVib27SuGaEh1rxyKncyEB46dKF47A/0',
       });

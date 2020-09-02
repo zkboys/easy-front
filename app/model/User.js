@@ -11,7 +11,8 @@ module.exports = app => {
       unique: true,
       defaultValue: UUIDV4,
     },
-    isAdmin: BOOLEAN,
+    isAdmin: BOOLEAN, // 内置超级管理员，有系统的所有权限，与 role 中的管理员不同
+    frozen: BOOLEAN, // 锁定，不可更新、删除
     account: STRING(20),
     jobNumber: STRING(20),
     password: STRING(100),

@@ -82,6 +82,8 @@ module.exports = class RoleController extends Controller {
     const role = await Role.findByPk(id);
     if (!role) return ctx.fail('角色不存在或已删除！');
 
+    if (role.frozen) return ctx.fail('固定角色不可修改');
+
     const exitName = await Role.findOne({ where: { name } });
     if (exitName && exitName.id !== id) return ctx.fail('此角色名已被占用！');
 
@@ -97,6 +99,10 @@ module.exports = class RoleController extends Controller {
 
     const { id } = ctx.params;
     const { Role } = ctx.model;
+
+    const role = await Role.findByPk(id);
+    if (role.frozen) return ctx.fail('固定角色不可删除');
+
     const result = await Role.destroy({ where: { id } });
 
     ctx.success(result);

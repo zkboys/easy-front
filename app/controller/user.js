@@ -169,6 +169,8 @@ module.exports = class UserController extends Controller {
     const user = await User.findByPk(id);
     if (!user) return ctx.fail('用户不存在或已删除！');
 
+    if (user.frozen) return ctx.fail('固定用户不能修改！');
+
     const exitName = await User.findOne({ where: { account } });
     if (exitName && exitName.id !== id) return ctx.fail('此用户名已被占用！');
 
@@ -193,6 +195,10 @@ module.exports = class UserController extends Controller {
 
     const { id } = ctx.params;
     const { User } = ctx.model;
+
+    const user = await User.findByPk(id);
+    if (user.frozen) return ctx.fail('固定用户不能删除！');
+
     const result = await User.destroy({ where: { id } });
 
     ctx.success(result);
@@ -224,7 +230,7 @@ module.exports = class UserController extends Controller {
   // 同步微信用户
   async syncWeChat(ctx) {
     const data = await getWeChatUsers();
-    const { Department, User, DepartmentUser } = ctx.model;
+    const { Department, User, Role, DepartmentUser } = ctx.model;
 
     const users = []; // 所有用户
     const departs = []; // 所有部门
@@ -309,8 +315,11 @@ module.exports = class UserController extends Controller {
         // 微信新增了用户
         let newUser;
         if (!u) {
-          newUser = await User.create(user, { transaction });
+          // 添加用户，并设置为员工角色
+          const role = await Role.findOne({ where: { name: '员工' }, transaction });
+          newUser = await role.createUser(user, { transaction });
         } else {
+          // 原用户，更新属性
           newUser = await u.update(user, { transaction });
         }
 

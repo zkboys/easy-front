@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = app => {
-  const { STRING, UUID, UUIDV4 } = app.Sequelize;
+  const { STRING, BOOLEAN, UUID, UUIDV4 } = app.Sequelize;
 
   const Role = app.model.define('role', {
     id: {
@@ -13,6 +13,7 @@ module.exports = app => {
     },
     name: STRING(200),
     description: STRING(500),
+    frozen: BOOLEAN, // 冻结，不可删除、不可修改
   });
 
   // Role.sync({force: true});

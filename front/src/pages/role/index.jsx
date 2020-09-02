@@ -36,7 +36,9 @@ export default class UserCenter extends Component {
         {
             title: '操作', dataIndex: 'operator', width: 100,
             render: (value, record) => {
-                const { id, name } = record;
+                const { id, name, frozen } = record;
+                if (frozen) return;
+
                 const items = [
                     {
                         label: '修改',
@@ -91,7 +93,7 @@ export default class UserCenter extends Component {
         if (this.state.deleting) return;
 
         this.setState({ deleting: true });
-        this.props.ajax.del(`/roles/${id}`, null, { successTip: '删除成功！', errorTip: '删除失败！' })
+        this.props.ajax.del(`/roles/${id}`, null, { successTip: '删除成功！' })
             .then(() => this.form.submit())
             .finally(() => this.setState({ deleting: false }));
     };

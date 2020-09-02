@@ -1,6 +1,6 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import {Pagination} from 'antd';
+import { Pagination } from 'antd';
 import './index.less';
 
 /**
@@ -55,14 +55,14 @@ export default class PaginationComponent extends Component {
         const totalPage = Math.ceil(total / pageSize);
         let style = this.props.style;
         if (total <= 0) {
-            style = {/* display: 'none', */ ...style};
+            style = {/* display: 'none', */ ...style };
         }
         return (
             <div className="pagination-wrap" style={style}>
                 <Pagination
                     {...props}
                     size={size}
-                    pageSizeOptions={['10', '15', '20', '30', '50', '100']}
+                    pageSizeOptions={[ '10', '15', '20', '30', '50', '100' ]}
                     onShowSizeChange={(num, size) => onPageSizeChange(size)}
                     onChange={(num) => onPageNumChange(num)}
                     defaultCurrent={1}

@@ -20,6 +20,13 @@ export default config()(props => {
 
     async function getMembers() {
         const members = await fetchMembers(teamId);
+        // 将自己放在第一个
+        const index = members.findIndex(item => item.id === user.id);
+        if (index > -1) {
+            const self = members.splice(index, 1)[0];
+            members.unshift(self);
+        }
+
         setMembers(members);
     }
 

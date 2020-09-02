@@ -37,7 +37,7 @@ export default config({
     // 请求相关定义 只是定义，不会触发请求，调用相关函数，才会触发请求
     const [ loading, fetchUsers ] = useGet('/users');
     const [ deleting, deleteUsers ] = api.deleteUsers(); // 可以单独封装成api
-    const [ deletingOne, deleteUser ] = useDel('/users/:id', { successTip: '删除成功！', errorTip: '删除失败！' });
+    const [ deletingOne, deleteUser ] = useDel('/users/:id', { successTip: '删除成功！' });
     const [ syncing, syncWeChatUsers ] = usePost('/syncWeChat', { successTip: '同步成功！', errorTip: '同步失败！' });
     const [ fetchRolesLoading, fetchRoles ] = useGet('/roles');
     const [ , relateRole ] = usePut('/relateUserRoles');
@@ -82,6 +82,7 @@ export default config({
         {
             title: '角色', dataIndex: 'roles', width: 400,
             render: (value, recode) => {
+                if (recode.isAdmin) return '超级管理员';
                 const roleIds = value.map(item => item.id);
                 return (
                     <Select
@@ -102,7 +103,10 @@ export default config({
         {
             title: '操作', dataIndex: 'operator', width: 100,
             render: (value, record) => {
-                const { id, name } = record;
+                const { id, name, frozen } = record;
+
+                if (frozen) return;
+
                 const items = [
                     {
                         label: '编辑',
