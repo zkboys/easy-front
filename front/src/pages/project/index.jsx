@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import config from 'src/commons/config-hoc';
-import { Tabs, Menu, Tooltip, Empty, Button, Input, Modal, Popconfirm } from 'antd';
+import { Tabs, Menu, Tooltip, Empty, Button, Input, Modal } from 'antd';
 import {
     ProjectOutlined,
     UsergroupAddOutlined,
@@ -16,6 +16,7 @@ import RoleTag from 'src/components/role-tag';
 import TabPage from 'src/components/tab-page';
 import Dynamic from 'src/components/dynamic';
 import CategoryModal from './CategoryModal';
+import CategoryMenu from './CategoryMenu';
 
 import './style.less';
 import { getColor } from '@/commons';
@@ -30,8 +31,9 @@ export default config({
 })(props => {
     const { user, match: { params }, query } = props;
     const { projectId } = params;
-    const [ apiId, setApiId ] = useState(query.apiId);
     const [ categoryId, setCategoryId ] = useState(query.setCategoryId);
+    const [ apiId, setApiId ] = useState(query.apiId);
+
     const [ activeKey, setActiveKey ] = useState(params.tabId !== ':tabId' ? params.tabId : 'project');
     const [ project, setProject ] = useState({});
     const [ categoryVisible, setCategoryVisible ] = useState(false);
@@ -64,8 +66,14 @@ export default config({
 
     // 改变浏览器地址
     useEffect(() => {
-        props.history.replace(`/projects/${projectId}/${activeKey}`);
-    }, [ activeKey ]);
+        const query = {};
+        if (categoryId) query.categoryId = categoryId;
+        if (apiId) query.apiId = apiId;
+
+        const queryStr = Object.entries(query).map(([ key, value ]) => `${key}=${value}`).join('&');
+
+        props.history.replace(`/projects/${projectId}/${activeKey}?${queryStr}`);
+    }, [ activeKey, categoryId, apiId ]);
 
     // projectId改变 获取 project详情
     useEffect(() => {
@@ -107,7 +115,6 @@ export default config({
     const isProjectMaster = user.isAdmin || [ 'owner', 'master' ].includes(userProjectRole);
     const isProjectOwner = user.isAdmin || [ 'owner' ].includes(userProjectRole);
 
-    console.log(project);
     return (
         <>
             <TabPage
@@ -141,7 +148,34 @@ export default config({
                         />
                     </>
                 )}
-                list={null}
+                list={(
+                    <CategoryMenu
+                        selectedKey={categoryId}
+                        projectId={projectId}
+                        project={project}
+                        isProjectMaster={isProjectMaster}
+                        onChange={type => {
+                            setProject({ ...project });
+
+                            if (type === 'delete') {
+
+                            }
+                            if (type === 'edit') {
+
+                            }
+                        }}
+                        onClick={(key, type) => {
+                            if (type === 'category' || key === 'all') {
+                                setCategoryId(key);
+                                setApiId(null);
+                            }
+
+                            if (type === 'api' && key !== 'all') {
+                                setApiId(key);
+                            }
+                        }}
+                    />
+                )}
             >
                 <TabPane tab={<span><AppstoreOutlined/> 接口</span>} key="api"></TabPane>
                 <TabPane tab={<span><ProjectOutlined/> 项目成员</span>} key="member"></TabPane>
@@ -158,6 +192,7 @@ export default config({
                 isEdit={!!editCategoryId}
                 onOk={() => {
                     setCategoryVisible(false);
+                    setProject({ ...project });
                 }}
                 onCancel={() => setCategoryVisible(false)}
             />

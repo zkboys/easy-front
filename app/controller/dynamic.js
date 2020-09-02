@@ -18,7 +18,7 @@ module.exports = class DynamicController extends Controller {
 
     let where;
     if (ctx.path.includes('/teams/')) where = { teamId: id };
-    if (ctx.path.includes('/projects/')) where = { project: id };
+    if (ctx.path.includes('/projects/')) where = { projectId: id };
     if (ctx.path.includes('/users/')) where = { userId: id };
 
     if (!where) return ctx.success({ count: 0, rows: [] });

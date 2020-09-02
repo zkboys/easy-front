@@ -25,3 +25,24 @@
     padding: 16px 0;
 }
 
+.category-menu {
+    .subtitle {
+        display: inline-flex;
+        width: 300px;
+        justify-content: space-between;
+
+        :global {
+            .anticon {
+                display: none;
+            }
+        }
+
+        &:hover {
+            :global {
+                .anticon {
+                    display: inline;
+                }
+            }
+        }
+    }
+}

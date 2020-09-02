@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import config from 'src/commons/config-hoc';
-import { Tabs, Menu, Tooltip, Empty, Button, Input, Modal, Popconfirm } from 'antd';
+import { Tabs, Menu, Tooltip, Empty, Button, Input, Modal } from 'antd';
 import {
     TeamOutlined,
     UsergroupAddOutlined,
@@ -15,6 +15,7 @@ import TeamModal from './TeamModal';
 import RoleTag from 'src/components/role-tag';
 import TabPage from 'src/components/tab-page';
 import Dynamic from 'src/components/dynamic';
+import confirm from 'src/components/confirm';
 import Project from './Project';
 import Member from './Member';
 
@@ -196,22 +197,16 @@ export default config({
                             ) : null}
                             {hasTeam && isTeamOwner ? (
                                 <Tooltip title="删除团队">
-                                    <Popconfirm
-                                        okType="danger"
-                                        title={(
-                                            <>
-                                                <div>您确定要删除此团队吗?</div>
-                                                <div
-                                                    style={{ marginTop: 8, fontSize: 14, color: 'red' }}
-                                                >
-                                                    团队下的所有项目、成员等信息也将被删除，请谨慎操作！
-                                                </div>
-                                            </>
-                                        )}
-                                        onConfirm={handleDeleteTeam}
-                                    >
-                                        <DeleteOutlined styleName="operator"/>
-                                    </Popconfirm>
+                                    <DeleteOutlined
+                                        styleName="operator"
+                                        onClick={async () => {
+                                            await confirm(
+                                                `您确定要删除团队「${team.name}」吗?`,
+                                                `「${team.name}」团队下的所有项目、成员等信息也将被删除，请谨慎操作！`,
+                                            );
+                                            await handleDeleteTeam();
+                                        }}
+                                    />
                                 </Tooltip>
                             ) : null}
 
