@@ -191,13 +191,13 @@ export function getMenuTreeDataAndPermissions(menus) {
 
 const colors = [
     'rgb(80, 193, 233)',
-    'rgb(255, 190, 26)',
+    'rgb(246,179,7)',
     '#2f54eb',
     'rgb(169, 109, 243)',
-    'rgb(253, 117, 80)',
+    'rgb(245,97,58)',
     'rgb(103, 197, 12)',
     'rgb(80, 193, 233)',
-    'rgb(103, 197, 12)',
+    'rgb(110,58,120)',
 ];
 
 // 根据字符获取颜色

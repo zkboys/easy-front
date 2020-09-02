@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const permission = require('./middleware/permission');
 const dynamic = require('./middleware/dynamic');
+const resource = require('./middleware/resource');
 
 module.exports = app => {
   const { router, controller } = app;
@@ -14,6 +15,7 @@ module.exports = app => {
     menu,
     team,
     project,
+    category,
     dynamic: dynamicController,
   } = controller;
 
@@ -80,6 +82,13 @@ module.exports = app => {
   api.put('/projects/:id', permission.project.master, project.update);
   api.del('/projects/:id', permission.project.master, project.destroy);
   api.get('/projects/:id/dynamics', dynamicController.index);
+
+  // 项目分类 用于判断 project是否存在 并且扩展出ctx.project
+  api.get('/projects/:projectId/categories', resource.project, project.categories);
+  api.get('/projects/:projectId/categories/:id', resource.project, project.category);
+  api.post('/projects/:projectId/categories', resource.project, project.createCategory);
+  api.put('/projects/:projectId/categories/:id', resource.project, project.updateCategory);
+  api.del('/projects/:projectId/categories/:id', resource.project, project.destroyCategory);
 
   // 未捕获请求，返回404
   api.get('/*', async ctx => {

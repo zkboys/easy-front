@@ -42,7 +42,7 @@ export default config({})(props => {
                 </div>
 
                 <div styleName="title">
-                    <a href="">{name}</a>
+                    <Link to={`/projects/${id}/:tabId`}>{name}</Link>
                 </div>
                 <div styleName="description">
                     {description}

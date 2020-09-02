@@ -133,22 +133,26 @@ export default config({
             try {
                 const team = await fetchTeam(teamId);
                 if (!team) {
-                    return Modal.info({
+                    return Modal.confirm({
                         title: '提示',
                         content: '此团队已被删除！',
-                        okText: '返回首页',
+                        okText: '去首页',
                         onOk: () => props.history.replace('/'),
+                        cancelText: '返回',
+                        onCancel: () => props.history.goBack(),
                     });
                 }
 
                 setTeam(team);
             } catch (e) {
                 if (e?.response?.status === 403) {
-                    Modal.info({
+                    Modal.confirm({
                         title: '提示',
                         content: '您暂未加入此团队，请联系团队管理员将您加入！',
-                        okText: '返回首页',
+                        okText: '去首页',
                         onOk: () => props.history.replace('/'),
+                        cancelText: '返回',
+                        onCancel: () => props.history.goBack(),
                     });
                 }
             }
@@ -174,7 +178,7 @@ export default config({
                 onChange={key => setActiveKey(key)}
                 detail={(
                     <>
-                        <div styleName="team-title">
+                        <div styleName="title">
                             {hasTeam ? <RoleTag role={userTeamRole}/> : null}
 
                             {hasTeam ? <h1>{team.name}</h1> : <h1>没有任何团队，请点击图标创建 --></h1>}
@@ -182,7 +186,7 @@ export default config({
                             {hasTeam && isTeamMaster ? (
                                 <Tooltip title="修改团队">
                                     <FormOutlined
-                                        styleName="team-operator"
+                                        styleName="operator"
                                         onClick={() => {
                                             setTeamVisible(true);
                                             setIsTeamEdit(true);
@@ -206,14 +210,14 @@ export default config({
                                         )}
                                         onConfirm={handleDeleteTeam}
                                     >
-                                        <DeleteOutlined styleName="team-operator"/>
+                                        <DeleteOutlined styleName="operator"/>
                                     </Popconfirm>
                                 </Tooltip>
                             ) : null}
 
                             <Tooltip title="创建团队">
                                 <UsergroupAddOutlined
-                                    styleName="team-operator"
+                                    styleName="operator"
                                     onClick={() => {
                                         setTeamVisible(true);
                                         setIsTeamEdit(false);
@@ -221,7 +225,7 @@ export default config({
                                 />
                             </Tooltip>
                         </div>
-                        <div styleName="team-description">
+                        <div styleName="description">
                             {hasTeam ? team.description : '点击创建自己的团队或者联系管理员将您加入相关团队'}
                         </div>
                         <Input

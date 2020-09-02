@@ -40,9 +40,9 @@ module.exports = class ProjectController extends Controller {
     }, ctx.params);
 
     const { id } = ctx.params;
-    const { Project } = ctx.model;
+    const { Project, Team, User } = ctx.model;
 
-    const result = await Project.findByPk(id);
+    const result = await Project.findByPk(id, { include: [ Team, User ] });
 
     ctx.success(result);
   }
@@ -132,6 +132,90 @@ module.exports = class ProjectController extends Controller {
 
     const result = await Project.destroy({ where: { id } });
 
+    ctx.success(result);
+  }
+
+  // 获取分类
+  async categories(ctx) {
+    ctx.validate({
+      projectId: 'string',
+    }, ctx.params);
+
+    const { projectId } = ctx.params;
+
+    const { Category, Api } = ctx.model;
+    const result = await Category.findAll({
+      where: { projectId },
+      include: Api,
+    });
+
+    ctx.success(result);
+  }
+
+  async category(ctx) {
+    ctx.validate({
+      projectId: 'string',
+      id: 'string',
+    }, ctx.params);
+
+    const { projectId, id } = ctx.params;
+    const { Category, Api } = ctx.model;
+
+    const result = await Category.findOne({
+      where: { projectId, id },
+      include: Api,
+    });
+    ctx.success(result);
+  }
+
+  async createCategory(ctx) {
+    const reqBody = ctx.request.body;
+    ctx.validate({
+      projectId: 'string',
+    }, ctx.params);
+    ctx.validate({
+      name: 'string',
+      description: 'string?',
+    }, reqBody);
+
+    const { projectId } = ctx.params;
+    const { Category } = ctx.model;
+
+    const result = await Category.create({ ...reqBody, projectId });
+    ctx.success(result);
+  }
+
+  async updateCategory(ctx) {
+    const reqBody = ctx.request.body;
+    ctx.validate({
+      projectId: 'string',
+      id: 'string',
+    }, ctx.params);
+    ctx.validate({
+      name: 'string',
+      description: 'string?',
+    }, reqBody);
+
+    const { id, projectId } = ctx.params;
+    const { Category } = ctx.model;
+
+    const category = await Category.findOne({ where: { projectId, id } });
+    if (!category) return ctx.fail('此分类不存在或已删除');
+
+    const result = await category.update(reqBody);
+    ctx.success(result);
+  }
+
+  async destroyCategory(ctx) {
+    ctx.validate({
+      projectId: 'string',
+      id: 'string',
+    }, ctx.params);
+
+    const { id, projectId } = ctx.params;
+    const { Category } = ctx.model;
+
+    const result = await Category.destroy({ where: { id, projectId } });
     ctx.success(result);
   }
 };
