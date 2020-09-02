@@ -210,3 +210,7 @@ export const roleOptions = [
     { value: 'master', label: '管理员', color: '#f50' },
     { value: 'member', label: '成员', color: '#2db7f5' },
 ];
+
+export const httpMethodOptions = [
+    'get', 'post', 'put', 'delete', 'head', 'options', 'patch',
+].map(value => ({ value, label: value.toUpperCase() }));

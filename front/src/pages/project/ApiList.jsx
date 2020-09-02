@@ -6,6 +6,7 @@ import { useGet } from '@/commons/ajax';
 import { Button, Empty, Input } from 'antd';
 import { ApiOutlined, AppstoreAddOutlined } from '@ant-design/icons';
 import _ from 'lodash';
+import ApiModal from './ApiModal';
 
 export default config()(props => {
     const { categoryId = 'all', project } = props;
@@ -21,11 +22,12 @@ export default config()(props => {
     const isAll = categoryId === 'all';
 
     const columns = [
-        { title: '接口名称', dataIndex: 'name' },
-        { title: '接口路径', dataIndex: 'path' },
-        { title: '接口分类', dataIndex: 'category' },
-        { title: '状态', dataIndex: 'status' },
-        { title: '标签', dataIndex: 'tag' },
+        { title: '接口名称', dataIndex: 'name', width: 100 },
+        { title: '接口路径', dataIndex: 'path', width: 200 },
+        { title: '接口分类', dataIndex: 'category', width: 100 },
+        { title: '接口描述', dataIndex: 'description' },
+        { title: '状态', dataIndex: 'status', width: 100 },
+        { title: '标签', dataIndex: 'tag', width: 100 },
     ];
 
     const handleSearchApi = _.debounce((e) => {
@@ -33,11 +35,15 @@ export default config()(props => {
         const input = document.getElementById('search-api');
         const value = input.value;
         dataSource.forEach(item => {
-            const { name, path, category, tag } = item;
+            const { name, path, category, description, tag } = item;
 
             if (!value) return item._hide = false;
 
-            item._hide = !name?.includes(value) && !path.includes(value) && !category?.name?.includes(value) && !tag?.includes(value);
+            item._hide = !name?.includes(value) &&
+                !path.includes(value) &&
+                !category?.name?.includes(value) &&
+                !description?.includes(value) &&
+                !tag?.includes(value);
         });
 
         setDataSource([ ...dataSource ]);
@@ -78,7 +84,7 @@ export default config()(props => {
                     id="search-api"
                     allowClear
                     style={{ width: 200, height: 28 }}
-                    placeholder="输入项目名称进行搜索"
+                    placeholder="输入关键字进行搜索"
                     onChange={handleSearchApi}
                 />
                 <Button
@@ -109,6 +115,15 @@ export default config()(props => {
                     </Empty>
                 )}
             </div>
+            <ApiModal
+                visible={apiVisible}
+                projectId={projectId}
+                categoryId={categoryId}
+                onOk={data => {
+                    // TODO
+                }}
+                onCancel={() => setApiVisible(false)}
+            />
         </PageContent>
     );
 });
