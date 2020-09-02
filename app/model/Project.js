@@ -18,7 +18,8 @@ module.exports = app => {
 
   // Project.sync({ force: true });
   Project.associate = function() {
-    app.model.Project.belongsTo(app.model.Team);
+    app.model.Project.belongsTo(app.model.Team, { onDelete: 'CASCADE' });
+
     app.model.Project.hasMany(app.model.Dynamic);
 
     // 与User表是多对多关系

@@ -24,9 +24,13 @@ module.exports = app => {
   // Dynamic.sync({ force: true });
 
   Dynamic.associate = function() {
-    app.model.Dynamic.belongsTo(app.model.User);
-    app.model.Dynamic.belongsTo(app.model.Team);
-    app.model.Dynamic.belongsTo(app.model.Project);
+
+    // 归属于用户（动态：用户 = n：1）用户删除的时候，动态也删除
+    app.model.Dynamic.belongsTo(app.model.User, { onDelete: 'CASCADE' });
+
+    // 团队删除的时候，设置 dynamic.teamId = null
+    app.model.Dynamic.belongsTo(app.model.Team, { onDelete: 'SET NULL' });
+    app.model.Dynamic.belongsTo(app.model.Project, { onDelete: 'SET NULL' });
   };
 
   return Dynamic;
