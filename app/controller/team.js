@@ -101,7 +101,7 @@ module.exports = class TeamController extends Controller {
     }, ctx.params);
 
     const { id } = ctx.params;
-    const { Team, Project } = ctx.model;
+    const { Team, Project, Dynamic } = ctx.model;
 
     // 多次数据库操作，进行事务处理
     let transaction;
@@ -110,6 +110,12 @@ module.exports = class TeamController extends Controller {
 
       // 删除所有关联项目
       await Project.destroy({ where: { teamId: id }, transaction });
+
+      // 解除动态关联，但是不删除动态
+      const dynamics = await Dynamic.findAll({ where: { teamId: id }, transaction });
+      for (const dynamic of dynamics) {
+        await dynamic.update({ teamId: null }, { transaction });
+      }
 
       // 删除当前团队
       const result = await Team.destroy({ where: { id }, transaction });

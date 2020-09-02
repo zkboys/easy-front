@@ -63,13 +63,6 @@ export default config({
 
                 <FormElement
                     {...formProps}
-                    label="项目名称"
-                    name="name"
-                    required
-                    autoFocus
-                />
-                <FormElement
-                    {...formProps}
                     type="select"
                     label="所属团队"
                     name="teamId"
@@ -77,6 +70,13 @@ export default config({
                     autoFocus
                     disabled={disabledTeam}
                     options={teams.map(item => ({ value: item.id, label: item.name }))}
+                />
+                <FormElement
+                    {...formProps}
+                    label="项目名称"
+                    name="name"
+                    required
+                    autoFocus
                 />
                 <FormElement
                     {...formProps}

@@ -163,7 +163,7 @@ export default config({
             </TabPane>
             <TabPane tab={<span><SolutionOutlined/> 个人动态</span>} key="dynamic">
                 <div className="pan-content">
-                    <Dynamic showTeamProject url={`/users/${userId}/dynamics`}/>
+                    <Dynamic showUser={false} showTeam showProject url={`/users/${userId}/dynamics`}/>
                 </div>
             </TabPane>
         </TabPage>

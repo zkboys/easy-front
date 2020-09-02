@@ -47,7 +47,7 @@ function changeLog(str) {
 }
 
 export default config()(props => {
-    const { url, pageSize = 10, team, project, showTeamProject } = props;
+    const { url, pageSize = 10, team, project, showUser = true, showTeam, showProject } = props;
     const [ pageNum, setPageNum ] = useState(1);
     const [ dataSource, setDataSource ] = useState([]);
     const [ noMore, setNoMore ] = useState(false);
@@ -66,6 +66,7 @@ export default config()(props => {
     }, [ url, team, project ]);
 
     useEffect(() => {
+        if (url.includes(':')) return;
         (async () => {
             const { rows = [] } = await fetchDataSource({ pageNum, pageSize });
 
@@ -123,9 +124,9 @@ export default config()(props => {
                                             {moment(createdAt).format('YYYY年MM月DD日 HH:mm')}
                                         </div>
                                         <div styleName="summary">
-                                            <Link to={`/users/${user.id}/:tabId`}>{user.name}</Link>
-                                            {showTeamProject && team ? `在团队${getContent({ ...team, type: 'teamLink' })}中：` : ''}
-                                            {showTeamProject && project ? `在项目${getContent({ ...project, type: 'projectLink' })}中：` : ''}
+                                            {showUser ? <Link to={`/users/${user.id}/:tabId`}>{user.name}</Link> : null}
+                                            {showTeam && team && !project ? <span>在团队{getContent({ ...team, type: 'teamLink' })}中：</span> : null}
+                                            {showProject && project ? <span>在项目{getContent({ ...project, type: 'projectLink' })}中：</span> : null}
                                             {summaryJsx}
                                             {detail ? (
                                                 <Button

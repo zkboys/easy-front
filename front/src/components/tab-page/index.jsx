@@ -41,6 +41,8 @@ const TabPage = config({
         const operator = tab.querySelector('.pan-operator');
         const content = tab.querySelector('.pan-content');
 
+        if (!content) return;
+
         content.style.height = operator ? `${height}px` : `${height + 50}px`;
     }, [ height, activeKey ]);
 

@@ -19,6 +19,7 @@ export default config()(props => {
     const [ deleteMemberLoading, deleteMember ] = useDel('/teams/:id/members/:memberId');
 
     async function getMembers() {
+        if (!teamId || teamId === ':teamId') return;
         const members = await fetchMembers(teamId);
         // 将自己放在第一个
         const index = members.findIndex(item => item.id === user.id);
