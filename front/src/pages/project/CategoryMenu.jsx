@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, Tooltip } from 'antd';
+import { Button, Empty, Menu, Tooltip } from 'antd';
 import config from 'src/commons/config-hoc';
 import { useDel, useGet } from 'src/commons/ajax';
 import {
@@ -10,15 +10,21 @@ import {
 } from '@ant-design/icons';
 import PageContent from 'src/layouts/page-content';
 import confirm from 'src/components/confirm';
-import CategoryModal from './CategoryModal';
 import './style.less';
 
 export default config({})(props => {
-    const { selectKey, onClick, onChange, projectId, project, isProjectMaster } = props;
+    const {
+        selectedKey,
+        onClick,
+        onChange,
+        projectId,
+        project,
+        isProjectMaster,
+        showModal,
+        keyWord,
+    } = props;
 
     const [ dataSource, setDataSource ] = useState([]);
-    const [ visible, setVisible ] = useState(false);
-    const [ editId, setEditId ] = useState(null);
     const [ loading, fetchCategories ] = useGet('/projects/:projectId/categories');
 
     const [ deleting, deleteCategory ] = useDel('/projects/:projectId/categories/:id', { successTip: '删除成功！' });
@@ -38,6 +44,27 @@ export default config({})(props => {
         onChange && onChange('delete');
     }
 
+    // 关键字改变，进行过滤
+    useEffect(() => {
+        dataSource.forEach(item => {
+            const { name, apis } = item;
+
+            if (!keyWord) {
+                item._hide = false;
+                apis.forEach(it => it._hide = false);
+                return;
+            }
+
+            item._hide = !name?.includes(keyWord);
+
+            apis.forEach(it => it._hide = !it.name.includes(keyWord));
+            const isAllHide = apis.every(it => it._hide);
+
+            // 如果不是api全部隐藏，要显示父级分类
+            if (!isAllHide) item._hide = false;
+        });
+        setDataSource([ ...dataSource ]);
+    }, [ keyWord ]);
 
     useEffect(() => {
         (async () => {
@@ -45,6 +72,25 @@ export default config({})(props => {
         })();
     }, [ projectId, project ]);
 
+    const showDataSource = dataSource.filter(item => !item._hide);
+    if (!showDataSource?.length) return (
+        <Empty
+            style={{ marginTop: 100 }}
+            description={dataSource?.length ? '无匹配结果' : '暂无任何分类'}
+        >
+            {dataSource?.length ? null : (
+                <Button
+                    type="primary"
+                    onClick={() => {
+                        showModal && showModal();
+                    }}
+                >
+                    <FolderOpenOutlined/>创建分类
+                </Button>
+            )}
+        </Empty>
+    );
+    console.log(selectedKey);
     return (
         <PageContent
             styleName="category-menu"
@@ -56,7 +102,7 @@ export default config({})(props => {
             <Menu
                 onClick={({ key }) => onClick(key, 'api')}
                 style={{ width: '100%' }}
-                selectedKeys={[ selectKey ]}
+                selectedKeys={[ selectedKey || 'all' ]}
                 mode="inline"
             >
                 <Menu.Item key="all"><ApiOutlined/>所有接口</Menu.Item>
@@ -88,8 +134,7 @@ export default config({})(props => {
                                                         e.preventDefault();
                                                         e.stopPropagation();
 
-                                                        setEditId(id);
-                                                        setVisible(true);
+                                                        showModal && showModal(id);
                                                     }}
                                                 />
                                             </Tooltip>
@@ -121,17 +166,6 @@ export default config({})(props => {
                     );
                 })}
             </Menu>
-            <CategoryModal
-                visible={visible}
-                isEdit={!!editId}
-                id={editId}
-                projectId={projectId}
-                onOk={() => {
-                    setVisible(false);
-                    onChange && onChange('edit');
-                }}
-                onCancel={() => setVisible(false)}
-            />
         </PageContent>
     );
 });

@@ -9,6 +9,7 @@ import {
     AppstoreOutlined,
     SolutionOutlined,
     DeleteOutlined,
+    ApiOutlined,
 } from '@ant-design/icons';
 import _ from 'lodash';
 import { useGet, useDel } from 'src/commons/ajax';
@@ -17,6 +18,7 @@ import TabPage from 'src/components/tab-page';
 import Dynamic from 'src/components/dynamic';
 import CategoryModal from './CategoryModal';
 import CategoryMenu from './CategoryMenu';
+import ApiList from './ApiList';
 
 import './style.less';
 import { getColor } from '@/commons';
@@ -33,8 +35,9 @@ export default config({
     const { projectId } = params;
     const [ categoryId, setCategoryId ] = useState(query.setCategoryId);
     const [ apiId, setApiId ] = useState(query.apiId);
+    const [ apiKeyWord, setApiKeyWord ] = useState(undefined);
 
-    const [ activeKey, setActiveKey ] = useState(params.tabId !== ':tabId' ? params.tabId : 'project');
+    const [ activeKey, setActiveKey ] = useState(params.tabId !== ':tabId' ? params.tabId : 'api');
     const [ project, setProject ] = useState({});
     const [ categoryVisible, setCategoryVisible ] = useState(false);
     const [ editCategoryId, setEditCategoryId ] = useState(null);
@@ -50,12 +53,25 @@ export default config({
         </div>
     ), [ project ]);
 
+    const apiListComponent = useMemo(() => (
+        <ApiList project={project} categoryId={categoryId}/>
+    ), [ project, categoryId ]);
+
     // 删除项目
     async function handleDeleteProject() {
         if (projectDeleteLoading) return;
         await deleteProject(projectId, { successTip: '删除成功！' });
         props.history.goBack();
     }
+
+    // 搜索接口
+    const handleSearchApi = _.debounce((e) => {
+        // 获取不到e.target
+        const input = document.getElementById('search-api');
+        const value = input.value;
+
+        setApiKeyWord(value);
+    }, 100);
 
     // 组件加载完成
     useEffect(() => {
@@ -134,7 +150,7 @@ export default config({
                             {isProjectMaster ? (
                                 <Button ghost onClick={() => setCategoryVisible(true) || setEditCategoryId(null)}>
                                     <FolderOpenOutlined/>
-                                    添加分类
+                                    创建分类
                                 </Button>
                             ) : null}
                         </div>
@@ -145,15 +161,18 @@ export default config({
                             id="search-api"
                             allowClear
                             placeholder="输入分类、接口名称进行搜索"
+                            onChange={handleSearchApi}
                         />
                     </>
                 )}
                 list={(
                     <CategoryMenu
-                        selectedKey={categoryId}
+                        selectedKey={apiId || categoryId}
                         projectId={projectId}
                         project={project}
                         isProjectMaster={isProjectMaster}
+                        showModal={(id) => setCategoryVisible(true) || setEditCategoryId(id)}
+                        keyWord={apiKeyWord}
                         onChange={type => {
                             setProject({ ...project });
 
@@ -177,7 +196,9 @@ export default config({
                     />
                 )}
             >
-                <TabPane tab={<span><AppstoreOutlined/> 接口</span>} key="api"></TabPane>
+                <TabPane tab={<span><ApiOutlined/> 接口</span>} key="api">
+                    {apiId ? '具体接口页面' : apiListComponent}
+                </TabPane>
                 <TabPane tab={<span><ProjectOutlined/> 项目成员</span>} key="member"></TabPane>
                 <TabPane tab={<span><ProjectOutlined/> 设置</span>} key="setting"></TabPane>
                 <TabPane tab={<span><SolutionOutlined/> 项目动态</span>} key="dynamic">
@@ -190,9 +211,10 @@ export default config({
                 projectId={projectId}
                 id={editCategoryId}
                 isEdit={!!editCategoryId}
-                onOk={() => {
+                onOk={(data) => {
                     setCategoryVisible(false);
                     setProject({ ...project });
+                    setCategoryId(data.id);
                 }}
                 onCancel={() => setCategoryVisible(false)}
             />
