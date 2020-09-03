@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { Tooltip, Select, Popconfirm } from 'antd';
 import {
     DeleteOutlined,
@@ -7,7 +6,7 @@ import {
 } from '@ant-design/icons';
 import config from 'src/commons/config-hoc';
 import { roleOptions } from 'src/commons';
-import { UserAvatar } from 'src/library/components';
+import UserLink from 'src/components/user-link';
 import './style.less';
 
 export default config({})(props => {
@@ -37,10 +36,7 @@ export default config({})(props => {
     return (
         <div styleName="root">
             <div styleName="name">
-                <Link to={`/users/${id}/:tabId`}>
-                    <UserAvatar styleName="avatar" src={avatar} name={name} alt="头像"/>
-                    {name}
-                </Link>
+                <UserLink user={{ id, avatar, name }}/>
             </div>
             <div styleName="email">{email}</div>
             <div styleName="role">

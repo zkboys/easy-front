@@ -9,13 +9,14 @@ import {
     BugOutlined,
 } from '@ant-design/icons';
 import _ from 'lodash';
+import Preview from './Preview';
 
 const { TabPane } = Tabs;
 
 const otherHeight = 168;
 
 export default config()(props => {
-    const { height: containerHeight, activeKey = 'preview', onTabChange } = props;
+    const { height: containerHeight, id: apiId, projectId, activeKey = 'preview', onTabChange } = props;
     const [ height, setHeight ] = useState(document.documentElement.clientHeight - otherHeight);
 
     // 窗口大小改变事件
@@ -39,8 +40,7 @@ export default config()(props => {
                 <Tabs onChange={key => onTabChange && onTabChange(key)} activeKey={activeKey}>
                     <TabPane tab={<span><EyeOutlined/> 预览</span>} key="preview">
                         <div style={{ height, overflowY: 'auto' }}>
-                            预览
-                            <div style={{ width: 100, height: 1000, background: 'green' }}/>
+                            <Preview id={apiId} projectId={projectId}/>
                         </div>
                     </TabPane>
                     <TabPane tab={<span><FormOutlined/> 编辑</span>} key="edit">

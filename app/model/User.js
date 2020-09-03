@@ -52,6 +52,7 @@ module.exports = app => {
 
     // 与Dynamic一对多关系
     app.model.User.hasMany(app.model.Dynamic);
+    app.model.User.hasMany(app.model.Api);
   };
 
   return User;

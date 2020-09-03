@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = app => {
-  const { INTEGER, ENUM, STRING} = app.Sequelize;
+  const { UUID, INTEGER, ENUM, STRING } = app.Sequelize;
 
   const Api = app.model.define('api', {
     id: {
@@ -13,6 +13,7 @@ module.exports = app => {
     },
     projectId: INTEGER,
     categoryId: INTEGER,
+    userId: UUID,
     name: STRING(200),
     description: STRING(500),
     method: STRING(20),
@@ -30,6 +31,8 @@ module.exports = app => {
   Api.associate = function() {
     app.model.Api.belongsTo(app.model.Category, { onDelete: 'CASCADE' });
     app.model.Api.belongsTo(app.model.Project, { onDelete: 'CASCADE' });
+    app.model.Api.belongsTo(app.model.User, { onDelete: 'CASCADE' });
+    app.model.Api.hasMany(app.model.Param);
   };
 
   return Api;

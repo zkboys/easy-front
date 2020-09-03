@@ -80,4 +80,8 @@ $ npm run deploy
 
 ## TODO
 - [x] 同一路由规则下，浏览器前进后退无效
+- [ ] 项目 统一 设置 params
+- [ ] 项目 统一 设置 prefix
+- [ ] 
+- [ ] 
 [egg]: https://eggjs.org

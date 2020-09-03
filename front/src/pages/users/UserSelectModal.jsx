@@ -47,7 +47,7 @@ export default config({
                 </FormElement>
                 <FormElement
                     {...formProps}
-                    type="select"
+                    type="radio-button"
                     label="角色"
                     name="role"
                     required

@@ -32,7 +32,6 @@ const TabPage = config({
         setHeight(height);
     }, 100);
 
-
     // height activeKey 改变，处理pan-content 高度
     useEffect(() => {
         onHeightChange && onHeightChange(height);

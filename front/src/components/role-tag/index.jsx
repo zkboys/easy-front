@@ -1,8 +1,9 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Tag } from 'antd';
 import { roleOptions } from 'src/commons';
 
-export default props => {
+const RoleTag = props => {
     const { role } = props;
     let { label, color } = roleOptions.find(item => item.value === role) || {};
 
@@ -17,4 +18,8 @@ export default props => {
     }
 
     return <Tag color={color}>{label}</Tag>;
-}
+};
+RoleTag.propTypes = {
+    role: PropTypes.object,
+};
+export default RoleTag;

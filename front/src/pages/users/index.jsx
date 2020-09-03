@@ -18,6 +18,7 @@ import {
 } from 'src/library/components';
 
 import EditModal from './EditModal';
+import UserLink from '@/components/user-link';
 
 export default config({
     pageHead: true,
@@ -62,22 +63,7 @@ export default config({
         { title: '账号', dataIndex: 'account', width: 200 },
         {
             title: '用户名', dataIndex: 'name', width: 200,
-            render: (name, record) => {
-                let { id, avatar } = record;
-
-                return (
-                    <Link to={`/users/${id}/:tabId`}>
-                        <UserAvatar
-                            src={avatar}
-                            name={name}
-                            style={{
-                                marginRight: 8,
-                            }}
-                        />
-                        {name}
-                    </Link>
-                );
-            },
+            render: (name, record) => <UserLink user={record}/>,
         },
         {
             title: '角色', dataIndex: 'roles', width: 400,

@@ -7,6 +7,7 @@ import {
     SettingOutlined,
     ApiOutlined,
     TeamOutlined,
+    BookOutlined,
 } from '@ant-design/icons';
 import _ from 'lodash';
 import { useGet } from 'src/commons/ajax';
@@ -66,6 +67,7 @@ export default config({
     const apiComponent = useMemo(() => (
         <Api
             id={apiId}
+            projectId={projectId}
             height={height}
             onTabChange={setApiTabKey}
             activeKey={apiTabKey}
@@ -213,6 +215,7 @@ export default config({
                 <TabPane tab={<span><SolutionOutlined/> 项目动态</span>} key="dynamic">
                     {dynamicComponent}
                 </TabPane>
+                <TabPane tab={<span><BookOutlined/> Wiki</span>} key="wiki"></TabPane>
             </TabPage>
 
             <CategoryModal

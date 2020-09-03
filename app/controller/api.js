@@ -34,9 +34,9 @@ module.exports = class ApiController extends Controller {
     }, ctx.params);
 
     const { id } = ctx.params;
-    const { Api } = ctx.model;
+    const { Api, Project, User } = ctx.model;
 
-    const result = await Api.findByPk(id);
+    const result = await Api.findByPk(id, { include: [ Project, User ] });
     ctx.success(result);
   }
 
@@ -47,6 +47,7 @@ module.exports = class ApiController extends Controller {
       categoryId: 'int',
     }, reqBody);
 
+    const user = ctx.user;
     const { Api, Category } = ctx.model;
     const requestBody = ctx.request.body;
     const { categoryId, apis } = requestBody;
@@ -81,9 +82,36 @@ module.exports = class ApiController extends Controller {
         api.categoryId = categoryId;
       });
 
-      const result = await Api.bulkCreate(apis);
-      ctx.success(result);
+      // 多次数据库操作，进行事务处理
+      let transaction;
+      try {
+        transaction = await ctx.model.transaction();
 
+        const result = [];
+        for (const api of apis) {
+          const { params } = api;
+          const paramsToSave = [];
+
+          if (params && params.length) {
+            params.forEach(key => {
+              paramsToSave.push({ key });
+            });
+          }
+
+          const savedApi = await user.createApi(api, { transaction });
+          result.push(savedApi);
+          for (const p of paramsToSave) {
+            await savedApi.createParam(p, { transaction });
+          }
+        }
+
+        await transaction.commit();
+        ctx.success(result);
+      } catch (e) {
+        if (transaction) await transaction.rollback();
+
+        throw e;
+      }
     } else {
       ctx.validate({
         name: 'string',
@@ -96,7 +124,7 @@ module.exports = class ApiController extends Controller {
       const { name, method, path } = requestBody;
       await check(name, method, path);
 
-      const result = await Api.create({ ...reqBody, projectId });
+      const result = await user.createApi({ ...reqBody, projectId });
       ctx.success(result);
     }
   }

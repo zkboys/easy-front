@@ -167,7 +167,7 @@ module.exports = class TeamController extends Controller {
   async updateMember(ctx) {
     ctx.validate({
       id: 'int',
-      memberId: 'int',
+      memberId: 'string',
     }, ctx.params);
 
     ctx.validate({
@@ -196,7 +196,7 @@ module.exports = class TeamController extends Controller {
   async destroyMember(ctx) {
     ctx.validate({
       id: 'int',
-      memberId: 'int',
+      memberId: 'string',
     }, ctx.params);
 
     const { id, memberId } = ctx.params;
