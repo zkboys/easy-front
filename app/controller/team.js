@@ -193,7 +193,7 @@ module.exports = class TeamController extends Controller {
   }
 
   // 删除成员
-  async deleteMember(ctx) {
+  async destroyMember(ctx) {
     ctx.validate({
       id: 'string',
       memberId: 'string',

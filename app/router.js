@@ -17,6 +17,7 @@ module.exports = app => {
     project,
     category,
     dynamic: dynamicController,
+    api: apiController,
   } = controller;
 
   // 登录
@@ -66,35 +67,40 @@ module.exports = app => {
   // 团队 crud
   api.get('/teams', team.index);
   api.get('/teams/:id', permission.team.member, team.show);
-  api.post('/teams', dynamic.team.add, team.create);
+  api.post('/teams', dynamic.team.create, team.create);
   api.put('/teams/:id', permission.team.master, dynamic.team.update, team.update);
-  api.del('/teams/:id', permission.team.master, dynamic.team.del, team.destroy);
+  api.del('/teams/:id', permission.team.master, dynamic.team.destroy, team.destroy);
   api.get('/teams/:id/members', permission.team.member, team.members);
-  api.post('/teams/:id/members', permission.team.master, dynamic.team.addMember, team.addMembers);
+  api.post('/teams/:id/members', permission.team.master, dynamic.team.createMembers, team.addMembers);
   api.put('/teams/:id/members/:memberId', permission.team.master, dynamic.team.updateMember, team.updateMember);
-  api.del('/teams/:id/members/:memberId', permission.team.master, dynamic.team.deleteMember, team.deleteMember);
+  api.del('/teams/:id/members/:memberId', permission.team.master, dynamic.team.destroyMember, team.destroyMember);
   api.get('/teams/:id/dynamics', permission.team.member, dynamicController.index);
 
   // 项目 crud
   api.get('/projects', project.index);
   api.get('/projects/:id', permission.project.member, project.show);
-  api.post('/projects', project.create);
-  api.put('/projects/:id', permission.project.master, project.update);
-  api.del('/projects/:id', permission.project.master, project.destroy);
+  api.post('/projects', dynamic.project.create, project.create);
+  api.put('/projects/:id', permission.project.master, dynamic.project.update, project.update);
+  api.del('/projects/:id', permission.project.master, dynamic.project.destroy, project.destroy);
   api.get('/projects/:id/dynamics', dynamicController.index);
 
   // 项目分类 用于判断 project是否存在 并且扩展出ctx.project
-  api.get('/projects/:projectId/categories', resource.project, project.categories);
-  api.get('/projects/:projectId/categories/:id', resource.project, project.category);
-  api.post('/projects/:projectId/categories', resource.project, project.createCategory);
-  api.put('/projects/:projectId/categories/:id', resource.project, project.updateCategory);
-  api.del('/projects/:projectId/categories/:id', resource.project, project.destroyCategory);
+  api.get('/projects/:projectId/categories', permission.project.master, resource.project, category.index);
+  api.get('/projects/:projectId/categories/:id', permission.project.master, resource.project, category.show);
+  api.post('/projects/:projectId/categories', permission.project.master, resource.project, dynamic.project.createCategory, category.create);
+  api.put('/projects/:projectId/categories/:id', permission.project.master, resource.project, dynamic.project.updateCategory, category.update);
+  api.del('/projects/:projectId/categories/:id', permission.project.master, resource.project, dynamic.project.destroyCategory, category.destroy);
+
+  api.get('/projects/:projectId/apis', permission.project.member, resource.project, apiController.index);
+  api.get('/projects/:projectId/apis/:id', permission.project.member, resource.project, apiController.show);
+  api.post('/projects/:projectId/apis', permission.project.master, resource.project, dynamic.project.createApi, apiController.create);
+  api.put('/projects/:projectId/apis/:id', permission.project.master, resource.project, dynamic.project.updateApi, apiController.update);
+  api.del('/projects/:projectId/apis/:id', permission.project.master, resource.project, dynamic.project.destroyApi, apiController.destroy);
 
   // 未捕获请求，返回404
   api.get('/*', async ctx => {
     ctx.status = 404;
   });
-
 
   // 文档
   router.get('/docs', async ctx => {

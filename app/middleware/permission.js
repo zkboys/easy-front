@@ -53,7 +53,9 @@ module.exports = {
   },
   project: {
     owner: async (ctx, next) => {
-      let { id } = ctx.params;
+      let { id, projectId } = ctx.params;
+      if (projectId) id = projectId;
+
       const user = ctx.user;
 
       if (user.isAdmin) return await next();
@@ -67,7 +69,9 @@ module.exports = {
       ctx.throw(403);
     },
     master: async (ctx, next) => {
-      let { id } = ctx.params;
+      let { id, projectId } = ctx.params;
+      if (projectId) id = projectId;
+
       const user = ctx.user;
 
       if (user.isAdmin) return await next();
@@ -81,7 +85,9 @@ module.exports = {
       ctx.throw(403);
     },
     member: async (ctx, next) => {
-      let { id } = ctx.params;
+      let { id, projectId } = ctx.params;
+      if (projectId) id = projectId;
+
       const user = ctx.user;
 
       if (user.isAdmin) return await next();

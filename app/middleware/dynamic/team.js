@@ -1,20 +1,9 @@
 'use strict';
 const { Op } = require('sequelize');
-
-function userLink(user) {
-  return `{"type": "userLink", "id": "${user.id}", "name": "${user.name}"}`;
-}
-
-function teamLink(team) {
-  return `{"type": "teamLink", "id": "${team.id}", "name": "${team.name}"}`;
-}
-
-function roleTag(role) {
-  return `{"type": "roleTag", "role": "${role}"}`;
-}
+const { userLink, teamLink, roleTag } = require('./util');
 
 module.exports = {
-  add: async (ctx, next) => {
+  create: async (ctx, next) => {
     const user = ctx.user;
     const { Dynamic } = ctx.model;
 
@@ -43,7 +32,7 @@ module.exports = {
       await Dynamic.create({ type: 'update', title: '团队动态', teamId, summary, userId: user.id, detail: detail.join('\n') });
     }
   },
-  del: async (ctx, next) => {
+  destroy: async (ctx, next) => {
     const user = ctx.user;
     const { Dynamic, Team } = ctx.model;
     const prevTeam = await Team.findByPk(ctx.params.id);
@@ -51,9 +40,9 @@ module.exports = {
     await next();
 
     const summary = `删除了团队${teamLink(prevTeam)}`;
-    await Dynamic.create({ type: 'delete', title: '团队动态', summary, userId: user.id });
+    await Dynamic.create({ type: 'delete', title: '团队动态', teamId: prevTeam.id, summary, userId: user.id });
   },
-  addMember: async (ctx, next) => {
+  createMembers: async (ctx, next) => {
     await next();
 
     const user = ctx.user;
@@ -85,7 +74,7 @@ module.exports = {
       },
     });
 
-    if (!member) return await next;
+    if (!member) return await next();
 
     let prevRole;
     if (member && member.teams && member.teams.length) prevRole = member.teams[0].team_user.role;
@@ -96,7 +85,7 @@ module.exports = {
     await Dynamic.create({ type: 'update', title: '团队动态', teamId, summary, userId: user.id });
   },
 
-  deleteMember: async (ctx, next) => {
+  destroyMember: async (ctx, next) => {
     await next();
 
     const user = ctx.user;

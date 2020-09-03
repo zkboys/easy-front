@@ -21,6 +21,8 @@ module.exports = app => {
     app.model.Project.belongsTo(app.model.Team, { onDelete: 'CASCADE' });
 
     app.model.Project.hasMany(app.model.Dynamic);
+    app.model.Project.hasMany(app.model.Category);
+    app.model.Project.hasMany(app.model.Api);
 
     // 与User表是多对多关系
     app.model.Project.belongsToMany(app.model.User, {
