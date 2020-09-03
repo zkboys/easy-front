@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Form } from 'antd';
+import { Form, Tabs } from 'antd';
 import { FormElement } from 'src/library/components';
 import config from 'src/commons/config-hoc';
 import { ModalContent } from 'src/library/components';
@@ -9,13 +9,16 @@ import CategorySelect from './CategorySelect';
 import './style.less';
 import _ from 'lodash';
 
+const { TabPane } = Tabs;
+
 export default config({
     modal: {
         title: props => props.isEdit ? '修改接口' : '添加接口',
-        width: 500,
+        width: 600,
     },
 })(props => {
     const { isEdit, id, projectId, categoryId, onOk } = props;
+    const [ activeKey, setActiveKey ] = useState('simple');
     const isAll = categoryId === 'all';
     const [ data, setData ] = useState({
         projectId,
@@ -37,12 +40,50 @@ export default config({
         form.setFieldsValue(res || {});
     }
 
+    function checkFast(rule, value, callback) {
+        if (!value) return callback('请输入内容');
+        const arr = value.split('\n');
+
+        if (!arr?.length || !arr.filter(it => !!it).length) return callback('请输入内容');
+
+        for (let i = 0; i < arr.length; i++) {
+            const line = arr[i];
+            const lineNum = i + 1;
+
+            if (!line) continue;
+
+            const strs = line.split(' ').filter(item => !!item);
+            const [ name, method, path ] = strs;
+            if (!name || !method || !path) return callback(`第${lineNum}行， 格式不正确！name method path param1 ...`);
+
+            if (!method) return callback(`第${lineNum}行，缺少method！`);
+            if (!httpMethodOptions.find(item => item.value === method.toLowerCase())) return callback(`第${lineNum} 行， method填写错误！`);
+
+            if (!path) return callback(`第${lineNum}行，缺少path！`);
+            if (!path.startsWith('/')) return callback(`第${lineNum}行，path需要以 / 开头！`);
+        }
+
+        callback();
+    }
+
     async function handleSubmit(values) {
         if (saving || updating) return;
 
+        const { fast } = values;
+
+        let apis = [];
+        if (fast) {
+            const lines = fast.split('\n').filter(it => !!it);
+            apis = lines.map(line => {
+                const items = line.split(' ').filter(item => !!item);
+                const [ name, method, path, ...params ] = items;
+                return { name, method: method.toLowerCase(), path, params };
+            });
+        }
+
         const ajaxMethod = isEdit ? updateApi : saveApi;
 
-        const data = await ajaxMethod(values);
+        const data = await ajaxMethod({ ...values, apis });
 
         onOk && onOk(data);
     }
@@ -70,6 +111,7 @@ export default config({
     const modalLoading = loading || saving || updating;
     return (
         <ModalContent
+            bodyStyle={{ paddingTop: 0 }}
             loading={modalLoading}
             okText="保存"
             cancelText="重置"
@@ -77,78 +119,115 @@ export default config({
             onCancel={() => form.resetFields()}
         >
             <Form
+                name="api"
                 form={form}
                 onFinish={handleSubmit}
                 initialValues={data}
             >
                 {isEdit ? <FormElement {...formProps} type="hidden" name="id"/> : null}
                 <FormElement {...formProps} type="hidden" name="projectId"/>
-                <FormElement {...formProps} type="hidden" name="categoryId"/>
-                <FormElement
-                    {...formProps}
-                    label="接口分类"
-                    name="categoryId"
-                    required
-                    autoFocus={isAll}
-                    allowClear={false}
+                <Tabs
+                    activeKey={activeKey}
+                    onChange={setActiveKey}
                 >
-                    <CategorySelect projectId={projectId}/>
-                </FormElement>
-                <FormElement
-                    {...formProps}
-                    label="接口名称"
-                    name="name"
-                    required
-                    autoFocus={!isAll}
-                    rules={[
-                        { validator: checkName },
-                    ]}
-                />
+                    <TabPane tab="表单填写" key="simple">
+                        {activeKey === 'simple' ? (
+                            <>
+                                <FormElement
+                                    {...formProps}
+                                    label="接口分类"
+                                    name="categoryId"
+                                    required
+                                    autoFocus={isAll}
+                                    allowClear={false}
+                                >
+                                    <CategorySelect projectId={projectId}/>
+                                </FormElement>
+                                <FormElement
+                                    {...formProps}
+                                    label="接口名称"
+                                    name="name"
+                                    required
+                                    autoFocus={!isAll}
+                                    rules={[
+                                        { validator: checkName },
+                                    ]}
+                                />
 
-                <div styleName="api-path-input">
-                    <FormElement
-                        {...formProps}
-                        style={{ flex: '0 0 200px' }}
-                        type="select"
-                        label="接口地址"
-                        name="method"
-                        required
-                        options={httpMethodOptions}
-                    />
-                    <FormElement
-                        style={{ flex: 1 }}
-                        name="path"
-                        label="接口地址"
-                        labelWidth={0}
-                        colon={false}
-                        required
-                        placeholder="/path"
-                        rules={[
-                            {
-                                validator: (rule, value) => {
-                                    if (value && !value.startsWith('/')) return Promise.reject('接口地址需要以 / 开头！');
+                                <div styleName="api-path-input">
+                                    <FormElement
+                                        {...formProps}
+                                        style={{ flex: '0 0 200px' }}
+                                        type="select"
+                                        label="接口地址"
+                                        name="method"
+                                        required
+                                        options={httpMethodOptions}
+                                    />
+                                    <FormElement
+                                        style={{ flex: 1 }}
+                                        name="path"
+                                        label="接口地址"
+                                        labelWidth={0}
+                                        colon={false}
+                                        required
+                                        placeholder="/path"
+                                        rules={[
+                                            {
+                                                validator: (rule, value) => {
+                                                    if (value && !value.startsWith('/')) return Promise.reject('接口地址需要以 / 开头！');
 
-                                    return Promise.resolve();
-                                },
-                            },
-                        ]}
-                    />
-                </div>
+                                                    return Promise.resolve();
+                                                },
+                                            },
+                                        ]}
+                                    />
+                                </div>
 
-                <FormElement
-                    {...formProps}
-                    type="textarea"
-                    label="接口描述"
-                    name="description"
-                    rows={3}
-                    placeholder="建议输入接口描述，便于开发人员理解接口用途，减少沟通成本"
-                />
-                <FormElement
-                    {...formProps}
-                    type="textarea"
-                    layout
-                    label=" "
-                >
+                                <FormElement
+                                    {...formProps}
+                                    type="textarea"
+                                    label="接口描述"
+                                    name="description"
+                                    rows={3}
+                                    placeholder="建议输入接口描述，便于开发人员理解接口用途，减少沟通成本"
+                                />
+                            </>
+                        ) : null}
+                    </TabPane>
+                    <TabPane tab="快速填写" key="fast" disabled={isEdit}>
+                        {activeKey === 'fast' ? (
+                            <>
+                                <FormElement
+                                    {...formProps}
+                                    label="接口分类"
+                                    name="categoryId"
+                                    required
+                                    autoFocus={isAll}
+                                    allowClear={false}
+                                >
+                                    <CategorySelect projectId={projectId}/>
+                                </FormElement>
+                                <FormElement
+                                    {...formProps}
+                                    type="textarea"
+                                    label=" "
+                                    colon={false}
+                                    name="fast"
+                                    elementStyle={{ height: 155 }}
+                                    rules={[ { validator: checkFast } ]}
+                                    placeholder={`快速批量添加，内容以空格隔开
+规则为：
+name method path param1 param2 ...
+例如：
+登录 post /login username password
+                            `}
+                                />
+                            </>
+                        ) : null}
+                    </TabPane>
+                </Tabs>
+                <FormElement {...formProps} layout label=" ">
                     更多信息可以在接口编辑页面添加
                 </FormElement>
             </Form>

@@ -6,7 +6,7 @@ import { useGet } from '@/commons/ajax';
 import { Button, Empty, Input } from 'antd';
 import { ApiOutlined } from '@ant-design/icons';
 import _ from 'lodash';
-import { apiStatusOptions } from 'src/commons';
+import { apiStatusOptions, httpMethodOptions } from 'src/commons';
 import ApiModal from './ApiModal';
 
 export default config()(props => {
@@ -31,6 +31,7 @@ export default config()(props => {
                 );
             },
         },
+        { title: '方法', dataIndex: 'method', width: 80, render: value => httpMethodOptions.find(item => item.value === value)?.label },
         { title: '接口路径', dataIndex: 'path', width: 200 },
         { title: '接口分类', dataIndex: 'category', width: 100, render: value => value?.name },
         { title: '接口描述', dataIndex: 'description' },

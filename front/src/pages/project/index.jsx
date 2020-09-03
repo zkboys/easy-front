@@ -75,7 +75,7 @@ export default config({
     // 搜索接口
     const handleSearchApi = _.debounce((e) => {
         // 获取不到e.target
-        const input = document.getElementById('search-api');
+        const input = document.getElementById('search-category-api');
         const value = input.value;
 
         setApiKeyWord(value);
@@ -165,7 +165,7 @@ export default config({
                             {project.description}
                         </div>
                         <Input
-                            id="search-api"
+                            id="search-category-api"
                             allowClear
                             placeholder="输入分类、接口名称进行搜索"
                             onChange={handleSearchApi}

@@ -147,7 +147,7 @@ export default class UserCenter extends Component {
         return (
             <PageContent styleName="root" loading={loading || loadingRoleMenu}>
                 <QueryBar>
-                    <Form onFinish={this.handleSearch} ref={form => this.form = form}>
+                    <Form name="role-query" onFinish={this.handleSearch} ref={form => this.form = form}>
                         <FormRow>
                             <FormElement
                                 {...formProps}

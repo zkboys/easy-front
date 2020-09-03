@@ -55,6 +55,7 @@ export default config({
         >
             {!isEdit ? <Alert type="warning" style={{ marginBottom: 16 }} message="当前团队中所有成员将自动加入到此项目中"/> : null}
             <Form
+                name="project"
                 form={form}
                 onFinish={handleSubmit}
                 initialValues={data}

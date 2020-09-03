@@ -211,7 +211,7 @@ export default config({
     return (
         <PageContent loading={pageLoading}>
             <QueryBar>
-                <Form form={form} onFinish={condition => setCondition({ condition, pageSize, pageNum: 1 })}>
+                <Form name="user-query" form={form} onFinish={condition => setCondition({ condition, pageSize, pageNum: 1 })}>
                     <FormRow>
                         <FormElement
                             {...formProps}

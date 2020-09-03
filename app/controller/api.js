@@ -44,27 +44,61 @@ module.exports = class ApiController extends Controller {
   async create(ctx) {
     const reqBody = ctx.request.body;
     ctx.validate({
-      name: 'string',
-      path: 'string',
-      method: 'string',
       categoryId: 'int',
-      description: 'string?',
     }, reqBody);
 
     const { Api, Category } = ctx.model;
     const requestBody = ctx.request.body;
-    const { name, categoryId } = requestBody;
+    const { categoryId, apis } = requestBody;
 
     const category = await Category.findByPk(categoryId);
     if (!category) return ctx.fail('分类不存在或已删除');
 
     const projectId = category.projectId;
 
-    const foundApi = await Api.findOne({ where: { name, projectId } });
-    if (foundApi) return ctx.fail('此Api名称已存在');
+    const check = async (name, method, path) => {
+      const foundApi = await Api.findOne({ where: { name, projectId } });
+      if (foundApi) return ctx.fail(`Api名称「${name}」已存在`);
 
-    const result = await Api.create({ ...reqBody, projectId });
-    ctx.success(result);
+      const foundApi2 = await Api.findOne({ where: { method, path } });
+      if (foundApi2) return ctx.fail(`${method} ${path} 接口已存在！`);
+    };
+    // 批量添加
+    if (apis && apis.length) {
+      ctx.validate({
+        categoryId: 'int',
+        apis: 'array?',
+      }, reqBody);
+
+      for (const api of apis) {
+        const { name, method, path } = api;
+
+        await check(name, method, path);
+      }
+
+      apis.forEach(api => {
+        api.projectId = projectId;
+        api.categoryId = categoryId;
+      });
+
+      const result = await Api.bulkCreate(apis);
+      ctx.success(result);
+
+    } else {
+      ctx.validate({
+        name: 'string',
+        path: 'string',
+        method: 'string',
+        categoryId: 'int',
+        description: 'string?',
+      }, reqBody);
+
+      const { name, method, path } = requestBody;
+      await check(name, method, path);
+
+      const result = await Api.create({ ...reqBody, projectId });
+      ctx.success(result);
+    }
   }
 
   // 更新
@@ -83,7 +117,7 @@ module.exports = class ApiController extends Controller {
 
     const { id } = ctx.params;
     const { Api, Category } = ctx.model;
-    const { categoryId, name } = reqBody;
+    const { categoryId, name, method, path } = reqBody;
 
     const foundApi = await Api.findByPk(id);
     if (!foundApi) return ctx.fail('此Api不存在或已删除');
@@ -94,6 +128,9 @@ module.exports = class ApiController extends Controller {
 
     const exitName = await Api.findOne({ where: { name, projectId } });
     if (exitName && exitName.id !== id) return ctx.fail('此Api名已被占用！');
+
+    const foundApi2 = await Api.findOne({ where: { method, path } });
+    if (foundApi2 && foundApi2.id !== id) return ctx.fail(`${method} ${path} 接口已存在！`);
 
     const result = await foundApi.update(reqBody);
     ctx.success(result);

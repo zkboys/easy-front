@@ -57,6 +57,7 @@ export default config({
             onCancel={() => form.resetFields()}
         >
             <Form
+                name="category"
                 form={form}
                 onFinish={handleSubmit}
                 initialValues={data}

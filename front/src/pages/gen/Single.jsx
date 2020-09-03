@@ -600,7 +600,11 @@ export default class UserCenter extends Component {
         return (
             <PageContent loading={loading || deleting} style={{padding: 0, margin: 0}}>
                 <QueryBar>
-                    <Form ref={form => this.form = form} initialValues={{type: 'mysql', method: 'get', userName: 'admin', password: '123456'}}>
+                    <Form
+                        name="gen-single"
+                        ref={form => this.form = form}
+                        initialValues={{type: 'mysql', method: 'get', userName: 'admin', password: '123456'}}
+                    >
                         <FormRow>
                             <FormElement
                                 {...formProps}

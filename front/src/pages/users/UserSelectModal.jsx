@@ -31,6 +31,7 @@ export default config({
             onCancel={() => form.resetFields()}
         >
             <Form
+                name="user-select"
                 form={form}
                 onFinish={handleSubmit}
                 initialValues={{ role: 'master' }}

@@ -112,7 +112,23 @@ module.exports = {
     await destroy(ctx, next, { name: '分类', Model: Category, link: categoryLink });
   },
   createApi: async (ctx, next) => {
-    await create(ctx, next, { name: '接口', link: apiLink });
+    const { apis } = ctx.request.body;
+
+    if (apis && apis.length) {
+      // 批量添加接口
+      await next();
+      const result = ctx.body;
+      const { id: userId } = ctx.user;
+      const { Dynamic, Project } = ctx.model;
+      const { projectId } = ctx.params;
+      const { teamId } = await Project.findByPk(projectId);
+
+      const summary = `批量创建了接口${result.map(item => apiLink(item)).join()}`;
+      await Dynamic.create({ type: 'create', title: '项目动态', teamId, projectId, summary, userId });
+
+    } else {
+      await create(ctx, next, { name: '接口', link: apiLink });
+    }
   },
   updateApi: async (ctx, next) => {
     const { Api } = ctx.model;

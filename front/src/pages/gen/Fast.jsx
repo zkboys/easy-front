@@ -166,6 +166,7 @@ export default class Fast extends Component {
         return (
             <PageContent style={{padding: 0, margin: 0}} loading={loading}>
                 <Form
+                    name="gen-fast"
                     ref={form => this.form = form}
                     onFinish={this.handleSubmit}
                 >
