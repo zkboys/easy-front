@@ -9,7 +9,7 @@ import ProjectModal from 'src/pages/project/ProjectModal';
 import ProjectItem from '@/pages/project/ProjectItem';
 
 export default config()(props => {
-    const { teamId, teams } = props;
+    const { height, teamId, teams } = props;
     const [ projects, setProjects ] = useState([]);
     const [ projectVisible, setProjectVisible ] = useState(false);
 
@@ -66,7 +66,7 @@ export default config()(props => {
                     </Button>
                 ) : null}
             </div>
-            <div className="pan-content">
+            <div className="pan-content" style={{height}}>
                 {showProjects?.length ? (
                     <div style={{ display: 'flex', flexFlow: 'wrap' }}>
                         {showProjects.map(project => (

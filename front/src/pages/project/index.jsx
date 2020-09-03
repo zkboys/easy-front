@@ -1,24 +1,22 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import config from 'src/commons/config-hoc';
-import { Tabs, Menu, Tooltip, Empty, Button, Input, Modal } from 'antd';
+import { Tabs, Button, Input, Modal } from 'antd';
 import {
-    ProjectOutlined,
-    UsergroupAddOutlined,
     FolderOpenOutlined,
-    FormOutlined,
-    AppstoreOutlined,
     SolutionOutlined,
-    DeleteOutlined,
+    SettingOutlined,
     ApiOutlined,
+    TeamOutlined,
 } from '@ant-design/icons';
 import _ from 'lodash';
-import { useGet, useDel } from 'src/commons/ajax';
+import { useGet } from 'src/commons/ajax';
 import RoleTag from 'src/components/role-tag';
 import TabPage from 'src/components/tab-page';
 import Dynamic from 'src/components/dynamic';
 import CategoryModal from './CategoryModal';
 import CategoryMenu from './CategoryMenu';
 import ApiList from './ApiList';
+import Api from 'src/pages/api';
 
 import './style.less';
 import { getColor } from '@/commons';
@@ -33,36 +31,46 @@ export default config({
 })(props => {
     const { user, match: { params }, query } = props;
     const { projectId } = params;
-    const [ categoryId, setCategoryId ] = useState(query.setCategoryId);
-    const [ apiId, setApiId ] = useState(query.apiId);
+    const [ height, setHeight ] = useState();
     const [ apiKeyWord, setApiKeyWord ] = useState(undefined);
 
     const [ activeKey, setActiveKey ] = useState(params.tabId !== ':tabId' ? params.tabId : 'api');
+    const [ categoryId, setCategoryId ] = useState(query.setCategoryId);
+    const [ apiId, setApiId ] = useState(query.apiId);
+    const [ apiTabKey, setApiTabKey ] = useState(query.apiTabKey);
+
     const [ project, setProject ] = useState({});
     const [ categoryVisible, setCategoryVisible ] = useState(false);
     const [ editCategoryId, setEditCategoryId ] = useState(null);
 
     const [ projectLoading, fetchProject ] = useGet('/projects/:id');
-    const [ projectDeleteLoading, deleteProject ] = useDel('/projects/:id');
 
 
     // 只用projectId, project 更新之后，Dynamic才重新渲染
     const dynamicComponent = useMemo(() => (
-        <div className="pan-content">
+        <div className="pan-content" style={{ height: height + 50 }}>
             <Dynamic url={`/projects/${projectId}/dynamics`} project={project}/>
         </div>
-    ), [ project ]);
+    ), [ height, project ]);
 
     const apiListComponent = useMemo(() => (
-        <ApiList project={project} categoryId={categoryId}/>
-    ), [ project, categoryId ]);
+        <ApiList
+            height={height}
+            project={project}
+            categoryId={categoryId}
+            onChange={() => setProject({ ...project })}
+            onClick={record => setApiId(record.id)}
+        />
+    ), [ height, project, categoryId ]);
 
-    // 删除项目
-    async function handleDeleteProject() {
-        if (projectDeleteLoading) return;
-        await deleteProject(projectId, { successTip: '删除成功！' });
-        props.history.goBack();
-    }
+    const apiComponent = useMemo(() => (
+        <Api
+            id={apiId}
+            height={height}
+            onTabChange={setApiTabKey}
+            activeKey={apiTabKey}
+        />
+    ), [ height, apiId, apiTabKey ]);
 
     // 搜索接口
     const handleSearchApi = _.debounce((e) => {
@@ -85,11 +93,12 @@ export default config({
         const query = {};
         if (categoryId) query.categoryId = categoryId;
         if (apiId) query.apiId = apiId;
+        if (apiTabKey) query.apiTabKey = apiTabKey;
 
         const queryStr = Object.entries(query).map(([ key, value ]) => `${key}=${value}`).join('&');
 
         props.history.replace(`/projects/${projectId}/${activeKey}?${queryStr}`);
-    }, [ activeKey, categoryId, apiId ]);
+    }, [ activeKey, categoryId, apiId, apiTabKey ]);
 
     // projectId改变 获取 project详情
     useEffect(() => {
@@ -134,13 +143,11 @@ export default config({
     return (
         <>
             <TabPage
-                loading={
-                    projectLoading ||
-                    projectDeleteLoading
-                }
+                loading={projectLoading}
                 detailStyle={{ backgroundColor: color }}
                 activeKey={activeKey}
                 onChange={key => setActiveKey(key)}
+                onHeightChange={setHeight}
                 detail={(
                     <>
                         <div styleName="title">
@@ -184,6 +191,8 @@ export default config({
                             }
                         }}
                         onClick={(key, type) => {
+                            setActiveKey('api');
+
                             if (type === 'category' || key === 'all') {
                                 setCategoryId(key);
                                 setApiId(null);
@@ -197,10 +206,10 @@ export default config({
                 )}
             >
                 <TabPane tab={<span><ApiOutlined/> 接口</span>} key="api">
-                    {apiId ? '具体接口页面' : apiListComponent}
+                    {apiId ? apiComponent : apiListComponent}
                 </TabPane>
-                <TabPane tab={<span><ProjectOutlined/> 项目成员</span>} key="member"></TabPane>
-                <TabPane tab={<span><ProjectOutlined/> 设置</span>} key="setting"></TabPane>
+                <TabPane tab={<span><TeamOutlined/> 项目成员</span>} key="member"></TabPane>
+                <TabPane tab={<span><SettingOutlined/> 设置</span>} key="setting"></TabPane>
                 <TabPane tab={<span><SolutionOutlined/> 项目动态</span>} key="dynamic">
                     {dynamicComponent}
                 </TabPane>

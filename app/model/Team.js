@@ -1,15 +1,15 @@
 'use strict';
 
 module.exports = app => {
-  const { STRING, UUID, UUIDV4 } = app.Sequelize;
+  const { STRING, INTEGER } = app.Sequelize;
 
   const Team = app.model.define('team', {
     id: {
-      type: UUID,
+      type: INTEGER,
+      autoIncrement: true,
       allowNull: false,
       primaryKey: true,
       unique: true,
-      defaultValue: UUIDV4,
     },
     name: STRING(200),
     description: STRING(500),

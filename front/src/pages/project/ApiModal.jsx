@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Input, Select, Row, Col } from 'antd';
+import { Form } from 'antd';
 import { FormElement } from 'src/library/components';
 import config from 'src/commons/config-hoc';
 import { ModalContent } from 'src/library/components';
@@ -7,6 +7,7 @@ import { useGet, usePost, usePut } from 'src/commons/ajax';
 import { httpMethodOptions } from 'src/commons';
 import CategorySelect from './CategorySelect';
 import './style.less';
+import _ from 'lodash';
 
 export default config({
     modal: {
@@ -23,10 +24,10 @@ export default config({
     });
 
     const [ form ] = Form.useForm();
-    const [ loading, fetchApi ] = useGet('/projects/:projectId/categories/:categoryId/apis/:id');
-
-    const [ saving, saveApi ] = usePost('/projects/:projectId/categories/:categoryId/apis/', { successTip: '添加成功！' });
-    const [ updating, updateApi ] = usePut('/projects/:projectId/categories/:categoryId/apis/:id', { successTip: '修改成功！' });
+    const [ loading, fetchApi ] = useGet('/projects/:projectId/apis/:id');
+    const [ , fetchApiByName ] = useGet('/projects/:projectId/apiByName');
+    const [ saving, saveApi ] = usePost('/projects/:projectId/apis/', { successTip: '添加成功！' });
+    const [ updating, updateApi ] = usePut('/projects/:projectId/apis/:id', { successTip: '修改成功！' });
 
     async function fetchData() {
         if (loading) return;
@@ -45,6 +46,17 @@ export default config({
 
         onOk && onOk(data);
     }
+
+    // 搜索接口
+    const checkName = _.debounce(async (rule, name, callback) => {
+        if (!name) return callback();
+
+        const api = await fetchApiByName({ projectId, name });
+
+        if ((isEdit && api && api.id !== id) || (!isEdit && api)) return callback('接口名称已被占用');
+
+        return callback();
+    }, 300);
 
     useEffect(() => {
         (async () => {
@@ -71,6 +83,7 @@ export default config({
             >
                 {isEdit ? <FormElement {...formProps} type="hidden" name="id"/> : null}
                 <FormElement {...formProps} type="hidden" name="projectId"/>
+                <FormElement {...formProps} type="hidden" name="categoryId"/>
                 <FormElement
                     {...formProps}
                     label="接口分类"
@@ -87,6 +100,9 @@ export default config({
                     name="name"
                     required
                     autoFocus={!isAll}
+                    rules={[
+                        { validator: checkName },
+                    ]}
                 />
 
                 <div styleName="api-path-input">
@@ -107,6 +123,15 @@ export default config({
                         colon={false}
                         required
                         placeholder="/path"
+                        rules={[
+                            {
+                                validator: (rule, value) => {
+                                    if (value && !value.startsWith('/')) return Promise.reject('接口地址需要以 / 开头！');
+
+                                    return Promise.resolve();
+                                },
+                            },
+                        ]}
                     />
                 </div>
 

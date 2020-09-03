@@ -1,15 +1,15 @@
 'use strict';
 
 module.exports = app => {
-  const { STRING, BOOLEAN, UUID, UUIDV4 } = app.Sequelize;
+  const { STRING, BOOLEAN, INTEGER } = app.Sequelize;
 
   const Role = app.model.define('role', {
     id: {
-      type: UUID,
+      type: INTEGER,
+      autoIncrement: true,
       allowNull: false,
       primaryKey: true,
       unique: true,
-      defaultValue: UUIDV4,
     },
     name: STRING(200),
     description: STRING(500),

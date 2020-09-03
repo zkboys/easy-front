@@ -30,6 +30,7 @@ export default config({
 })(props => {
     const { user, match: { params } } = props;
 
+    const [ height, setHeight ] = useState();
     const [ activeKey, setActiveKey ] = useState(params.tabId !== ':tabId' ? params.tabId : 'project');
     const [ teamId, setTeamId ] = useState(params.teamId);
     const [ teams, setTeams ] = useState([]);
@@ -45,14 +46,16 @@ export default config({
     // 只用teamId 更新之后，Project才重新渲染
     const projectComponent = useMemo(() => (
         <Project
+            height={height}
             teamId={teamId}
             teams={teams}
         />
-    ), [ teamId, teams ]);
+    ), [ height, teamId, teams ]);
 
     // 只用teamId 更新之后，Member才重新渲染
     const memberComponent = useMemo(() => (
         <Member
+            height={height}
             teamId={teamId}
             team={team}
             teams={teams}
@@ -65,14 +68,14 @@ export default config({
                 }
             }}
         />
-    ), [ teamId, team, teams ]);
+    ), [ height, teamId, team, teams ]);
 
     // 只用teamId, team 更新之后，Dynamic才重新渲染
     const dynamicComponent = useMemo(() => (
-        <div className="pan-content">
+        <div className="pan-content" style={{ height: height + 50 }}>
             <Dynamic url={`/teams/${teamId}/dynamics`} team={team}/>
         </div>
-    ), [ teamId, team ]);
+    ), [ height, teamId, team ]);
 
     async function getTeams() {
         const teams = await fetchTeams();
@@ -177,6 +180,7 @@ export default config({
                 }
                 activeKey={activeKey}
                 onChange={key => setActiveKey(key)}
+                onHeightChange={setHeight}
                 detail={(
                     <>
                         <div styleName="title">

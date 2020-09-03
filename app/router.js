@@ -71,7 +71,7 @@ module.exports = app => {
   api.put('/teams/:id', permission.team.master, dynamic.team.update, team.update);
   api.del('/teams/:id', permission.team.master, dynamic.team.destroy, team.destroy);
   api.get('/teams/:id/members', permission.team.member, team.members);
-  api.post('/teams/:id/members', permission.team.master, dynamic.team.createMembers, team.addMembers);
+  api.post('/teams/:id/members', permission.team.master, dynamic.team.addMembers, team.addMembers);
   api.put('/teams/:id/members/:memberId', permission.team.master, dynamic.team.updateMember, team.updateMember);
   api.del('/teams/:id/members/:memberId', permission.team.master, dynamic.team.destroyMember, team.destroyMember);
   api.get('/teams/:id/dynamics', permission.team.member, dynamicController.index);
@@ -96,6 +96,7 @@ module.exports = app => {
   api.post('/projects/:projectId/apis', permission.project.master, resource.project, dynamic.project.createApi, apiController.create);
   api.put('/projects/:projectId/apis/:id', permission.project.master, resource.project, dynamic.project.updateApi, apiController.update);
   api.del('/projects/:projectId/apis/:id', permission.project.master, resource.project, dynamic.project.destroyApi, apiController.destroy);
+  api.get('/projects/:projectId/apiByName', permission.project.member,apiController.byName)
 
   // 未捕获请求，返回404
   api.get('/*', async ctx => {

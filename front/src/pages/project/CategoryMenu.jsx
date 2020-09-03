@@ -90,7 +90,6 @@ export default config({})(props => {
             )}
         </Empty>
     );
-    console.log(selectedKey);
     return (
         <PageContent
             styleName="category-menu"
@@ -154,7 +153,6 @@ export default config({})(props => {
                                 </span>
                             )}
                         >
-                            <Menu.Item key={'123'}><ApiOutlined/> {'123123'}</Menu.Item>
                             {apis.map(it => {
                                 const { id, name } = it;
 

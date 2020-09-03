@@ -5,7 +5,7 @@ module.exports = class DynamicController extends Controller {
   // 获取动态 team user project 公用
   async index(ctx) {
     ctx.validate({
-      id: 'string',
+      id: 'int',
     }, ctx.params);
     const { id } = ctx.params;
     const { pageNum = 1, pageSize = 10 } = ctx.query;

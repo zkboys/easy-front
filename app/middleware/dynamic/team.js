@@ -42,7 +42,7 @@ module.exports = {
     const summary = `删除了团队${teamLink(prevTeam)}`;
     await Dynamic.create({ type: 'delete', title: '团队动态', teamId: prevTeam.id, summary, userId: user.id });
   },
-  createMembers: async (ctx, next) => {
+  addMembers: async (ctx, next) => {
     await next();
 
     const user = ctx.user;

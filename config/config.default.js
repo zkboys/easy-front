@@ -96,6 +96,11 @@ module.exports = appInfo => {
     fileExtensions: [ '.jpg', '.jpeg', '.png' ], // 扩展几种上传的文件格式
   };
 
+  exports.validate = {
+    convert: true,
+    // validateRoot: false,
+  };
+
   return {
     ...exports,
     ...userConfig,

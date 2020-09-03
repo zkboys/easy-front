@@ -28,7 +28,7 @@ module.exports = class RoleController extends Controller {
   // 获取详情
   async show(ctx) {
     ctx.validate({
-      id: 'string',
+      id: 'int',
     }, ctx.params);
 
     const { id } = ctx.params;
@@ -67,7 +67,7 @@ module.exports = class RoleController extends Controller {
     const requestBody = ctx.request.body;
 
     ctx.validate({
-      id: 'string',
+      id: 'int',
     }, ctx.params);
 
     ctx.validate({
@@ -94,7 +94,7 @@ module.exports = class RoleController extends Controller {
   // 删除
   async destroy(ctx) {
     ctx.validate({
-      id: 'string',
+      id: 'int',
     }, ctx.params);
 
     const { id } = ctx.params;
@@ -113,7 +113,7 @@ module.exports = class RoleController extends Controller {
     const reqBody = ctx.request.body;
     ctx.validate({
       menuIds: 'array',
-      roleId: 'string',
+      roleId: 'int',
     }, reqBody);
 
     const { menuIds, roleId } = reqBody;

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import config from 'src/commons/config-hoc';
 import { Tabs } from 'antd';
@@ -16,6 +16,7 @@ const TabPage = config({
     const {
         loading,
         onChange,
+        onHeightChange,
         activeKey,
         detail,
         detailStyle,
@@ -23,7 +24,6 @@ const TabPage = config({
     } = props;
 
     const [ height, setHeight ] = useState(document.documentElement.clientHeight - otherHeight);
-    const tabWrap = useRef();
 
     // 窗口大小改变事件
     const handleWindowResize = _.debounce(() => {
@@ -35,15 +35,7 @@ const TabPage = config({
 
     // height activeKey 改变，处理pan-content 高度
     useEffect(() => {
-        const tab = tabWrap.current.querySelector('.ant-tabs-tabpane-active');
-        if (!tab) return;
-
-        const operator = tab.querySelector('.pan-operator');
-        const content = tab.querySelector('.pan-content');
-
-        if (!content) return;
-
-        content.style.height = operator ? `${height}px` : `${height + 50}px`;
+        onHeightChange && onHeightChange(height);
     }, [ height, activeKey ]);
 
     // 组件加载完成
@@ -73,7 +65,7 @@ const TabPage = config({
                         {list}
                     </div>
                 </div>
-                <div styleName="tabs-wrap" ref={tabWrap}>
+                <div styleName="tabs-wrap">
                     <Tabs onChange={key => onChange(key)} activeKey={activeKey} type="card">
                         {props.children}
                     </Tabs>

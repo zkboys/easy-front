@@ -1,16 +1,16 @@
 'use strict';
 module.exports = app => {
-  const { UUID, UUIDV4 } = app.Sequelize;
+  const { INTEGER } = app.Sequelize;
 
   return app.model.define('role_menu', {
     id: {
-      type: UUID,
+      type: INTEGER,
+      autoIncrement: true,
       allowNull: false,
       primaryKey: true,
       unique: true,
-      defaultValue: UUIDV4,
     },
-    roleId: UUID,
-    menuId: UUID,
+    roleId: INTEGER,
+    menuId: INTEGER,
   });
 };

@@ -9,7 +9,7 @@ import { AppstoreAddOutlined, UserAddOutlined } from '@ant-design/icons';
 import MemberItem from 'src/components/member-item';
 
 export default config()(props => {
-    const { teamId, team, teams, user, onChange } = props;
+    const { height, teamId, team, teams, user, onChange } = props;
     const [ members, setMembers ] = useState([]);
     const [ memberVisible, setMemberVisible ] = useState(false);
 
@@ -130,7 +130,7 @@ export default config()(props => {
                     </Button>
                 ) : null}
             </div>
-            <div className="pan-content">
+            <div className="pan-content" style={{height}}>
                 {showMembers?.length ? (
                     showMembers.map(member => {
                         return (

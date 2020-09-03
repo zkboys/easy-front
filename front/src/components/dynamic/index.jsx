@@ -10,10 +10,12 @@ import RoleTag from '../role-tag';
 import './style.less';
 
 function getContent(data) {
-    const { type, id, name, role } = data;
+    const { type, id, name, role, projectId } = data;
     if (type === 'teamLink') return <Link to={`/teams/${id}/project`}>{name}</Link>;
     if (type === 'projectLink') return <Link to={`/projects/${id}/:tabId`}>{name}</Link>;
     if (type === 'userLink') return <Link to={`/users/${id}/:tabId`}>{name}</Link>;
+    if (type === 'categoryLink') return <Link to={`/projects/${projectId}/:tabId?categoryId=${id}`}>{name}</Link>;
+    if (type === 'apiLink') return <Link to={`/projects/${projectId}/:tabId?apiId=${id}`}>{name}</Link>;
     if (type === 'roleTag') return <RoleTag role={role}/>;
 }
 

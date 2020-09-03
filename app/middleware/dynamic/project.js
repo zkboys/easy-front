@@ -1,6 +1,6 @@
 'use strict';
 const { Op } = require('sequelize');
-const { userLink, projectLink, categoryLink, roleTag } = require('./util');
+const { userLink, projectLink, categoryLink, apiLink, roleTag, getUpdateDetail } = require('./util');
 
 module.exports = {
   create: async (ctx, next) => {
@@ -21,15 +21,14 @@ module.exports = {
     const prevProject = await Project.findByPk(ctx.params.id);
 
     await next();
-    const { id: projectId, teamId, name, description } = ctx.body;
+    const { id: projectId, teamId } = ctx.body;
 
     const summary = `更新了项目${projectLink(prevProject)}`;
-    const detail = [];
-    if (prevProject.name !== name) detail.push(`项目名称<<->>${prevProject.name} -->> ${name}`);
-    if (prevProject.description !== description) detail.push(`项目描述<<->>${prevProject.description} -->> ${description}`);
+    const map = { name: '接口名称', description: '接口描述' };
+    const detail = getUpdateDetail(map, prevProject, ctx.body);
 
-    if (detail.length) {
-      await Dynamic.create({ type: 'update', title: '项目动态', teamId, projectId, summary, userId: user.id, detail: detail.join('\n') });
+    if (detail) {
+      await Dynamic.create({ type: 'update', title: '项目动态', teamId, projectId, summary, userId: user.id, detail });
     }
   },
   destroy: async (ctx, next) => {
@@ -43,7 +42,7 @@ module.exports = {
     const summary = `删除了项目${projectLink(prevProject)}`;
     await Dynamic.create({ type: 'delete', title: '项目动态', projectId, teamId, summary, userId: user.id });
   },
-  createMembers: async (ctx, next) => {
+  addMembers: async (ctx, next) => {
     await next();
 
     const user = ctx.user;
@@ -92,70 +91,85 @@ module.exports = {
   },
 
   destroyMember: async (ctx, next) => {
-    await next();
-
-    const user = ctx.user;
-    const { Dynamic, User, Project } = ctx.model;
-
-    const { projectId, id: memberId } = ctx.params;
-
-    const { teamId } = await Project.findByPk(projectId);
-
-    const member = await User.findByPk(memberId);
-
-    const summary = `移除了项目成员${userLink(member)}`;
-    await Dynamic.create({ type: 'delete', title: '项目动态', teamId, projectId, summary, userId: user.id });
+    const { User } = ctx.model;
+    await destroy(ctx, next, { name: '成员', Model: User, link: categoryLink });
   },
   createCategory: async (ctx, next) => {
-    await next();
-
-    const user = ctx.user;
-    const { Dynamic, Project } = ctx.model;
-
-    const { projectId } = ctx.params;
-
-    const { teamId } = await Project.findByPk(projectId);
-
-    const summary = `添加了分类${categoryLink(ctx.request.body)}`;
-    await Dynamic.create({ type: 'create', title: '项目动态', teamId, projectId, summary, userId: user.id });
+    await create(ctx, next, { name: '分类', link: categoryLink });
   },
   updateCategory: async (ctx, next) => {
-    const user = ctx.user;
-    const { Dynamic, Project, Category } = ctx.model;
-    const prevCategory = await Category.findByPk(ctx.params.id);
-
-    await next();
-    const { projectId, name, description } = ctx.body;
-    const { teamId } = await Project.findByPk(projectId);
-
-    const summary = `更新了分类${categoryLink(ctx.body)}`;
-    const detail = [];
-    if (prevCategory.name !== name) detail.push(`分类名称<<->>${prevCategory.name} -->> ${name}`);
-    if (prevCategory.description !== description) detail.push(`分类描述<<->>${prevCategory.description} -->> ${description}`);
-
-    if (detail.length) {
-      await Dynamic.create({ type: 'update', title: '项目动态', teamId, projectId, summary, userId: user.id, detail: detail.join('\n') });
-    }
+    const { Category } = ctx.model;
+    const map = { name: '接口名称', description: '接口描述' };
+    await update(ctx, next, {
+      name: '分类',
+      Model: Category,
+      map,
+      link: categoryLink,
+    });
   },
   destroyCategory: async (ctx, next) => {
-    const user = ctx.user;
-    const { Dynamic, Project, Category } = ctx.model;
-    const { projectId, id: categoryId } = ctx.params;
-    const prevCategory = await Category.findByPk(categoryId);
-
-    await next();
-
-    const { teamId } = await Project.findByPk(projectId);
-    const summary = `删除了项目分类${categoryLink(prevCategory)}`;
-    await Dynamic.create({ type: 'delete', title: '项目动态', teamId, projectId, summary, userId: user.id });
+    const { Category } = ctx.model;
+    await destroy(ctx, next, { name: '分类', Model: Category, link: categoryLink });
   },
   createApi: async (ctx, next) => {
-
+    await create(ctx, next, { name: '接口', link: apiLink });
   },
   updateApi: async (ctx, next) => {
-
+    const { Api } = ctx.model;
+    const map = { name: '接口名称', method: '接口方法', path: '接口地址', description: '接口描述' };
+    await update(ctx, next, {
+      name: '接口',
+      Model: Api,
+      map,
+      link: apiLink,
+    });
   },
   destroyApi: async (ctx, next) => {
-
+    const { Api } = ctx.model;
+    await destroy(ctx, next, { name: '接口', Model: Api, link: apiLink });
   },
 };
+
+async function create(ctx, next, { name, link }) {
+  await next();
+
+  const { id: userId } = ctx.user;
+  const { Dynamic, Project } = ctx.model;
+  const { projectId } = ctx.params;
+  const { teamId } = await Project.findByPk(projectId);
+
+  const summary = `创建了${name}${link(ctx.body)}`;
+  await Dynamic.create({ type: 'create', title: '项目动态', teamId, projectId, summary, userId });
+}
+
+async function update(ctx, next, { name, Model, map, link }) {
+  const { id } = ctx.params;
+  const { id: userId } = ctx.user;
+  const { Dynamic, Project } = ctx.model;
+  const prevObj = await Model.findByPk(id);
+
+  await next();
+
+  const { projectId } = ctx.body;
+  const { teamId } = await Project.findByPk(projectId);
+
+  const summary = `更新了${name}${link(ctx.body)}`;
+  const detail = getUpdateDetail(map, prevObj, ctx.body);
+
+  if (detail) {
+    await Dynamic.create({ type: 'update', title: '项目动态', teamId, projectId, summary, userId, detail });
+  }
+}
+
+async function destroy(ctx, next, { name, Model, link }) {
+  const { id: userId } = ctx.user;
+  const { Dynamic, Project } = ctx.model;
+  const { projectId, id } = ctx.params;
+  const prevObj = await Model.findByPk(id);
+
+  await next();
+
+  const { teamId } = await Project.findByPk(projectId);
+  const summary = `${name === '成员' ? '移除' : '删除'}了${name}${link(prevObj)}`;
+  await Dynamic.create({ type: 'delete', title: '项目动态', teamId, projectId, summary, userId });
+}

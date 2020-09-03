@@ -6,7 +6,7 @@ module.exports = class CategoryController extends Controller {
   // 查询
   async index(ctx) {
     ctx.validate({
-      projectId: 'string',
+      projectId: 'int',
     }, ctx.params);
 
     const { projectId } = ctx.params;
@@ -23,7 +23,7 @@ module.exports = class CategoryController extends Controller {
   // 获取详情
   async show(ctx) {
     ctx.validate({
-      id: 'string',
+      id: 'int',
     }, ctx.params);
 
     const { id } = ctx.params;
@@ -40,7 +40,7 @@ module.exports = class CategoryController extends Controller {
   async create(ctx) {
     const reqBody = ctx.request.body;
     ctx.validate({
-      projectId: 'string',
+      projectId: 'int',
     }, ctx.params);
     ctx.validate({
       name: 'string',
@@ -63,7 +63,7 @@ module.exports = class CategoryController extends Controller {
   async update(ctx) {
     const reqBody = ctx.request.body;
     ctx.validate({
-      id: 'string',
+      id: 'int',
     }, ctx.params);
     ctx.validate({
       name: 'string',
@@ -71,6 +71,7 @@ module.exports = class CategoryController extends Controller {
     }, reqBody);
 
     const { id } = ctx.params;
+    const { name } = reqBody;
     const { Category } = ctx.model;
 
     const category = await Category.findOne({ where: { id } });
@@ -87,7 +88,7 @@ module.exports = class CategoryController extends Controller {
   // 删除
   async destroy(ctx) {
     ctx.validate({
-      id: 'string',
+      id: 'int',
     }, ctx.params);
 
     const { id } = ctx.params;

@@ -1,19 +1,19 @@
 'use strict';
 
 module.exports = app => {
-  const { ENUM, STRING, TEXT, UUID, UUIDV4 } = app.Sequelize;
+  const { ENUM, STRING, TEXT, UUID, INTEGER } = app.Sequelize;
 
   const Dynamic = app.model.define('dynamic', {
     id: {
-      type: UUID,
+      type: INTEGER,
+      autoIncrement: true,
       allowNull: false,
       primaryKey: true,
       unique: true,
-      defaultValue: UUIDV4,
     },
     userId: UUID,
-    teamId: UUID,
-    projectId: UUID,
+    teamId: INTEGER,
+    projectId: INTEGER,
 
     type: ENUM('create', 'update', 'delete'),
     title: STRING(100),

@@ -32,7 +32,7 @@ module.exports = class TeamController extends Controller {
   // 获取详情
   async show(ctx) {
     ctx.validate({
-      id: 'string',
+      id: 'int',
     }, ctx.params);
 
     const { id } = ctx.params;
@@ -72,7 +72,7 @@ module.exports = class TeamController extends Controller {
     const requestBody = ctx.request.body;
 
     ctx.validate({
-      id: 'string',
+      id: 'int',
     }, ctx.params);
 
     ctx.validate({
@@ -97,7 +97,7 @@ module.exports = class TeamController extends Controller {
   // 删除
   async destroy(ctx) {
     ctx.validate({
-      id: 'string',
+      id: 'int',
     }, ctx.params);
 
     const { id } = ctx.params;
@@ -123,7 +123,7 @@ module.exports = class TeamController extends Controller {
   // 查询成员
   async members(ctx) {
     ctx.validate({
-      id: 'string',
+      id: 'int',
     }, ctx.params);
 
     const { id } = ctx.params;
@@ -140,7 +140,7 @@ module.exports = class TeamController extends Controller {
   // 添加成员
   async addMembers(ctx) {
     ctx.validate({
-      id: 'string',
+      id: 'int',
     }, ctx.params);
 
     ctx.validate({
@@ -166,8 +166,8 @@ module.exports = class TeamController extends Controller {
   // 修改成员
   async updateMember(ctx) {
     ctx.validate({
-      id: 'string',
-      memberId: 'string',
+      id: 'int',
+      memberId: 'int',
     }, ctx.params);
 
     ctx.validate({
@@ -195,8 +195,8 @@ module.exports = class TeamController extends Controller {
   // 删除成员
   async destroyMember(ctx) {
     ctx.validate({
-      id: 'string',
-      memberId: 'string',
+      id: 'int',
+      memberId: 'int',
     }, ctx.params);
 
     const { id, memberId } = ctx.params;

@@ -20,7 +20,7 @@ module.exports = class MenuController extends Controller {
   // 获取菜单详情
   async show(ctx) {
     ctx.validate({
-      id: 'string',
+      id: 'int',
     }, ctx.params);
 
     const { id } = ctx.params;
@@ -49,7 +49,7 @@ module.exports = class MenuController extends Controller {
     const requestBody = ctx.request.body;
 
     ctx.validate({
-      id: 'string',
+      id: 'int',
     }, ctx.params);
 
     const { id } = ctx.params;
@@ -65,7 +65,7 @@ module.exports = class MenuController extends Controller {
   // 删除菜单 及子菜单
   async destroy(ctx) {
     ctx.validate({
-      id: 'string',
+      id: 'int',
     }, ctx.params);
 
     const { id } = ctx.params;

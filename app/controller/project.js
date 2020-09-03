@@ -36,7 +36,7 @@ module.exports = class ProjectController extends Controller {
   // 获取详情
   async show(ctx) {
     ctx.validate({
-      id: 'string',
+      id: 'int',
     }, ctx.params);
 
     const { id } = ctx.params;
@@ -55,7 +55,7 @@ module.exports = class ProjectController extends Controller {
 
     ctx.validate({
       name: 'string',
-      teamId: 'string',
+      teamId: 'int',
       description: 'string?',
     }, requestBody);
 
@@ -98,12 +98,12 @@ module.exports = class ProjectController extends Controller {
     const requestBody = ctx.request.body;
 
     ctx.validate({
-      id: 'string',
+      id: 'int',
     }, ctx.params);
 
     ctx.validate({
       name: 'string',
-      teamId: 'string',
+      teamId: 'int',
       description: 'string?',
     }, requestBody);
 
@@ -124,7 +124,7 @@ module.exports = class ProjectController extends Controller {
   // 删除
   async destroy(ctx) {
     ctx.validate({
-      id: 'string',
+      id: 'int',
     }, ctx.params);
 
     const { id } = ctx.params;

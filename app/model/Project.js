@@ -1,19 +1,19 @@
 'use strict';
 
 module.exports = app => {
-  const { STRING, UUID, UUIDV4 } = app.Sequelize;
+  const { STRING, INTEGER } = app.Sequelize;
 
   const Project = app.model.define('project', {
     id: {
-      type: UUID,
+      type: INTEGER,
+      autoIncrement: true,
       allowNull: false,
       primaryKey: true,
       unique: true,
-      defaultValue: UUIDV4,
     },
     name: STRING(200),
     description: STRING(500),
-    teamId: UUID,
+    teamId: INTEGER,
   });
 
   // Project.sync({ force: true });

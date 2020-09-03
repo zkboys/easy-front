@@ -6,15 +6,15 @@ module.exports = class ApiController extends Controller {
   // 查询
   async index(ctx) {
     ctx.validate({
-      projectId: 'string',
+      projectId: 'int',
     }, ctx.params);
     ctx.validate({
-      categoryId: 'string?',
+      categoryId: 'int?',
     }, ctx.query);
 
     const { projectId } = ctx.params;
     const { categoryId } = ctx.query;
-    const { Api } = ctx.model;
+    const { Api, Category } = ctx.model;
 
     if (!projectId && !categoryId) return ctx.fail('projectId、categoryId不能同时为空');
 
@@ -22,7 +22,7 @@ module.exports = class ApiController extends Controller {
     if (categoryId) where.categoryId = categoryId;
     if (projectId) where.projectId = projectId;
 
-    const result = await Api.findAll({ where });
+    const result = await Api.findAll({ where, include: Category });
 
     ctx.success(result);
   }
@@ -30,7 +30,7 @@ module.exports = class ApiController extends Controller {
   // 获取详情
   async show(ctx) {
     ctx.validate({
-      id: 'string',
+      id: 'int',
     }, ctx.params);
 
     const { id } = ctx.params;
@@ -47,7 +47,7 @@ module.exports = class ApiController extends Controller {
       name: 'string',
       path: 'string',
       method: 'string',
-      categoryId: 'string',
+      categoryId: 'int',
       description: 'string?',
     }, reqBody);
 
@@ -71,13 +71,13 @@ module.exports = class ApiController extends Controller {
   async update(ctx) {
     const reqBody = ctx.request.body;
     ctx.validate({
-      id: 'string',
+      id: 'int',
     }, ctx.params);
     ctx.validate({
       name: 'string',
       path: 'string',
       method: 'string',
-      categoryId: 'string',
+      categoryId: 'int',
       description: 'string?',
     }, reqBody);
 
@@ -102,13 +102,27 @@ module.exports = class ApiController extends Controller {
   // 删除
   async destroy(ctx) {
     ctx.validate({
-      id: 'string',
+      id: 'int',
     }, ctx.params);
 
     const { id } = ctx.params;
     const { Api } = ctx.model;
 
     const result = await Api.destroy({ where: { id } });
+    ctx.success(result);
+  }
+
+  // 根据名称查询
+  async byName(ctx) {
+    ctx.validate({
+      name: 'string',
+    }, ctx.query);
+
+    const { name } = ctx.query;
+    const { Api } = ctx.model;
+
+    const result = await Api.findOne({ where: { name } });
+
     ctx.success(result);
   }
 };

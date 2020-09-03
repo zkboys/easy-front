@@ -1,17 +1,17 @@
 'use strict';
 
 module.exports = app => {
-  const { STRING, UUID, UUIDV4 } = app.Sequelize;
+  const { STRING, INTEGER } = app.Sequelize;
 
   const Category = app.model.define('category', {
     id: {
-      type: UUID,
+      type: INTEGER,
+      autoIncrement: true,
       allowNull: false,
       primaryKey: true,
       unique: true,
-      defaultValue: UUIDV4,
     },
-    projectId: UUID,
+    projectId: INTEGER,
     name: STRING(200),
     description: STRING(500),
   });

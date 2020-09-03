@@ -214,3 +214,8 @@ export const roleOptions = [
 export const httpMethodOptions = [
     'get', 'post', 'put', 'delete', 'head', 'options', 'patch',
 ].map(value => ({ value, label: value.toUpperCase() }));
+
+export const apiStatusOptions = [
+    { value: '00', label: '后端未完成', color: 'red' },
+    { value: '01', label: '后端已完成', color: 'green' },
+];

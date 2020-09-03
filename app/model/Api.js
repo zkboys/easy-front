@@ -1,22 +1,28 @@
 'use strict';
 
 module.exports = app => {
-  const { STRING, UUID, UUIDV4 } = app.Sequelize;
+  const { INTEGER, ENUM, STRING} = app.Sequelize;
 
   const Api = app.model.define('api', {
     id: {
-      type: UUID,
+      type: INTEGER,
+      autoIncrement: true,
       allowNull: false,
       primaryKey: true,
       unique: true,
-      defaultValue: UUIDV4,
     },
-    projectId: UUID,
-    categoryId: UUID,
+    projectId: INTEGER,
+    categoryId: INTEGER,
     name: STRING(200),
     description: STRING(500),
     method: STRING(20),
     path: STRING(200),
+    status: {
+      type: ENUM('00', '01'), // 后端未完成 后端已完成
+      defaultValue: '00',
+      allowNull: false,
+      comment: '后端状态',
+    },
   });
 
   // Api.sync({ force: true });

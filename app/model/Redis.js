@@ -1,15 +1,15 @@
 'use strict';
 
 module.exports = app => {
-  const { STRING, TEXT, UUID, UUIDV4 } = app.Sequelize;
+  const { STRING, TEXT, INTEGER } = app.Sequelize;
 
   const Redis = app.model.define('redis', {
     id: {
-      type: UUID,
+      type: INTEGER,
+      autoIncrement: true,
       allowNull: false,
       primaryKey: true,
       unique: true,
-      defaultValue: UUIDV4,
     },
     key: {
       type: STRING,

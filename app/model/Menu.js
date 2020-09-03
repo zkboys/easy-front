@@ -1,17 +1,17 @@
 'use strict';
 
 module.exports = app => {
-  const { INTEGER, STRING, UUID, UUIDV4 } = app.Sequelize;
+  const { INTEGER, STRING, UUID } = app.Sequelize;
 
   const Menu = app.model.define('menu', {
     id: {
-      type: UUID,
+      type: INTEGER,
+      autoIncrement: true,
       allowNull: false,
       primaryKey: true,
       unique: true,
-      defaultValue: UUIDV4,
     },
-    parentId: UUID,
+    parentId: INTEGER,
     text: STRING(200),
     icon: STRING(200),
     path: STRING(200),
