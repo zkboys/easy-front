@@ -40,7 +40,12 @@ export default config()(props => {
     const handleSubmit = async (values) => {
         if (updating) return;
 
-        console.log(values);
+        const { queryParams } = values;
+
+        // 校验
+        if (queryParams?.length) {
+            await Promise.all(queryParams.map(record => record._form.validateFields()));
+        }
 
         const result = await updateApi({ ...values });
 
