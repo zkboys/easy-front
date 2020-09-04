@@ -93,12 +93,12 @@ export default config()(props => {
             ) : null}
             {headerParams?.length ? (
                 <div styleName="params-box">
-                    <h3>headers<Help type="paramHeader"/></h3>
+                    <h3>请求头（headers）<Help type="paramHeader"/></h3>
                     <Table
                         columns={[
-                            { title: '字段名', dataIndex: 'key' },
-                            { title: '参数值', dataIndex: 'value' },
-                            { title: '是否必填', dataIndex: 'required' },
+                            { title: '字段名', dataIndex: 'key', width: 150 },
+                            { title: '参数值', dataIndex: 'value', width: 200 },
+                            { title: '必填', dataIndex: 'required', width: 100, render: value => <YesNoTag value={value}/> },
                             { title: '描述', dataIndex: 'description' },
                         ]}
                         dataSource={headerParams}
@@ -108,7 +108,7 @@ export default config()(props => {
             ) : null}
             {pathParams?.length ? (
                 <div styleName="params-box">
-                    <h3>path<Help type="paramPath"/></h3>
+                    <h3>地址参数（path）<Help type="paramPath"/></h3>
                     <Table
                         columns={paramColumns}
                         dataSource={pathParams}
@@ -118,7 +118,7 @@ export default config()(props => {
             ) : null}
             {queryParams?.length ? (
                 <div styleName="params-box">
-                    <h3>query<Help type="paramQuery"/></h3>
+                    <h3>查询字符串（query）<Help type="paramQuery"/></h3>
                     <Table
                         columns={paramColumns}
                         dataSource={queryParams}
@@ -128,7 +128,7 @@ export default config()(props => {
             ) : null}
             {bodyParams?.length ? (
                 <div styleName="params-box">
-                    <h3>body<Help type="paramBody"/></h3>
+                    <h3>请求体（body）<Help type="paramBody"/></h3>
                     {/* TODO 有可能是多层级 */}
                     <Table
                         columns={paramColumns}

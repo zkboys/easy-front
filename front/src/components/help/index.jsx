@@ -4,12 +4,12 @@ import { QuestionCircleOutlined } from '@ant-design/icons';
 import PropTypes from 'prop-types';
 
 const map = {
-    paramHeader: 'HTTP头信息，一般用于设置token',
-    paramPath: '地址中携带的参数，一般DELETE、PUT请求使用。比如 DELETE /users/:id 中的id',
-    paramQuery: '地址中的查询字符串，一般GET请求使用。比如 GET /users?name=tom&age=23 中的name和age',
+    paramHeader: 'HTTP头信息，一般用于携带TOKEN、Cookie、数据类型等。',
+    paramPath: '地址中携带的参数，一般DELETE、PUT请求使用。比如 DELETE /users/:id 中的id。',
+    paramQuery: '地址中的查询字符串，一般GET请求使用。比如 GET /users?name=tom&age=23 中的name和age。',
     paramBody: 'HTTP请求体，一般POST、PUT请求使用。',
 
-    httpPath: '支持动态路由，比如：GET /users/:id 或 Get /users/{id}',
+    httpPath: '支持动态路由，比如：GET /users/:id 或 Get /users/{id}。',
 };
 
 const Help = props => {

@@ -86,7 +86,7 @@ module.exports = class ApiController extends Controller {
       return pathKeysArr.map(item => {
         const key = item.replace(':', '').replace('{', '').replace('}', '');
         const type = 'path';
-        return { key, type };
+        return { key, type, required: true };
       });
     };
 

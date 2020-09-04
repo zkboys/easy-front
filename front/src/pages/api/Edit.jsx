@@ -42,8 +42,10 @@ export default config()(props => {
         const params = getPathParams(e.target.value);
         const newPathParams = params.map(p => {
             const exit = pathParams.find(item => item.key === p.key) || {};
-
-            return { ...exit, ...p };
+            const param = { ...exit, ...p };
+            if (!param.valueType) param.valueType = 'string';
+            param.required = true;
+            return param;
         });
         setPathParams(newPathParams);
         form.setFieldsValue({ pathParams: newPathParams });
@@ -174,7 +176,7 @@ export default config()(props => {
 
                     <BlockTitle>请求参数</BlockTitle>
                     <div styleName="params-box">
-                        <h3>headers<Help type="paramHeader"/></h3>
+                        <h3>请求头（headers）<Help type="paramHeader"/></h3>
                         <FormElement
                             labelWidth={0}
                             name="headerParams"
@@ -187,7 +189,15 @@ export default config()(props => {
                     </div>
                     {pathParams?.length ? (
                         <div styleName="params-box">
-                            <h3>path<Help type="paramPath"/> <span style={{ fontSize: 12, fontWeight: 'normal' }}>注：修改「接口地址」会自动同步</span></h3>
+                            <h3>地址参数（path）<Help type="paramPath"/></h3>
+                            <span style={{
+                                marginLeft: 16,
+                                color: '#faad15',
+                                fontSize: 12,
+                                fontWeight: 'normal',
+                            }}>
+                                注：修改「接口地址」会自动同步！
+                            </span>
                             <FormElement
                                 labelWidth={0}
                                 name="pathParams"
@@ -202,7 +212,7 @@ export default config()(props => {
                         </div>
                     ) : null}
                     <div styleName="params-box">
-                        <h3>query<Help type="paramQuery"/></h3>
+                        <h3>查询字符串（query）<Help type="paramQuery"/></h3>
                         <FormElement
                             labelWidth={0}
                             name="queryParams"
@@ -212,7 +222,7 @@ export default config()(props => {
                     </div>
                     {bodyParams?.length ? (
                         <div styleName="params-box">
-                            <h3>body<Help type="paramBody"/></h3>
+                            <h3>请求体（body）<Help type="paramBody"/></h3>
                             {/* TODO 有可能是多层级 */}
                             <Table
                                 columns={paramColumns}
