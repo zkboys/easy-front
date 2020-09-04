@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import moment from 'moment';
-import { Table, Tooltip } from 'antd';
+import { Table } from 'antd';
 import config from 'src/commons/config-hoc';
 import PageContent from 'src/layouts/page-content';
 import { useGet } from 'src/commons/ajax';
@@ -9,38 +9,63 @@ import ApiMethod from 'src/components/api-method';
 import UserLink from 'src/components/user-link';
 import Help from 'src/components/help';
 import Copy from 'src/components/copy';
-import './style-preview.less';
+import YesNoTag from 'src/components/yes-no-tag';
+import ValueType from '@/components/value-type';
+import BlockTitle from '@/components/block-title';
+import './PreviewStyle.less';
 
 export default config()(props => {
     const { id, projectId } = props;
     const [ api, setApi ] = useState({});
+    const [ headerParams, setHeaderParams ] = useState([]);
+    const [ pathParams, setPathParams ] = useState([]);
+    const [ queryParams, setQueryParams ] = useState([]);
+    const [ bodyParams, setBodyParams ] = useState([]);
 
     const [ loading, fetchApi ] = useGet('/projects/:projectId/apis/:id');
 
     useEffect(() => {
         (async () => {
             const api = await fetchApi({ projectId, id });
+            const { params } = api;
+            const headerParams = params.filter(item => item.type === 'header');
+            const pathParams = params.filter(item => item.type === 'path');
+            const queryParams = params.filter(item => item.type === 'query');
+            const bodyParams = params.filter(item => item.type === 'body');
             setApi(api);
+            setHeaderParams(headerParams);
+            setPathParams(pathParams);
+            setQueryParams(queryParams);
+            setBodyParams(bodyParams);
         })();
     }, [ id ]);
 
+    console.log(api);
+
+    const paramColumns = [
+        { title: '字段名', dataIndex: 'key', width: 150 },
+        { title: '类型', dataIndex: 'valueType', width: 100, render: value => <ValueType type={value}/> },
+        { title: '必填', dataIndex: 'required', width: 100, render: value => <YesNoTag value={value}/> },
+        { title: '默认值', dataIndex: 'defaultValue', width: 150, render: value => value || '-' },
+        { title: '描述', dataIndex: 'description', render: value => value || '-' },
+    ];
     const mockPath = `${window.location.origin}/mock/${projectId}${api?.project?.apiPrefix || ''}${api.path}`;
     return (
         <PageContent styleName="root">
-            <h2 styleName="title">基本信息</h2>
+            <BlockTitle>基本信息</BlockTitle>
             <div styleName="base-box">
                 <div styleName="item">
                     <div styleName="label">接口名称</div>
                     <div styleName="value">{api.name}</div>
                 </div>
                 <div styleName="item">
-                    <div styleName="label">创建人</div>
+                    <div styleName="label">创建用户</div>
                     <div styleName="value">
                         <UserLink user={api.user}/>
                     </div>
                 </div>
                 <div styleName="item">
-                    <div styleName="label">状态</div>
+                    <div styleName="label">后端状态</div>
                     <div styleName="value"><ApiStatus status={api.status}/></div>
                 </div>
                 <div styleName="item">
@@ -49,7 +74,11 @@ export default config()(props => {
                 </div>
                 <div styleName="item">
                     <div styleName="label">接口路径</div>
-                    <div styleName="value"><ApiMethod method={api.method}/>{api.path}</div>
+                    <div styleName="value">
+                        <ApiMethod method={api.method}/>
+                        {api.path}
+                        <Copy text={api.path}/>
+                    </div>
                 </div>
                 <div styleName="item"/>
                 <div styleName="item all">
@@ -60,37 +89,58 @@ export default config()(props => {
                     </div>
                 </div>
             </div>
-            <h2 styleName="title">请求参数</h2>
-            <h3>headers<Help.HttpParamHeader/></h3>
-            <Table
-                columns={[
-                    { title: '键（key）', dataIndex: 'key' },
-                    { title: '值（value）', dataIndex: 'key' },
-                ]}
-            />
-            <h3>path<Help.HttpParamPath/></h3>
-            <Table
-                columns={[
-                    { title: '键（key）', dataIndex: 'key' },
-                    { title: '值（value）', dataIndex: 'key' },
-                ]}
-            />
-            <h3>query<Help.HttpParamQuery/></h3>
-            <Table
-                columns={[
-                    { title: '键（key）', dataIndex: 'key' },
-                    { title: '值（value）', dataIndex: 'key' },
-                ]}
-            />
-            <h3>body<Help.HttpParamBody/></h3>
-            {/* TODO 有可能是多层级 */}
-            <Table
-                columns={[
-                    { title: '键（key）', dataIndex: 'key' },
-                    { title: '值（value）', dataIndex: 'key' },
-                ]}
-            />
-            <h2 styleName="title">响应结果（200）</h2>
+            <BlockTitle>请求参数</BlockTitle>
+            {!headerParams?.length && !pathParams?.length && !queryParams?.length && !bodyParams?.length ? (
+                <span>此接口不需要传递任何参数</span>
+            ) : null}
+            {headerParams?.length ? (
+                <div styleName="params-box">
+                    <h3>headers<Help type="paramHeader"/></h3>
+                    <Table
+                        columns={[
+                            { title: '字段名', dataIndex: 'key' },
+                            { title: '参数值', dataIndex: 'value' },
+                            { title: '是否必填', dataIndex: 'required' },
+                            { title: '描述', dataIndex: 'description' },
+                        ]}
+                        dataSource={headerParams}
+                        pagination={false}
+                    />
+                </div>
+            ) : null}
+            {pathParams?.length ? (
+                <div styleName="params-box">
+                    <h3>path<Help type="paramPath"/></h3>
+                    <Table
+                        columns={paramColumns}
+                        dataSource={pathParams}
+                        pagination={false}
+                    />
+                </div>
+            ) : null}
+            {queryParams?.length ? (
+                <div styleName="params-box">
+                    <h3>query<Help type="paramQuery"/></h3>
+                    <Table
+                        columns={paramColumns}
+                        dataSource={queryParams}
+                        pagination={false}
+                    />
+                </div>
+            ) : null}
+            {bodyParams?.length ? (
+                <div styleName="params-box">
+                    <h3>body<Help type="paramBody"/></h3>
+                    {/* TODO 有可能是多层级 */}
+                    <Table
+                        columns={paramColumns}
+                        dataSource={bodyParams}
+                        pagination={false}
+                    />
+                </div>
+            ) : null}
+
+            <BlockTitle>响应结果（200）</BlockTitle>
         </PageContent>
     );
 });

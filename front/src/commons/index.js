@@ -1,6 +1,7 @@
 import { session } from 'src/library/utils/storage';
 import { getNodeByPropertyAndValue, convertToTree } from 'src/library/utils/tree-utils';
 import { pathToRegexp } from 'path-to-regexp';
+import { loadScript } from '@/library/utils';
 import { ROUTE_BASE_NAME } from 'src/router/AppRouter';
 
 const LOGIN_USER_STORAGE_KEY = 'login-user';
@@ -225,3 +226,67 @@ export const apiStatusOptions = [
     { value: '00', label: '未完成', color: 'red' },
     { value: '01', label: '已完成', color: 'green' },
 ];
+
+export const valueTypeOptions = [
+    { value: 'number', label: 'Number', color: '' },
+    { value: 'string', label: 'String', color: '' },
+    { value: 'boolean', label: 'Boolean', color: '' },
+    { value: 'array', label: 'Array', color: '' },
+    { value: 'object', label: 'Object', color: '' },
+];
+
+
+const OLD_LESS_ID = `less:color:old`;
+const LESS_ID = `less:color`;
+const LESS_URL = `/less.min.js`;
+
+// 主题颜色快速生效
+const themeStyleContent = window.localStorage.getItem('theme-style-content');
+if (themeStyleContent) {
+    const themeStyle = document.createElement('style');
+    themeStyle.type = 'text/css';
+    themeStyle.id = OLD_LESS_ID;
+    themeStyle.innerHTML = themeStyleContent;
+    document.body.insertBefore(themeStyle, document.body.firstChild);
+}
+
+export function setPrimaryColor(color) {
+    const changeColor = () => {
+        window.less
+            .modifyVars({
+                '@primary-color': color,
+            })
+            .then(() => {
+                // 先清除缓存样式
+                const oldStyle = document.getElementById(OLD_LESS_ID);
+                if (oldStyle) oldStyle.remove();
+
+                // 将生成之后的style标签插入body首部
+                // 由于每个页面的css也是异步加载（无论开发、还是生产），会导致样式插入在生成的style标签之后，导致主题失效
+                const lessColor = document.getElementById(LESS_ID);
+                if (!lessColor) return;
+
+                // document.head.appendChild(lessColor);
+                document.body.insertBefore(lessColor, document.body.firstChild);
+                window.localStorage.setItem('theme-style-content', lessColor.innerHTML);
+            });
+    };
+
+    if (window._lessLoaded) {
+        changeColor();
+    } else {
+        window.less = {
+            logLevel: 2,
+            async: true,
+            javascriptEnabled: true,
+            modifyVars: { // less.js加载完成就会触发一次转换，需要传入变量
+                '@primary-color': color,
+            },
+        };
+
+        loadScript(LESS_URL).then(() => {
+            window._lessLoaded = true;
+            changeColor();
+        });
+    }
+}

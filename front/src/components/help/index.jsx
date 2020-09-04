@@ -3,22 +3,31 @@ import { Tooltip } from 'antd';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import PropTypes from 'prop-types';
 
+const map = {
+    paramHeader: 'HTTP头信息，一般用于设置token',
+    paramPath: '地址中携带的参数，一般DELETE、PUT请求使用。比如 DELETE /users/:id 中的id',
+    paramQuery: '地址中的查询字符串，一般GET请求使用。比如 GET /users?name=tom&age=23 中的name和age',
+    paramBody: 'HTTP请求体，一般POST、PUT请求使用。',
+
+    httpPath: '支持动态路由，比如：GET /users/:id 或 Get /users/{id}',
+};
+
 const Help = props => {
-    const { title, style } = props;
+    const { title, type, style } = props;
+    const label = map[type];
+
+    if (!title && !label) return null;
+
     return (
-        <Tooltip title={title}>
-            <QuestionCircleOutlined {...props} style={{ marginLeft: 4, ...style }}/>
+        <Tooltip title={title || label}>
+            <QuestionCircleOutlined {...props} style={{ margin: '0 4px', ...style }}/>
         </Tooltip>
     );
 };
 
 Help.propTypes = {
     title: PropTypes.any,
+    type: PropTypes.oneOf(Object.keys(map)).isRequired,
 };
-
-Help.HttpParamHeader = props => <Help title="HTTP头信息，一般用于设置token" {...props}/>;
-Help.HttpParamPath = props => <Help title="地址中携带的参数，一般DELETE、PUT请求使用。比如 DELETE /users/:id 中的id" {...props}/>;
-Help.HttpParamQuery = props => <Help title="地址中的查询字符串，一般GET请求使用。比如 GET /users?name=tom&age=23 中的name和age" {...props}/>;
-Help.HttpParamBody = props => <Help title="HTTP请求体，一般POST、PUT请求使用。" {...props}/>;
 
 export default Help;

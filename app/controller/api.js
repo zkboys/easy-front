@@ -22,7 +22,13 @@ module.exports = class ApiController extends Controller {
     if (categoryId) where.categoryId = categoryId;
     if (projectId) where.projectId = projectId;
 
-    const result = await Api.findAll({ where, include: Category });
+    const result = await Api.findAll({
+      where,
+      include: Category,
+      order: [
+        [ 'updatedAt', 'DESC' ],
+      ],
+    });
 
     ctx.success(result);
   }
@@ -34,9 +40,11 @@ module.exports = class ApiController extends Controller {
     }, ctx.params);
 
     const { id } = ctx.params;
-    const { Api, Project, User } = ctx.model;
+    const { Api, Project, User, Param } = ctx.model;
 
-    const result = await Api.findByPk(id, { include: [ Project, User ] });
+    const result = await Api.findByPk(id, {
+      include: [ Project, User, Param ],
+    });
     ctx.success(result);
   }
 
@@ -64,42 +72,63 @@ module.exports = class ApiController extends Controller {
       const foundApi2 = await Api.findOne({ where: { method, path } });
       if (foundApi2) return ctx.fail(`${method} ${path} 接口已存在！`);
     };
-    // 批量添加
-    if (apis && apis.length) {
-      ctx.validate({
-        categoryId: 'int',
-        apis: 'array?',
-      }, reqBody);
 
-      for (const api of apis) {
-        const { name, method, path } = api;
+    // 获取path中参数
+    const getPathParams = path => {
+      if (!path) return [];
 
-        await check(name, method, path);
-      }
+      const pathArr = path.split('/');
+      const pathKeysArr = pathArr.filter(item => item.startsWith(':') || item.startsWith('{'));
 
-      apis.forEach(api => {
-        api.projectId = projectId;
-        api.categoryId = categoryId;
+      return pathKeysArr.map(item => {
+        const key = item.replace(':', '').replace('{', '').replace('}', '');
+        const type = 'path';
+        return { key, type };
       });
+    };
 
-      // 多次数据库操作，进行事务处理
-      let transaction;
-      try {
-        transaction = await ctx.model.transaction();
+    // 多次数据库操作，进行事务处理
+    let transaction;
+    try {
+      transaction = await ctx.model.transaction();
+
+      // 批量添加
+      if (apis && apis.length) {
+        ctx.validate({
+          categoryId: 'int',
+          apis: 'array?',
+        }, reqBody);
+
+        for (const api of apis) {
+          const { name, method, path } = api;
+
+          await check(name, method, path);
+        }
+
+        apis.forEach(api => {
+          api.projectId = projectId;
+          api.categoryId = categoryId;
+        });
 
         const result = [];
         for (const api of apis) {
-          const { params } = api;
-          const paramsToSave = [];
+          const { method, path, params } = api;
+          // 获取 path 参数
+          const pathParams = getPathParams(path);
+
+          const paramsToSave = [ ...pathParams ];
+
+          const type = method.toLowerCase() === 'get' ? 'query' : 'body';
 
           if (params && params.length) {
             params.forEach(key => {
-              paramsToSave.push({ key });
+              paramsToSave.push({ key, type });
             });
           }
 
           const savedApi = await user.createApi(api, { transaction });
           result.push(savedApi);
+
           for (const p of paramsToSave) {
             await savedApi.createParam(p, { transaction });
           }
@@ -107,25 +136,35 @@ module.exports = class ApiController extends Controller {
 
         await transaction.commit();
         ctx.success(result);
-      } catch (e) {
-        if (transaction) await transaction.rollback();
 
-        throw e;
+      } else {
+        ctx.validate({
+          name: 'string',
+          path: 'string',
+          method: 'string',
+          categoryId: 'int',
+          description: 'string?',
+        }, reqBody);
+
+        const { name, method, path } = requestBody;
+        await check(name, method, path);
+
+        const paramsToSave = getPathParams(path);
+
+        const savedApi = await user.createApi({ ...reqBody, projectId }, { transaction });
+
+        for (const p of paramsToSave) {
+          await savedApi.createParam(p, { transaction });
+        }
+
+        await transaction.commit();
+        ctx.success(savedApi);
       }
-    } else {
-      ctx.validate({
-        name: 'string',
-        path: 'string',
-        method: 'string',
-        categoryId: 'int',
-        description: 'string?',
-      }, reqBody);
 
-      const { name, method, path } = requestBody;
-      await check(name, method, path);
+    } catch (e) {
+      if (transaction) await transaction.rollback();
 
-      const result = await user.createApi({ ...reqBody, projectId });
-      ctx.success(result);
+      throw e;
     }
   }
 

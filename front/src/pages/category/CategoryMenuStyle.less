@@ -1,0 +1,21 @@
+.category-menu {
+    .subtitle {
+        display: inline-flex;
+        width: 270px;
+        justify-content: space-between;
+
+        :global {
+            .anticon {
+                display: none;
+            }
+        }
+
+        &:hover {
+            :global {
+                .anticon {
+                    display: inline;
+                }
+            }
+        }
+    }
+}

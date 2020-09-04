@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = app => {
-  const { INTEGER, ENUM, STRING } = app.Sequelize;
+  const { BOOLEAN, INTEGER, ENUM, STRING } = app.Sequelize;
 
   const Param = app.model.define('param', {
     id: {
@@ -14,8 +14,11 @@ module.exports = app => {
     projectId: INTEGER, // 项目参数 所有接口公用参数 如果是api参数，此为空
     apiId: INTEGER,
     type: ENUM('header', 'path', 'query', 'body'),
-    name: STRING(200),
-    key: STRING(200),
+    name: STRING(200), // 参数中文名
+    key: STRING(200), // 参数字段名
+    value: STRING(200),
+    valueType: ENUM('number', 'string', 'boolean', 'array', 'object'),
+    required: BOOLEAN,
     defaultValue: STRING(200), // 默认值
     description: STRING(500),
   });

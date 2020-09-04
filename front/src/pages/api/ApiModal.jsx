@@ -5,9 +5,10 @@ import config from 'src/commons/config-hoc';
 import { ModalContent } from 'src/library/components';
 import { useGet, usePost, usePut } from 'src/commons/ajax';
 import { httpMethodOptions } from 'src/commons';
-import CategorySelect from './CategorySelect';
-import './style.less';
+import CategorySelect from 'src/pages/category/CategorySelect';
 import _ from 'lodash';
+import PathInput from './PathInput';
+
 
 const { TabPane } = Tabs;
 
@@ -56,11 +57,13 @@ export default config({
             const [ name, method, path ] = strs;
             if (!name || !method || !path) return callback(`第${lineNum}行， 格式不正确！name method path param1 ...`);
 
-            if (!method) return callback(`第${lineNum}行，缺少method！`);
-            if (!httpMethodOptions.find(item => item.value === method.toLowerCase())) return callback(`第${lineNum} 行， method填写错误！`);
+            if (!method) return callback(`第${lineNum}行，缺少method！比如：get post put delete 等`);
 
-            if (!path) return callback(`第${lineNum}行，缺少path！`);
-            if (!path.startsWith('/')) return callback(`第${lineNum}行，path需要以 / 开头！`);
+            const methodOk = httpMethodOptions.some(item => item.value === method.toLowerCase());
+            if (!methodOk) return callback(`第${lineNum} 行， method填写错误！比如：get post put delete 等`);
+
+            if (!path) return callback(`第${lineNum}行，缺少path！比如：/users/:id`);
+            if (!path.startsWith('/')) return callback(`第${lineNum}行，path需要以 / 开头！比如：/users/:id`);
         }
 
         callback();
@@ -94,7 +97,7 @@ export default config({
 
         const api = await fetchApiByName({ projectId, name });
 
-        if ((isEdit && api && api.id !== id) || (!isEdit && api)) return callback('接口名称已被占用');
+        if ((isEdit && api && `${api.id}` !== `${id}`) || (!isEdit && api)) return callback('接口名称已被占用');
 
         return callback();
     }, 300);
@@ -154,35 +157,7 @@ export default config({
                                     ]}
                                 />
 
-                                <div styleName="api-path-input">
-                                    <FormElement
-                                        {...formProps}
-                                        style={{ flex: '0 0 200px' }}
-                                        type="select"
-                                        label="接口地址"
-                                        name="method"
-                                        required
-                                        options={httpMethodOptions}
-                                    />
-                                    <FormElement
-                                        style={{ flex: 1 }}
-                                        name="path"
-                                        label="接口地址"
-                                        labelWidth={0}
-                                        colon={false}
-                                        required
-                                        placeholder="/path"
-                                        rules={[
-                                            {
-                                                validator: (rule, value) => {
-                                                    if (value && !value.startsWith('/')) return Promise.reject('接口地址需要以 / 开头！');
-
-                                                    return Promise.resolve();
-                                                },
-                                            },
-                                        ]}
-                                    />
-                                </div>
+                                <PathInput formProps={formProps}/>
 
                                 <FormElement
                                     {...formProps}

@@ -14,13 +14,13 @@ import { useGet } from 'src/commons/ajax';
 import RoleTag from 'src/components/role-tag';
 import TabPage from 'src/components/tab-page';
 import Dynamic from 'src/components/dynamic';
-import CategoryModal from './CategoryModal';
-import CategoryMenu from './CategoryMenu';
-import ApiList from './ApiList';
+import CategoryModal from 'src/pages/category/CategoryModal';
+import CategoryMenu from 'src/pages/category/CategoryMenu';
+import ApiList from 'src/pages/api/ApiList';
 import Api from 'src/pages/api';
 
-import './style.less';
-import { getColor } from '@/commons';
+import './indexStyle.less';
+import { getColor, setPrimaryColor } from '@/commons';
 
 const { TabPane } = Tabs;
 
@@ -36,7 +36,7 @@ export default config({
     const [ apiKeyWord, setApiKeyWord ] = useState(undefined);
 
     const [ activeKey, setActiveKey ] = useState(params.tabId !== ':tabId' ? params.tabId : 'api');
-    const [ categoryId, setCategoryId ] = useState(query.setCategoryId);
+    const [ categoryId, setCategoryId ] = useState(query.categoryId);
     const [ apiId, setApiId ] = useState(query.apiId);
     const [ apiTabKey, setApiTabKey ] = useState(query.apiTabKey);
 
@@ -58,6 +58,7 @@ export default config({
         <ApiList
             height={height}
             project={project}
+            projectId={projectId}
             categoryId={categoryId}
             onChange={() => setProject({ ...project })}
             onClick={record => setApiId(record.id)}
@@ -121,6 +122,8 @@ export default config({
                 }
 
                 setProject(project);
+                const color = getColor(project.name);
+                setPrimaryColor(color);
             } catch (e) {
                 if (e?.response?.status === 403) {
                     Modal.confirm({

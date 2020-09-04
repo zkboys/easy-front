@@ -6,14 +6,14 @@ import config from 'src/commons/config-hoc';
 import { getColor } from 'src/commons';
 import RoleTag from 'src/components/role-tag';
 import ProjectModal from './ProjectModal';
-import './style-item.less';
+import './ProjectItemStyle.less';
 
 export default config({})(props => {
     const { data = {}, onEdit, user } = props;
     const [ visible, setVisible ] = useState(false);
 
     const { id, name, description, team = {}, users = [] } = data;
-    const color = getColor(team.name);
+    const color = getColor(data.name);
     const role = users.find(item => item.id === user.id)?.project_user?.role;
     const isMaster = user.isAdmin || [ 'owner', 'master' ].includes(role);
 

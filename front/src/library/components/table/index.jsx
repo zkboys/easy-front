@@ -163,7 +163,7 @@ export default class TableComponent extends Component {
         }
 
         return (
-            <div ref={node => this.wrapper = node}>
+            <div style={{ width: '100%' }} ref={node => this.wrapper = node}>
                 <Table
                     scroll={tableScroll}
                     pagination={false}

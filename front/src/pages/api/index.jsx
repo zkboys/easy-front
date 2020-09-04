@@ -10,6 +10,8 @@ import {
 } from '@ant-design/icons';
 import _ from 'lodash';
 import Preview from './Preview';
+import Edit from './Edit';
+import './indexStyle.less';
 
 const { TabPane } = Tabs;
 
@@ -36,15 +38,28 @@ export default config()(props => {
 
     return (
         <PageContent style={{ margin: 0, padding: 0 }}>
-            <div className="pan-content" style={{ height: containerHeight + 50, paddingTop: 0, paddingBottom: 0 }}>
+            <div className="pan-content" style={{ height: containerHeight + 50, paddingLeft: 16 }}>
                 <Tabs onChange={key => onTabChange && onTabChange(key)} activeKey={activeKey}>
                     <TabPane tab={<span><EyeOutlined/> 预览</span>} key="preview">
                         <div style={{ height, overflowY: 'auto' }}>
-                            <Preview id={apiId} projectId={projectId}/>
+                            {activeKey === 'preview' ? (
+                                <Preview
+                                    id={apiId}
+                                    projectId={projectId}
+                                />
+                            ) : null}
                         </div>
                     </TabPane>
                     <TabPane tab={<span><FormOutlined/> 编辑</span>} key="edit">
-                        编辑
+                        <div style={{ height, overflowY: 'auto' }}>
+                            {activeKey === 'edit' ? (
+                                <Edit
+                                    id={apiId}
+                                    projectId={projectId}
+                                    height={height}
+                                />
+                            ) : null}
+                        </div>
                     </TabPane>
                     <TabPane tab={<span><BugOutlined/> 运行</span>} key="run">
                         运行

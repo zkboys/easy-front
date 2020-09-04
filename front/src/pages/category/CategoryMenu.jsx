@@ -10,7 +10,7 @@ import {
 } from '@ant-design/icons';
 import PageContent from 'src/layouts/page-content';
 import confirm from 'src/components/confirm';
-import './style.less';
+import './CategoryMenuStyle.less';
 
 export default config({})(props => {
     const {

@@ -20,6 +20,7 @@ import Project from './Project';
 import Member from './Member';
 
 import './style.less';
+import { getColor, setPrimaryColor } from '@/commons';
 
 const { TabPane } = Tabs;
 
@@ -148,6 +149,8 @@ export default config({
                 }
 
                 setTeam(team);
+                const color = getColor(team.name);
+                setPrimaryColor(color);
             } catch (e) {
                 if (e?.response?.status === 403) {
                     Modal.confirm({
@@ -170,6 +173,7 @@ export default config({
 
     const showTeams = teams.filter(item => !item._hide);
 
+    const color = getColor(team.name);
     return (
         <>
             <TabPage
@@ -181,6 +185,7 @@ export default config({
                 activeKey={activeKey}
                 onChange={key => setActiveKey(key)}
                 onHeightChange={setHeight}
+                detailStyle={{ backgroundColor: color }}
                 detail={(
                     <>
                         <div styleName="title">

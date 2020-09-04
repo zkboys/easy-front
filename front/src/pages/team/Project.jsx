@@ -66,7 +66,7 @@ export default config()(props => {
                     </Button>
                 ) : null}
             </div>
-            <div className="pan-content" style={{height}}>
+            <div className="pan-content" style={{ height, padding: 16 }}>
                 {showProjects?.length ? (
                     <div style={{ display: 'flex', flexFlow: 'wrap' }}>
                         {showProjects.map(project => (

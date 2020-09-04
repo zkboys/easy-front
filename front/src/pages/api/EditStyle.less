@@ -1,0 +1,62 @@
+.root {
+    position: relative;
+    padding-right: 0;
+    margin-right: 0
+}
+
+.top {
+    overflow-y: scroll;
+    padding-right: 16px;
+}
+
+.bottom {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 50px;
+    padding-top: 16px;
+    border-top: 1px solid #e8e8e8;
+    margin-right: 32px;
+
+    & > * {
+        margin: 0 8px;
+    }
+}
+
+.base-box {
+    display: flex;
+    flex-flow: wrap;
+}
+
+.item {
+    display: flex;
+    align-items: center;
+    flex-basis: 50%;
+    height: 40px;
+
+    &.all {
+        flex-basis: 100%;
+    }
+
+    .label {
+        position: relative;
+        flex: 0 0 74px;
+        //text-align-last: justify;
+        text-align: right;
+        padding-right: 16px;
+
+        &:after {
+            content: '：';
+            position: absolute;
+            right: 0;
+        }
+    }
+
+    .value {
+        flex: 1;
+    }
+}
+
+.params-box {
+
+}

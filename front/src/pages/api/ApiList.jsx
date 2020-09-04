@@ -6,12 +6,12 @@ import { useGet } from '@/commons/ajax';
 import { Button, Empty, Input } from 'antd';
 import { ApiOutlined } from '@ant-design/icons';
 import _ from 'lodash';
-import { apiStatusOptions, httpMethodOptions } from 'src/commons';
+import { httpMethodOptions } from 'src/commons';
 import ApiModal from './ApiModal';
 import ApiStatus from 'src/components/api-status';
 
 export default config()(props => {
-    const { height, categoryId = 'all', project, onChange, onClick } = props;
+    const { height, categoryId = 'all', projectId, project, onChange, onClick } = props;
     const [ dataSource, setDataSource ] = useState([]);
     const [ apiVisible, setApiVisible ] = useState(false);
     const [ category, setCategory ] = useState({});
@@ -20,7 +20,6 @@ export default config()(props => {
     const [ loading, fetchApis ] = useGet('/projects/:projectId/apis');
     const [ allLoading, fetchAllApis ] = useGet('/projects/:projectId/apis');
 
-    const projectId = project?.id;
     const isAll = categoryId === 'all';
 
     const columns = [
@@ -116,9 +115,10 @@ export default config()(props => {
                     <ApiOutlined/> 创建接口
                 </Button>
             </div>
-            <div className="pan-content" style={{ height }}>
+            <div className="pan-content" style={{ height, padding: 16 }}>
                 {dataSource?.length ? (
                     <Table
+                        offsetHeight={16}
                         columns={columns}
                         dataSource={showDataSource}
                     />
