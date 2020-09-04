@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = app => {
-  const { STRING, BOOLEAN, TEXT, INTEGER, UUID, UUIDV4 } = app.Sequelize;
+  const { STRING, BOOLEAN, TEXT, INTEGER, UUID, UUIDV1 } = app.Sequelize;
 
   const User = app.model.define('user', {
     id: {
@@ -9,7 +9,7 @@ module.exports = app => {
       allowNull: false,
       primaryKey: true,
       unique: true,
-      defaultValue: UUIDV4,
+      defaultValue: UUIDV1,
     },
     isAdmin: BOOLEAN, // 内置超级管理员，有系统的所有权限，与 role 中的管理员不同
     frozen: BOOLEAN, // 锁定，不可更新、删除

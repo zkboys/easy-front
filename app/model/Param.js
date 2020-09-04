@@ -11,13 +11,16 @@ module.exports = app => {
       primaryKey: true,
       unique: true,
     },
-    projectId: INTEGER, // 项目参数 所有接口公用参数 如果是api参数，此为空
-    apiId: INTEGER,
+    projectId: INTEGER, // 项目参数 所有接口公用参数 如果是api参数，projectId为空
+    apiId: INTEGER, // 如果是项目参数，apiId为空
     type: ENUM('header', 'path', 'query', 'body'),
     name: STRING(200), // 参数中文名
     key: STRING(200), // 参数字段名
     value: STRING(200),
-    valueType: ENUM('number', 'string', 'boolean', 'array', 'object'),
+    valueType: {
+      type: ENUM('number', 'string', 'boolean', 'array', 'object'),
+      defaultValue: 'string',
+    },
     required: BOOLEAN,
     defaultValue: STRING(200), // 默认值
     description: STRING(500),

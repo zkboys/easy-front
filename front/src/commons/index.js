@@ -191,9 +191,9 @@ export function getMenuTreeDataAndPermissions(menus) {
 
 
 const colors = [
-    'rgb(80, 193, 233)',
-    'rgb(246,179,7)',
     '#2f54eb',
+    'rgb(246,179,7)',
+    'rgb(80, 193, 233)',
     'rgb(169, 109, 243)',
     'rgb(245,97,58)',
     'rgb(103, 197, 12)',
@@ -290,3 +290,17 @@ export function setPrimaryColor(color) {
         });
     }
 }
+
+// 获取path中参数
+export function getPathParams(path) {
+    if (!path) return [];
+
+    const pathArr = path.split('/');
+    const pathKeysArr = pathArr.filter(item => item.startsWith(':') || item.startsWith('{'));
+
+    return pathKeysArr.map(item => {
+        const key = item.replace(':', '').replace('{', '').replace('}', '');
+        const type = 'path';
+        return { key, type };
+    });
+};

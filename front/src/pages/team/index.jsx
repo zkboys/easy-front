@@ -122,6 +122,7 @@ export default config({
                 const teamId = teams[0].id;
                 setTeamId(teamId);
             }
+            if (!teams?.length) setPrimaryColor(getColor());
         })();
     }, []);
 

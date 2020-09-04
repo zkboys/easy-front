@@ -79,6 +79,7 @@ export default config({
                     type="password"
                     label="密码"
                     name="password"
+                    required={!isEdit}
                 />
                 <FormElement
                     {...formProps}

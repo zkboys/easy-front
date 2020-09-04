@@ -77,7 +77,6 @@ export default config({
                     label="分类描述"
                     name="description"
                     rows={6}
-                    required
                 />
             </Form>
         </ModalContent>

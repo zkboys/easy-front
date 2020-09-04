@@ -36,6 +36,8 @@ export default (options = {}) => {
             event = false,          // 是否添加event高阶组件，可以使用this.props.addEventListener添加dom事件，并在组件卸载时会自动清理；通过this.props.removeEventListener移出dom事件
             pubSub = false,         // 是否添加发布订阅高阶组件，可以使用this.props.subscribe(topic, (msg, data) => {...})订阅事件，并在组件卸载时，会自动取消订阅; 通过this.props.publish(topic, data)发布事件
             modal = false,          // 当前组件是否是modal
+            convertParams = true,   // 是否把path参数为数字，转换为数字，如果后端使用自增id，是数值类型
+            convertQuery = true,    // 是否把query参数转为数字
         } = options;
 
         const hocFunctions = [];
@@ -47,7 +49,7 @@ export default (options = {}) => {
 
         if (pubSub) hocFunctions.push(pubSubHoc());
 
-        if (query === true) hocFunctions.push(queryHoc());
+        if (query === true) hocFunctions.push(queryHoc({ convertQuery }));
 
         if (router === true) hocFunctions.push(withRouter);
 
@@ -93,6 +95,17 @@ export default (options = {}) => {
                         this.onHide();
                     }
                 });
+            }
+
+            componentDidMount() {
+                // 如果是数字，转换为数字类型 一般后端如果是自增id，都为数字
+                const params = this?.props?.match?.params;
+                if (convertParams && params) {
+                    Object.entries(params).forEach(([ key, value ]) => {
+                        if (/^[1-9][0-9]*$/.test(value)) params[key] = Number(value);
+                    });
+                }
+                console.log(this?.props?.match?.params);
             }
 
             componentWillUnmount() {
@@ -160,6 +173,13 @@ export default (options = {}) => {
             render() {
                 const user = getLoginUser() || {};
 
+                const params = this?.props?.match?.params;
+                if (convertParams && params) {
+                    Object.entries(params).forEach(([ key, value ]) => {
+                        if (/^[1-9][0-9]*$/.test(value)) params[key] = Number(value);
+                    });
+                }
+                
                 return (
                     <WrappedComponent
                         onComponentWillShow={func => this.onShow = func}

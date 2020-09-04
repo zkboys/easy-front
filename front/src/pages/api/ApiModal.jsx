@@ -97,7 +97,7 @@ export default config({
 
         const api = await fetchApiByName({ projectId, name });
 
-        if ((isEdit && api && `${api.id}` !== `${id}`) || (!isEdit && api)) return callback('接口名称已被占用');
+        if ((isEdit && api && api.id !== id) || (!isEdit && api)) return callback('接口名称已被占用');
 
         return callback();
     }, 300);

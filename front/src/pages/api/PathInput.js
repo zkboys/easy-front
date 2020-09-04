@@ -6,7 +6,7 @@ import Help from 'src/components/help';
 import './PathInputStyle.less';
 
 const PathInput = props => {
-    const { formProps } = props;
+    const { formProps, onBlur } = props;
     return (
         <div styleName="api-path-input">
             <FormElement
@@ -27,7 +27,17 @@ const PathInput = props => {
                 colon={false}
                 required
                 placeholder="/path"
+                onBlur={onBlur}
                 rules={[
+                    {
+                        validator: (rule, value) => {
+                            if (!value) return Promise.resolve();
+
+                            if (value.trim().includes(' ')) return Promise.reject('地址不合法！');
+
+                            return Promise.resolve();
+                        },
+                    },
                     {
                         validator: (rule, value) => {
                             if (value && !value.startsWith('/')) return Promise.reject('接口地址需要以 / 开头！');

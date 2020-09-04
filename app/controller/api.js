@@ -56,7 +56,7 @@ module.exports = class ApiController extends Controller {
     }, reqBody);
 
     const user = ctx.user;
-    const { Api, Category } = ctx.model;
+    const { Api, Category, Param } = ctx.model;
     const requestBody = ctx.request.body;
     const { categoryId, apis } = requestBody;
 
@@ -64,6 +64,9 @@ module.exports = class ApiController extends Controller {
     if (!category) return ctx.fail('分类不存在或已删除');
 
     const projectId = category.projectId;
+
+    // 项目公共参数
+    const projectParams = await Param.findAll({ where: { projectId } });
 
     const check = async (name, method, path) => {
       const foundApi = await Api.findOne({ where: { name, projectId } });
@@ -91,6 +94,20 @@ module.exports = class ApiController extends Controller {
     let transaction;
     try {
       transaction = await ctx.model.transaction();
+
+      const createParams = async (savedApi, paramsToSave) => {
+        // 复制项目公共参数
+        if (projectParams && projectParams.length) {
+          projectParams.forEach(item => {
+            const { id, projectId, updatedAt, createdAt, ...others } = item.toJSON();
+            paramsToSave.push(others);
+          });
+        }
+
+        for (const p of paramsToSave) {
+          await savedApi.createParam(p, { transaction });
+        }
+      };
 
       // 批量添加
       if (apis && apis.length) {
@@ -122,16 +139,14 @@ module.exports = class ApiController extends Controller {
 
           if (params && params.length) {
             params.forEach(key => {
-              paramsToSave.push({ key, type });
+              paramsToSave.push({ key, type, required: true });
             });
           }
 
           const savedApi = await user.createApi(api, { transaction });
           result.push(savedApi);
 
-          for (const p of paramsToSave) {
-            await savedApi.createParam(p, { transaction });
-          }
+          await createParams(savedApi, paramsToSave);
         }
 
         await transaction.commit();
@@ -150,12 +165,9 @@ module.exports = class ApiController extends Controller {
         await check(name, method, path);
 
         const paramsToSave = getPathParams(path);
-
         const savedApi = await user.createApi({ ...reqBody, projectId }, { transaction });
 
-        for (const p of paramsToSave) {
-          await savedApi.createParam(p, { transaction });
-        }
+        await createParams(savedApi, paramsToSave);
 
         await transaction.commit();
         ctx.success(savedApi);

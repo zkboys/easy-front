@@ -24,7 +24,7 @@ export default config()(props => {
 
     const columns = [
         {
-            title: '接口名称', dataIndex: 'name', width: 100,
+            title: '接口名称', dataIndex: 'name', width: 150,
             render: (value, record) => {
                 return (
                     <a onClick={() => onClick(record)}>{value}</a>

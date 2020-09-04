@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { Button } from 'antd';
 import { Operator, Table, tableEditable } from 'src/library/components';
 import { valueTypeOptions } from 'src/commons';
+import YesNoTag from 'src/components/yes-no-tag';
 import { v4 as uuid } from 'uuid';
 
 
@@ -75,7 +76,23 @@ const handleKeyDown = (e, tabIndex, dataSource, handleAdd) => {
 const EditTable = tableEditable(Table);
 
 const HttpParams = props => {
-    let { title, value, onChange, addable, deletable, ...others } = props;
+    let {
+        tabIndexStart = 1,      // 防止一个页面出现多个 HttpParams 组件是 tabIndex重复问题
+        title,
+        value,
+        onChange,
+        addable = true,
+        deletable = true,
+        disabledFields = [],    // 不可编辑列
+        fields = [              // 需要展示的列
+            'key',
+            'valueType',
+            'required',
+            'description',
+            'operator',
+        ],
+        ...others
+    } = props;
     if (!value) value = [];
 
     console.log(value);
@@ -118,22 +135,24 @@ const HttpParams = props => {
                     justifyContent: 'space-between',
                     alignItems: 'center',
                 }}>
-                    <Button
-                        disabled={!addable}
-                        type="primary"
-                        size="small"
-                        style={{ marginRight: 16 }}
-                        onClick={handleAdd}
-                    >
-                        添加一行
-                    </Button>
+                    {addable ? (
+                        <Button
+                            type="primary"
+                            size="small"
+                            style={{ marginRight: 16 }}
+                            onClick={handleAdd}
+                        >
+                            添加一行
+                        </Button>
+                    ) : null}
                     <span>字段名</span>
                 </div>
             ),
             dataIndex: 'key',
             width: 150,
             formProps: (record, index) => {
-                const tabIndex = index + 1; // index * 2 + 2;
+                if (disabledFields?.includes('key')) return;
+                const tabIndex = tabIndexStart + index + 1; // index * 2 + 2;
                 return {
                     tabIndex,
                     autoFocus: true,
@@ -151,15 +170,37 @@ const HttpParams = props => {
             },
         },
         {
+            title: <span style={{ paddingLeft: 8 }}>字段值</span>,
+            dataIndex: 'defaultValue',
+            formProps: (record, index) => {
+                if (disabledFields?.includes('defaultValue')) return;
+                const length = value?.length || 0;
+
+                const tabIndex = tabIndexStart + index + length * 1 + 1; // index * 2 + 2;
+                return {
+                    tabIndex,
+                    placeholder: '请输入字段值',
+                    onFocus: handleFocus,
+                    onBlur: async (e) => {
+                        record.defaultValue = e.target.value;
+                        await handleChange();
+                    },
+                    onKeyDown: (e) => handleKeyDown(e, tabIndex, value, handleAdd),
+                };
+            },
+        },
+        {
             title: '类型',
             dataIndex: 'valueType',
             align: 'center',
             width: 150,
             formProps: (record) => {
+                if (disabledFields?.includes('valueType')) return;
                 return {
                     required: true,
                     type: 'select',
                     options: valueTypeOptions,
+                    placeholder: '请选择类型',
                     onChange: (type) => {
                         record.valueType = type;
                         handleChange();
@@ -172,7 +213,9 @@ const HttpParams = props => {
             dataIndex: 'required',
             align: 'center',
             width: 80,
-            formProps: (record, index) => {
+            render: value => <YesNoTag value={value}/>,
+            formProps: (record) => {
+                if (disabledFields?.includes('required')) return;
                 return {
                     type: 'checkbox',
                     required: true,
@@ -184,14 +227,16 @@ const HttpParams = props => {
             },
         },
         {
-            title: '描述',
+            title: <span style={{ paddingLeft: 8 }}>描述</span>,
             dataIndex: 'description',
             formProps: (record, index) => {
+                if (disabledFields?.includes('description')) return;
                 const length = value?.length || 0;
 
-                const tabIndex = index + length * 1 + 1; // index * 2 + 2;
+                const tabIndex = tabIndexStart + index + length * 2 + 1; // index * 2 + 2;
                 return {
                     tabIndex,
+                    placeholder: '请输入描述',
                     onFocus: handleFocus,
                     onBlur: async (e) => {
                         record.description = e.target.value;
@@ -220,7 +265,7 @@ const HttpParams = props => {
                 return <Operator items={items}/>;
             },
         },
-    ];
+    ].filter(item => fields.includes(item.dataIndex));
 
     return (
         <EditTable
