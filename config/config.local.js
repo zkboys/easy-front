@@ -21,6 +21,7 @@ module.exports = () => {
     database: 'easy_front',
     timezone: '+08:00',
     define: {
+      paranoid: true,
       charset: 'utf8',
       dialectOptions: {
         collate: 'utf8_general_ci',

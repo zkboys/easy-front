@@ -23,6 +23,7 @@ module.exports = () => {
     timezone: '+08:00',
     define: {
       charset: 'utf8',
+      paranoid: true,
       dialectOptions: {
         collate: 'utf8_general_ci',
       },

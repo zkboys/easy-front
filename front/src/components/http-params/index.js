@@ -75,7 +75,7 @@ const handleKeyDown = (e, tabIndex, dataSource, handleAdd) => {
 const EditTable = tableEditable(Table);
 
 const HttpParams = props => {
-    let { title, value, onChange, ...others } = props;
+    let { title, value, onChange, addable, deletable, ...others } = props;
     if (!value) value = [];
 
     console.log(value);
@@ -119,6 +119,7 @@ const HttpParams = props => {
                     alignItems: 'center',
                 }}>
                     <Button
+                        disabled={!addable}
                         type="primary"
                         size="small"
                         style={{ marginRight: 16 }}
@@ -208,6 +209,7 @@ const HttpParams = props => {
                     {
                         label: '删除',
                         color: 'red',
+                        disabled: !deletable,
                         confirm: {
                             title: `您确定删除字段「${key}」?`,
                             onConfirm: () => handleDelete(id),
