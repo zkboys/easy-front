@@ -1,75 +1,49 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Button } from 'antd';
 import { Operator, Table, tableEditable } from 'src/library/components';
 import { valueTypeOptions } from 'src/commons';
 import YesNoTag from 'src/components/yes-no-tag';
 import { v4 as uuid } from 'uuid';
+import './style.less';
 
 
-const handleKeyDown = (e, tabIndex, dataSource, handleAdd) => {
+const handleKeyDown = (e, tabIndex, maxIndex, record, handleAdd, isRowLast) => {
     const { keyCode, ctrlKey, shiftKey, altKey, metaKey } = e;
-
-    if (ctrlKey || shiftKey || altKey || metaKey) return;
-
-    const length = dataSource?.length || 0;
-
     const isUp = keyCode === 38;
-    const isRight = keyCode === 39;
     const isDown = keyCode === 40;
-    const isLeft = keyCode === 37;
     const isEnter = keyCode === 13;
 
-    let nextTabIndex;
+    const createNewRow = (shiftKey || ctrlKey || metaKey) && isEnter;
 
-    if (isDown || isEnter) {
-        if (tabIndex === length || tabIndex === length * 2) {
-            nextTabIndex = undefined;
-        } else {
-            nextTabIndex = tabIndex + 1;
-        }
-    }
+    if (!createNewRow && (ctrlKey || shiftKey || altKey || metaKey)) return;
 
-    if (isUp) nextTabIndex = tabIndex - 1;
+    if (!isUp && !isDown && !isEnter) return;
 
-    if (isLeft) {
-        if (tabIndex <= length) {
-            nextTabIndex = tabIndex - 1 <= 0 ? undefined : tabIndex - 1 + length;
-        } else {
-            nextTabIndex = tabIndex - length;
-        }
-    }
+    let nextTabIndex = tabIndex + 1;
 
-    if (isRight) {
-        if (tabIndex <= length) {
-            nextTabIndex = tabIndex + length;
-        } else {
-            nextTabIndex = tabIndex - length === length ? undefined : tabIndex - length + 1;
-        }
-    }
+    const selectNext = () => {
+        const nextInput = document.querySelector(`input[tabindex='${nextTabIndex}']`);
 
-    const nextInput = document.querySelector(`input[tabindex='${nextTabIndex}']`);
+        if (!nextInput) return;
 
-    if (nextInput) {
-        // 确保方向键也可以选中
+        // 确保方向键选中
         setTimeout(() => {
             nextInput.focus();
             nextInput.select();
         });
-    } else if (isEnter || isDown || isRight) {
+    };
+
+    if (createNewRow) {
         // 新增一行
-        handleAdd(true);
+        handleAdd(true, record);
 
-        // 等待新增行渲染完成，新增行 input 获取焦点
-        setTimeout(() => {
-            let ti = tabIndex;
-
-            if (isRight) ti = tabIndex - length;
-
-            if ((isDown || isEnter) && tabIndex === length * 2) ti = tabIndex + 1;
-
-            handleKeyDown({ keyCode: 13 }, ti, dataSource, handleAdd);
-        });
+        // 等待渲染
+        setTimeout(() => selectNext(), 10);
+    } else {
+        // 选中下一个
+        if (isUp) nextTabIndex = tabIndex - 1;
+        selectNext();
     }
 };
 
@@ -89,32 +63,41 @@ const HttpParams = props => {
             'valueType',
             'required',
             'description',
-            'operator',
         ],
         ...others
     } = props;
+
+    const [ expandedRowKeys, setExpandedRowKeys ] = useState([]);
+    const [ maxTabIndex, setMaxTabIndex ] = useState(tabIndexStart);
+
+    if (!fields.includes('_add')) fields.unshift('_add');
+    if (!fields.includes('_operator')) fields.push('_operator');
+    // if (!fields.includes('_tabIndex')) fields.push('_tabIndex');
     if (!value) value = [];
 
-    console.log(value);
 
-    const handleAdd = (append) => {
-        const length = value.length;
-        const key = `field${length + 1}`;
+    const handleAdd = (append, record) => {
+        let dataSource;
+        if (!record) dataSource = value;
+        if (Array.isArray(record)) dataSource = record;
+        if (record && record._parentChildren) dataSource = record._parentChildren;
+        if (!dataSource) return;
+
+        const index = record ? dataSource.findIndex(item => item.id === record.id) : value.length - 1;
         const id = uuid();
-
         const newRecord = {
             id,
-            key,
             required: false,
             isAdd: true,
             valueType: 'string',
         };
 
-        append ? value.push(newRecord) : value.unshift(newRecord);
+        dataSource.splice(index + 1, 0, newRecord);
+
         onChange([ ...value ]);
     };
 
-    const handleChange = async () => {
+    const handleChange = () => {
         onChange([ ...value ]);
     };
 
@@ -130,32 +113,29 @@ const HttpParams = props => {
     const columns = [
         {
             title: (
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                }}>
-                    {addable ? (
-                        <Button
-                            type="primary"
-                            size="small"
-                            style={{ marginRight: 16 }}
-                            onClick={handleAdd}
-                        >
-                            添加一行
-                        </Button>
-                    ) : null}
-                    <span>字段名</span>
-                </div>
+                <Button
+                    disabled={!addable}
+                    type="primary"
+                    size="small"
+                    onClick={() => handleAdd()}
+                >
+                    添加
+                </Button>
             ),
+            dataIndex: '_add',
+            width: 50,
+        },
+        { title: 'tabIndex', dataIndex: '_tabIndex', render: (value, record) => `${value} - ${record._isLastRow}` },
+        {
+            title: '字段名',
             dataIndex: 'key',
-            width: 150,
-            formProps: (record, index) => {
+            width: 200,
+            formProps: (record) => {
                 if (disabledFields?.includes('key')) return;
-                const tabIndex = tabIndexStart + index + 1; // index * 2 + 2;
+                const tabIndex = record._tabIndex;
                 return {
                     tabIndex,
-                    autoFocus: true,
+                    noSpace: true,
                     rules: [
                         { required: true, message: '请输入字段名！' },
                         { pattern: /^[a-zA-Z_][a-zA-Z\d_]*$/, message: '字段名不合法！' },
@@ -165,18 +145,17 @@ const HttpParams = props => {
                         record.key = e.target.value;
                         await handleChange();
                     },
-                    onKeyDown: (e) => handleKeyDown(e, tabIndex, value, handleAdd),
+                    onKeyDown: (e) => handleKeyDown(e, tabIndex, maxTabIndex, record, handleAdd, record._isLastRow),
                 };
             },
         },
         {
             title: <span style={{ paddingLeft: 8 }}>字段值</span>,
             dataIndex: 'defaultValue',
-            formProps: (record, index) => {
+            formProps: (record) => {
                 if (disabledFields?.includes('defaultValue')) return;
-                const length = value?.length || 0;
 
-                const tabIndex = tabIndexStart + index + length * 1 + 1; // index * 2 + 2;
+                const tabIndex = record._tabIndex + maxTabIndex;
                 return {
                     tabIndex,
                     placeholder: '请输入字段值',
@@ -185,7 +164,7 @@ const HttpParams = props => {
                         record.defaultValue = e.target.value;
                         await handleChange();
                     },
-                    onKeyDown: (e) => handleKeyDown(e, tabIndex, value, handleAdd),
+                    onKeyDown: (e) => handleKeyDown(e, tabIndex, maxTabIndex, record, handleAdd, record._isLastRow),
                 };
             },
         },
@@ -229,11 +208,10 @@ const HttpParams = props => {
         {
             title: <span style={{ paddingLeft: 8 }}>描述</span>,
             dataIndex: 'description',
-            formProps: (record, index) => {
+            formProps: (record) => {
                 if (disabledFields?.includes('description')) return;
-                const length = value?.length || 0;
 
-                const tabIndex = tabIndexStart + index + length * 2 + 1; // index * 2 + 2;
+                const tabIndex = record._tabIndex + maxTabIndex * 2;
                 return {
                     tabIndex,
                     placeholder: '请输入描述',
@@ -242,22 +220,34 @@ const HttpParams = props => {
                         record.description = e.target.value;
                         await handleChange();
                     },
-                    onKeyDown: (e) => handleKeyDown(e, tabIndex, value, handleAdd),
+                    onKeyDown: (e) => handleKeyDown(e, tabIndex, maxTabIndex, record, handleAdd, record._isLastRow),
                 };
             },
         },
         {
-            title: '操作', dataIndex: 'operator', width: 60,
+            title: '操作', dataIndex: '_operator', width: 70,
             render: (value, record) => {
-                const { id, key } = record;
+                const { id, key, valueType } = record;
+                const hasChildren = [ 'object', 'array-object' ].includes(valueType);
                 const items = [
                     {
                         label: '删除',
                         color: 'red',
+                        icon: 'delete',
                         disabled: !deletable,
                         confirm: {
-                            title: `您确定删除字段「${key}」?`,
+                            title: key ? `您确定删除字段「${key}」?` : '您确定删除此记录吗？',
                             onConfirm: () => handleDelete(id),
+                        },
+                    },
+                    {
+                        label: '添加子级',
+                        icon: 'plus',
+                        disabled: !addable || !hasChildren,
+                        onClick: () => {
+                            if (!record.children) record.children = [];
+
+                            handleAdd(false, record.children);
                         },
                     },
                 ];
@@ -267,12 +257,60 @@ const HttpParams = props => {
         },
     ].filter(item => fields.includes(item.dataIndex));
 
+    useEffect(() => {
+        const expandedRowKeys = [];
+        const loop = nodes => {
+            if (!nodes?.length) return;
+
+            nodes.forEach(node => {
+                const { children, id } = node;
+                if (children?.length) {
+                    expandedRowKeys.push(id);
+                    loop(children);
+                }
+            });
+        };
+        loop(value);
+        setExpandedRowKeys(expandedRowKeys);
+
+    }, [ value.length ]);
+
+    // value 改变 计算tabIndex
+    useEffect(() => {
+        let max = 0;
+        const loop = nodes => {
+            if (!nodes?.length) return;
+
+            nodes.forEach((node, index, arr) => {
+                node._parentChildren = nodes;
+
+                node._tabIndex = tabIndexStart + max++;
+                node._isLastRow = index === arr.length - 1 && !node.children?.length;
+
+                if (node.children?.length) {
+                    loop(node.children);
+                }
+            });
+        };
+
+        loop(value);
+
+        setMaxTabIndex(max);
+    }, [ value ]);
     return (
         <EditTable
+            styleName="root"
+            locale={{
+                // emptyText: '暂无数据',
+            }}
             surplusSpace={false}
             style={{ width: '100%' }}
             columns={columns}
             dataSource={value}
+            expandable={{
+                // expandedRowKeys,
+            }}
+            rowKey="id"
             {...others}
         />
     );

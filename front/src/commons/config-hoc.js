@@ -102,7 +102,7 @@ export default (options = {}) => {
                 const params = this?.props?.match?.params;
                 if (convertParams && params) {
                     Object.entries(params).forEach(([ key, value ]) => {
-                        if (/^[1-9][0-9]*$/.test(value)) params[key] = Number(value);
+                        if (key.toLowerCase().endsWith('id') && /^[1-9][0-9]*$/.test(value)) params[key] = Number(value);
                     });
                 }
                 console.log(this?.props?.match?.params);
@@ -176,10 +176,10 @@ export default (options = {}) => {
                 const params = this?.props?.match?.params;
                 if (convertParams && params) {
                     Object.entries(params).forEach(([ key, value ]) => {
-                        if (/^[1-9][0-9]*$/.test(value)) params[key] = Number(value);
+                        if (key.toLowerCase().endsWith('id') && /^[1-9][0-9]*$/.test(value)) params[key] = Number(value);
                     });
                 }
-                
+
                 return (
                     <WrappedComponent
                         onComponentWillShow={func => this.onShow = func}

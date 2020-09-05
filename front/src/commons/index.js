@@ -228,11 +228,14 @@ export const apiStatusOptions = [
 ];
 
 export const valueTypeOptions = [
-    { value: 'number', label: 'Number', color: '' },
     { value: 'string', label: 'String', color: '' },
+    { value: 'number', label: 'Number', color: '' },
     { value: 'boolean', label: 'Boolean', color: '' },
-    { value: 'array', label: 'Array', color: '' },
     { value: 'object', label: 'Object', color: '' },
+    { value: 'array-object', label: 'Array-Object', color: '' },
+    { value: 'array-string', label: 'Array-String', color: '' },
+    { value: 'array-number', label: 'Array-Number', color: '' },
+    { value: 'array-boolean', label: 'Array-Boolean', color: '' },
 ];
 
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import moment from 'moment';
-import { Table, Form, Tabs, Space, Affix, Button } from 'antd';
+import { Table, Form, Tabs, Space, Affix, Button, Tooltip } from 'antd';
 import config from 'src/commons/config-hoc';
 import PageContent from 'src/layouts/page-content';
 import FixBottom from 'src/layouts/fix-bottom';
@@ -22,6 +22,7 @@ import _ from 'lodash';
 import PathInput from './PathInput';
 
 import './EditStyle.less';
+import { QuestionCircleOutlined } from '@ant-design/icons';
 
 export default config()(props => {
     const { id, projectId, height, onSubmit } = props;
@@ -92,6 +93,24 @@ export default config()(props => {
             api.pathParams = pathParams;
             api.queryParams = queryParams;
             api.headerParams = headerParams;
+            api.bodyParams = [
+                {
+                    id: 100, key: 'user', valueType: 'object', required: true, description: '用户对象',
+                    children: [
+                        { id: 1001, key: 'name', valueType: 'string', required: true, description: '用户名' },
+                        { id: 1002, key: 'name2', valueType: 'string', required: true, description: '用户名' },
+                        { id: 1003, key: 'name3', valueType: 'string', required: true, description: '用户名' },
+                    ],
+
+                },
+                {
+                    id: 1004, key: 'name4', valueType: 'object', required: true, description: '用户名',
+                    children: [
+                        { id: 1005, key: 'name5', valueType: 'object', required: true, description: '用户名' },
+                        { id: 1006, key: 'name6', valueType: 'object', required: true, description: '用户名' },
+                    ],
+                },
+            ];
             setApi(api);
 
             setHeaderParams(headerParams);
@@ -174,16 +193,34 @@ export default config()(props => {
                         />
                     </div>
 
-                    <BlockTitle>请求参数</BlockTitle>
+                    <BlockTitle>
+                        请求参数
+                        <Tooltip
+                            overlayClassName="edit-param-help"
+                            overlayStyle={{ width: 500 }}
+                            title={(
+                                <div>
+                                    <div>编辑说明：</div>
+                                    <div>1. 点击Tab键，进入下一个输入框；</div>
+                                    <div>2. 点击Enter键，编辑下一个输入框；</div>
+                                    <div>3. 点击上、下方向键，编辑上、下一个输入框；</div>
+                                    <div>4. 按住Ctrl 或 Command 或 Shift + Enter键，新增一行；</div>
+                                    <div>5. 按住Ctrl 或 Command键 + 点击删除，直接删除无提示；</div>
+                                </div>
+                            )}
+                        >
+                            <QuestionCircleOutlined style={{ margin: '0 4px' }}/>
+                        </Tooltip>
+                    </BlockTitle>
                     <div styleName="params-box">
-                        <h3>请求头（headers）<Help type="paramHeader"/></h3>
+                        <h3>请求头（header）<Help type="paramHeader"/></h3>
                         <FormElement
                             labelWidth={0}
                             name="headerParams"
                         >
                             <HttpParams
                                 tabIndexStart={1}
-                                fields={[ 'key', 'defaultValue', 'required', 'description', 'operator' ]}
+                                fields={[ 'key', 'defaultValue', 'required', 'description' ]}
                             />
                         </FormElement>
                     </div>
@@ -220,19 +257,23 @@ export default config()(props => {
                             <HttpParams tabIndexStart={2000}/>
                         </FormElement>
                     </div>
-                    {bodyParams?.length ? (
-                        <div styleName="params-box">
-                            <h3>请求体（body）<Help type="paramBody"/></h3>
-                            {/* TODO 有可能是多层级 */}
-                            <Table
-                                columns={paramColumns}
-                                dataSource={bodyParams}
-                                pagination={false}
-                            />
-                        </div>
-                    ) : null}
+                    <div styleName="params-box">
+                        <h3>请求体（body）<Help type="paramBody"/></h3>
+                        <FormElement
+                            labelWidth={0}
+                            name="bodyParams"
+                        >
+                            <HttpParams tabIndexStart={3000}/>
+                        </FormElement>
+                    </div>
 
                     <BlockTitle>响应结果（200）</BlockTitle>
+                    <div styleName="params-box">
+                        <h3>响应头（header）</h3>
+                    </div>
+                    <div styleName="params-box">
+                        <h3>响应体（body）</h3>
+                    </div>
                 </div>
                 <div styleName="bottom">
                     <Button type="primary" onClick={() => form.submit()}>保存</Button>
