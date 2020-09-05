@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { Button, Form, Modal, Select } from 'antd';
 
 import PageContent from 'src/layouts/page-content';
@@ -14,7 +13,6 @@ import {
     Pagination,
     QueryBar,
     Table,
-    UserAvatar,
 } from 'src/library/components';
 
 import EditModal from './EditModal';

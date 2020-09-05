@@ -143,7 +143,7 @@ export default config({
 
     const userProjectRole = project?.users?.find(item => item.id === user.id)?.project_user.role;
     const isProjectMaster = user.isAdmin || [ 'owner', 'master' ].includes(userProjectRole);
-    const isProjectOwner = user.isAdmin || [ 'owner' ].includes(userProjectRole);
+    // const isProjectOwner = user.isAdmin || [ 'owner' ].includes(userProjectRole);
 
     return (
         <>

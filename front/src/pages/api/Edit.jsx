@@ -1,23 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
-import moment from 'moment';
-import { Table, Form, Tabs, Space, Affix, Button, Tooltip } from 'antd';
+import { Form, Button, Tooltip } from 'antd';
 import config from 'src/commons/config-hoc';
 import PageContent from 'src/layouts/page-content';
-import FixBottom from 'src/layouts/fix-bottom';
-import { useGet, usePost, usePut } from 'src/commons/ajax';
-import ApiStatus from 'src/components/api-status';
-import ApiMethod from 'src/components/api-method';
-import UserLink from 'src/components/user-link';
+import { useGet, usePut } from 'src/commons/ajax';
 import Help from 'src/components/help';
-import Copy from 'src/components/copy';
-import YesNoTag from 'src/components/yes-no-tag';
-import ValueType from '@/components/value-type';
 import BlockTitle from '@/components/block-title';
 import HttpParams from 'src/components/http-params';
 
 import { FormElement } from '@/library/components';
 import CategorySelect from '@/pages/category/CategorySelect';
-import { httpMethodOptions, apiStatusOptions, getPathParams } from '@/commons';
+import { apiStatusOptions, getPathParams } from '@/commons';
 import _ from 'lodash';
 import PathInput from './PathInput';
 
@@ -30,10 +22,7 @@ export default config()(props => {
 
     const topEl = useRef(null);
     const [ api, setApi ] = useState({});
-    const [ headerParams, setHeaderParams ] = useState([]);
     const [ pathParams, setPathParams ] = useState([]);
-    const [ queryParams, setQueryParams ] = useState([]);
-    const [ bodyParams, setBodyParams ] = useState([]);
 
     const [ loading, fetchApi ] = useGet('/projects/:projectId/apis/:id');
     const [ , fetchApiByName ] = useGet('/projects/:projectId/apiByName');
@@ -42,7 +31,7 @@ export default config()(props => {
     const handlePathBlur = e => {
         const params = getPathParams(e.target.value);
         const newPathParams = params.map(p => {
-            const exit = pathParams.find(item => item.key === p.key) || {};
+            const exit = pathParams.find(item => item.field === p.field) || {};
             const param = { ...exit, ...p };
             if (!param.valueType) param.valueType = 'string';
             param.required = true;
@@ -82,42 +71,22 @@ export default config()(props => {
             const api = await fetchApi({ projectId, id });
             const { params } = api;
             const headerParams = params.filter(item => item.type === 'header');
-            const pathParams = params.filter(item => item.type === 'path').map(item => {
-                if (!item.valueType) item.valueType = undefined;
-
-                return item;
-            });
+            const pathParams = params.filter(item => item.type === 'path').forEach(item => item.valueType = item.valueType || undefined);
             const queryParams = params.filter(item => item.type === 'query');
             const bodyParams = params.filter(item => item.type === 'body');
+            const responseHeaderParams = params.filter(item => item.type === 'response-header');
+            const responseBodyParams = params.filter(item => item.type === 'response-body');
 
             api.pathParams = pathParams;
             api.queryParams = queryParams;
             api.headerParams = headerParams;
-            api.bodyParams = [
-                {
-                    id: 100, key: 'user', valueType: 'object', required: true, description: '用户对象',
-                    children: [
-                        { id: 1001, key: 'name', valueType: 'string', required: true, description: '用户名' },
-                        { id: 1002, key: 'name2', valueType: 'string', required: true, description: '用户名' },
-                        { id: 1003, key: 'name3', valueType: 'string', required: true, description: '用户名' },
-                    ],
+            api.bodyParams = bodyParams;
+            api.responseHeaderParams = responseHeaderParams;
+            api.responseBodyParams = responseBodyParams;
 
-                },
-                {
-                    id: 1004, key: 'name4', valueType: 'object', required: true, description: '用户名',
-                    children: [
-                        { id: 1005, key: 'name5', valueType: 'object', required: true, description: '用户名' },
-                        { id: 1006, key: 'name6', valueType: 'object', required: true, description: '用户名' },
-                    ],
-                },
-            ];
             setApi(api);
 
-            setHeaderParams(headerParams);
             setPathParams(pathParams);
-            setQueryParams(queryParams);
-            setBodyParams(bodyParams);
-
 
             form.setFieldsValue(api);
 
@@ -127,19 +96,11 @@ export default config()(props => {
 
     }, [ id ]);
 
-    const paramColumns = [
-        { title: '字段名', dataIndex: 'key', width: 150 },
-        { title: '类型', dataIndex: 'valueType', width: 100, render: value => <ValueType type={value}/> },
-        { title: '必填', dataIndex: 'required', width: 100, render: value => <YesNoTag value={value}/> },
-        { title: '默认值', dataIndex: 'defaultValue', width: 150, render: value => value || '-' },
-        { title: '描述', dataIndex: 'description', render: value => value || '-' },
-    ];
-    const mockPath = `${window.location.origin}/mock/${projectId}${api?.project?.apiPrefix || ''}${api.path}`;
     const formProps = {
         labelWidth: 100,
     };
     return (
-        <PageContent styleName="root">
+        <PageContent styleName="root" loading={loading}>
             <Form
                 name="api-edit"
                 form={form}
@@ -220,7 +181,7 @@ export default config()(props => {
                         >
                             <HttpParams
                                 tabIndexStart={1}
-                                fields={[ 'key', 'defaultValue', 'required', 'description' ]}
+                                fields={[ 'field', 'defaultValue', 'required', 'description' ]}
                             />
                         </FormElement>
                     </div>
@@ -243,7 +204,7 @@ export default config()(props => {
                                     tabIndexStart={1000}
                                     addable={false}
                                     deletable={false}
-                                    disabledFields={[ 'key', 'required' ]}
+                                    disabledFields={[ 'field', 'required' ]}
                                 />
                             </FormElement>
                         </div>
@@ -270,9 +231,27 @@ export default config()(props => {
                     <BlockTitle>响应结果（200）</BlockTitle>
                     <div styleName="params-box">
                         <h3>响应头（header）</h3>
+                        <FormElement
+                            labelWidth={0}
+                            name="responseHeaderParams"
+                        >
+                            <HttpParams
+                                tabIndexStart={4000}
+                                fields={[ 'field', 'description' ]}
+                            />
+                        </FormElement>
                     </div>
                     <div styleName="params-box">
                         <h3>响应体（body）</h3>
+                        <FormElement
+                            labelWidth={0}
+                            name="responseBodyParams"
+                        >
+                            <HttpParams
+                                tabIndexStart={5000}
+                                fields={[ 'field', 'valueType', 'description' ]}
+                            />
+                        </FormElement>
                     </div>
                 </div>
                 <div styleName="bottom">

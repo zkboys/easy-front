@@ -41,7 +41,7 @@ export default config()(props => {
     }, [ id ]);
 
     const paramColumns = [
-        { title: '字段名', dataIndex: 'key', width: 150 },
+        { title: '字段名', dataIndex: 'field', width: 150 },
         { title: '类型', dataIndex: 'valueType', width: 100, render: value => <ValueType type={value}/> },
         { title: '必填', dataIndex: 'required', width: 100, render: value => <YesNoTag value={value}/> },
         // { title: '默认值', dataIndex: 'defaultValue', width: 150, render: value => value || '-' },
@@ -49,7 +49,7 @@ export default config()(props => {
     ];
     const mockPath = `${window.location.origin}/mock/${projectId}${api?.project?.apiPrefix || ''}${api.path}`;
     return (
-        <PageContent styleName="root">
+        <PageContent styleName="root" loading={loading}>
             <BlockTitle>基本信息</BlockTitle>
             <div styleName="base-box">
                 <div styleName="item">
@@ -96,7 +96,7 @@ export default config()(props => {
                     <h3>请求头（headers）<Help type="paramHeader"/></h3>
                     <Table
                         columns={[
-                            { title: '字段名', dataIndex: 'key', width: 150 },
+                            { title: '字段名', dataIndex: 'field', width: 150 },
                             { title: '参数值', dataIndex: 'value', width: 200 },
                             { title: '必填', dataIndex: 'required', width: 100, render: value => <YesNoTag value={value}/> },
                             { title: '描述', dataIndex: 'description' },

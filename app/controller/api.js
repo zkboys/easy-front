@@ -72,7 +72,7 @@ module.exports = class ApiController extends Controller {
       const foundApi = await Api.findOne({ where: { name, projectId } });
       if (foundApi) return ctx.fail(`Api名称「${name}」已存在`);
 
-      const foundApi2 = await Api.findOne({ where: { method, path } });
+      const foundApi2 = await Api.findOne({ where: { projectId, method, path } });
       if (foundApi2) return ctx.fail(`${method} ${path} 接口已存在！`);
     };
 
@@ -84,9 +84,9 @@ module.exports = class ApiController extends Controller {
       const pathKeysArr = pathArr.filter(item => item.startsWith(':') || item.startsWith('{'));
 
       return pathKeysArr.map(item => {
-        const key = item.replace(':', '').replace('{', '').replace('}', '');
+        const field = item.replace(':', '').replace('{', '').replace('}', '');
         const type = 'path';
-        return { key, type, required: true };
+        return { field, type, required: true };
       });
     };
 
@@ -138,8 +138,8 @@ module.exports = class ApiController extends Controller {
           const type = method.toLowerCase() === 'get' ? 'query' : 'body';
 
           if (params && params.length) {
-            params.forEach(key => {
-              paramsToSave.push({ key, type, required: true });
+            params.forEach(field => {
+              paramsToSave.push({ field, type, required: true });
             });
           }
 

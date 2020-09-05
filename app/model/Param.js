@@ -15,7 +15,7 @@ module.exports = app => {
     apiId: INTEGER, // 如果是项目参数，apiId为空
     type: ENUM('header', 'path', 'query', 'body'),
     name: STRING(200), // 参数中文名
-    key: STRING(200), // 参数字段名
+    field: STRING(200), // 参数字段名
     value: STRING(200),
     valueType: {
       type: ENUM('number', 'string', 'boolean', 'array', 'object'),
