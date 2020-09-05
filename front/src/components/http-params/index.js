@@ -85,6 +85,7 @@ const HttpParams = props => {
         const id = uuid();
         const newRecord = {
             id,
+            parentId: record?._parent?.id,
             required: false,
             valueType: 'string',
             _isAdd: true,

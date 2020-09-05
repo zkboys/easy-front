@@ -299,8 +299,8 @@ export function getPathParams(path) {
     const pathKeysArr = pathArr.filter(item => item.startsWith(':') || item.startsWith('{'));
 
     return pathKeysArr.map(item => {
-        const key = item.replace(':', '').replace('{', '').replace('}', '');
+        const field = item.replace(':', '').replace('{', '').replace('}', '');
         const type = 'path';
-        return { key, type };
+        return { field, type };
     });
 };

@@ -105,7 +105,6 @@ export default (options = {}) => {
                         if (key.toLowerCase().endsWith('id') && /^[1-9][0-9]*$/.test(value)) params[key] = Number(value);
                     });
                 }
-                console.log(this?.props?.match?.params);
             }
 
             componentWillUnmount() {

@@ -11,6 +11,7 @@ module.exports = app => {
       primaryKey: true,
       unique: true,
     },
+    parentId: INTEGER, // object array 等多层级结构
     projectId: INTEGER, // 项目参数 所有接口公用参数 如果是api参数，projectId为空
     apiId: INTEGER, // 如果是项目参数，apiId为空
     type: ENUM('header', 'path', 'query', 'body'),
@@ -24,6 +25,7 @@ module.exports = app => {
     required: BOOLEAN,
     defaultValue: STRING(200), // 默认值
     description: STRING(500),
+    mock: STRING(500), // mock 配置
   });
 
   // Param.sync({ force: true });
