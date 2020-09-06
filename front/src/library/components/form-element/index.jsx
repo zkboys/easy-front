@@ -1,7 +1,7 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import {Form} from 'antd';
-import {QuestionCircleOutlined} from '@ant-design/icons';
+import { Form } from 'antd';
+import { QuestionCircleOutlined } from '@ant-design/icons';
 import {
     InputNumber,
     Input,
@@ -19,7 +19,7 @@ import {
 import IconPicker from '../icon-picker';
 import './index.less';
 
-const {TextArea, Password} = Input;
+const { TextArea, Password } = Input;
 const FormItem = Form.Item;
 
 // input hidden number textarea password mobile email select select-tree checkbox checkbox-group radio radio-button radio-group switch date time date-time date-range cascader
@@ -42,7 +42,7 @@ export function isInputLikeElement(type) {
 }
 
 function getElement(item) {
-    const {type = 'input', component, ...props} = item;
+    const { type = 'input', component, ...props } = item;
 
     const commonProps = {
         size: 'default',
@@ -54,7 +54,10 @@ function getElement(item) {
 
     // 如果 component 存在，说明是自定义组件
     if (component) {
-        return typeof component === 'function' ? component() : component;
+        if (typeof component === 'function') return component({ ...commonProps, ...props });
+
+        const Comp = component;
+        return <Comp {...commonProps} {...props}/>;
     }
 
     if (isInputLikeElement(type)) {
@@ -66,7 +69,7 @@ function getElement(item) {
     }
 
     if (type === 'select') {
-        const {options = [], ...others} = props;
+        const { options = [], ...others } = props;
 
         return (
             <Select {...commonProps} {...others}>
@@ -85,7 +88,7 @@ function getElement(item) {
     if (type === 'radio') return <Radio {...commonProps} {...props}>{props.label}</Radio>;
     if (type === 'radio-group') return <Radio.Group {...commonProps} {...props}/>;
     if (type === 'radio-button') {
-        const {options = [], ...others} = props;
+        const { options = [], ...others } = props;
         return (
             <Radio.Group buttonStyle="solid" {...commonProps} {...others}>
                 {options.map(opt => <Radio.Button key={opt.value} {...opt}>{opt.label}</Radio.Button>)}
@@ -95,7 +98,7 @@ function getElement(item) {
 
     if (type === 'cascader') return <Cascader {...commonProps} {...props}/>;
 
-    if (type === 'switch') return <Switch {...commonProps} {...props} style={{...props.style, width: 'auto'}}/>;
+    if (type === 'switch') return <Switch {...commonProps} {...props} style={{ ...props.style, width: 'auto' }}/>;
 
     if (type === 'date') return <DatePicker {...commonProps} {...props}/>;
 
@@ -119,9 +122,9 @@ class FormElement extends Component {
         // 自定义属性
         form: PropTypes.object,
         type: PropTypes.string.isRequired,
-        labelWidth: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+        labelWidth: PropTypes.oneOfType([ PropTypes.number, PropTypes.string ]),
         showLabel: PropTypes.bool,
-        width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+        width: PropTypes.oneOfType([ PropTypes.number, PropTypes.string ]),
         labelTip: PropTypes.any,
         tip: PropTypes.any,
         decorator: PropTypes.object,
@@ -178,7 +181,7 @@ class FormElement extends Component {
             if (!e || !e.target) {
                 return e;
             }
-            const {target} = e;
+            const { target } = e;
             return target.type === 'checkbox' ? target.checked : target.value;
         },
     };
@@ -193,15 +196,15 @@ class FormElement extends Component {
 
         // 如果存在required属性，自动添加必填校验
         if (required && !rules.find(item => 'required' in item)) {
-            rules.push({required: true, message: `${requireMessage}!`});
+            rules.push({ required: true, message: `${requireMessage}!` });
         }
 
         if (maxLength !== void 0 && !rules.find(item => 'max' in item)) {
-            rules.push({max: maxLength, message: `最大长度不能超过 ${maxLength} 个字符！`});
+            rules.push({ max: maxLength, message: `最大长度不能超过 ${maxLength} 个字符！` });
         }
 
         if (minLength !== void 0 && !rules.find(item => 'min' in item)) {
-            rules.push({min: minLength, message: `最小长度不能低于 ${minLength} 个字符！`});
+            rules.push({ min: minLength, message: `最小长度不能低于 ${minLength} 个字符！` });
         }
 
         return rules;
@@ -268,7 +271,7 @@ class FormElement extends Component {
 
         let labelWithoutWidth = true;
         if (!labelCol && labelWidth !== undefined) {
-            labelCol = {flex: `0 0 ${labelWidth}px`};
+            labelCol = { flex: `0 0 ${labelWidth}px` };
             labelWithoutWidth = false;
         }
 
@@ -288,15 +291,15 @@ class FormElement extends Component {
         }
 
         // 处理元素样式
-        let eleStyle = {width: '100%'};
-        eleStyle = {...eleStyle, ...elementStyle};
+        let eleStyle = { width: '100%' };
+        eleStyle = { ...eleStyle, ...elementStyle };
 
         // 处理placeholder
         if (!('placeholder' in others)) {
             if (isInputLikeElement(type)) {
                 others.placeholder = `请输入${label}`;
             } else if (type === 'date-range') {
-                others.placeholder = ['开始日期', '结束日期'];
+                others.placeholder = [ '开始日期', '结束日期' ];
             } else {
                 others.placeholder = `请选择${label}`;
             }
@@ -320,7 +323,7 @@ class FormElement extends Component {
                         placement="bottom"
                         title={labelTip}
                     >
-                        <QuestionCircleOutlined style={{marginRight: '4px'}}/>
+                        <QuestionCircleOutlined style={{ marginRight: '4px' }}/>
                     </Tooltip>
                     {label}
                 </span>
@@ -350,7 +353,7 @@ class FormElement extends Component {
             if (children && !shouldUpdate) {
                 children = children ? React.cloneElement(children, elementProps) : null;
             } else {
-                children = getElement({type, ...elementProps});
+                children = getElement({ type, ...elementProps });
             }
         }
 
@@ -359,7 +362,7 @@ class FormElement extends Component {
 
         return (
             <div
-                style={{display: type === 'hidden' ? 'none' : 'flex', ...wrapperStyle, ...style}}
+                style={{ display: type === 'hidden' ? 'none' : 'flex', ...wrapperStyle, ...style }}
                 className="form-element-flex-root"
                 ref={node => this.container = node}
             >

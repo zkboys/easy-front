@@ -77,6 +77,7 @@ $ npm run deploy
 - [路由 egg-router-plus](https://github.com/eggjs/egg-router-plus)
 - [校验 egg-validate](https://github.com/eggjs/egg-validate)
 - [测试 mochajs](https://mochajs.org/)
+- [Mock Mock.js](http://mockjs.com/)
 
 ## TODO
 - [x] 同一路由规则下，浏览器前进后退无效

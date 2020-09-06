@@ -303,4 +303,151 @@ export function getPathParams(path) {
         const type = 'path';
         return { field, type };
     });
-};
+}
+
+// mock 占位符
+export const mockStations = [
+    {
+        value: 'Basic',
+        label: 'Basic',
+        children: [
+            { value: '@boolean', label: '@boolean' },
+            { value: '@natural', label: '@natural' },
+            { value: '@integer', label: '@integer' },
+            { value: '@float', label: '@float' },
+            { value: '@character', label: '@character' },
+            { value: '@string', label: '@string' },
+            { value: '@range', label: '@range' },
+        ],
+    },
+
+    {
+        value: 'Date',
+        label: 'Date',
+        children: [
+            { value: '@date', label: '@date' },
+            { value: '@time', label: '@time' },
+            { value: '@datetime', label: '@datetime' },
+            { value: '@now', label: '@now' },
+        ],
+    },
+
+    {
+        value: 'Image',
+        label: 'Image',
+        children: [
+            { value: '@image', label: '@image' },
+            { value: '@dataImage', label: '@dataImage' },
+        ],
+    },
+
+    {
+        value: 'Color',
+        label: 'Color',
+        children: [
+            { value: '@color', label: '@color' },
+            { value: '@hex', label: '@hex' },
+            { value: '@rgb', label: '@rgb' },
+            { value: '@rgba', label: '@rgba' },
+            { value: '@hsl', label: '@hsl' },
+        ],
+    },
+
+    {
+        value: 'Text',
+        label: 'Text',
+        children: [
+            { value: '@paragraph', label: '@paragraph' },
+            { value: '@sentence', label: '@sentence' },
+            { value: '@word', label: '@word' },
+            { value: '@title', label: '@title' },
+            { value: '@cparagraph', label: '@cparagraph' },
+            { value: '@csentence', label: '@csentence' },
+            { value: '@cword', label: '@cword' },
+            { value: '@ctitle', label: '@ctitle' },
+        ],
+    },
+
+    {
+        value: 'Name',
+        label: 'Name',
+        children: [
+            { value: '@first', label: '@first' },
+            { value: '@last', label: '@last' },
+            { value: '@name', label: '@name' },
+            { value: '@cfirst', label: '@cfirst' },
+            { value: '@clast', label: '@clast' },
+            { value: '@cname', label: '@cname' },
+        ],
+    },
+
+    {
+        value: 'Web',
+        label: 'Web',
+        children: [
+            { value: '@url', label: '@url' },
+            { value: '@domain', label: '@domain' },
+            { value: '@protocol', label: '@protocol' },
+            { value: '@tld', label: '@tld' },
+            { value: '@email', label: '@email' },
+            { value: '@ip', label: '@ip' },
+        ],
+    },
+
+    {
+        value: 'Address',
+        label: 'Address',
+        children: [
+            { value: '@region', label: '@region' },
+            { value: '@province', label: '@province' },
+            { value: '@city', label: '@city' },
+            { value: '@county', label: '@county' },
+            { value: '@zip', label: '@zip' },
+        ],
+    },
+
+    {
+        value: 'Helper',
+        label: 'Helper',
+        children: [
+            { value: '@capitalize', label: '@capitalize' },
+            { value: '@upper', label: '@upper' },
+            { value: '@lower', label: '@lower' },
+            { value: '@pick', label: '@pick' },
+            { value: '@shuffle', label: '@shuffle' },
+        ],
+    },
+
+    {
+        value: 'Miscellaneous',
+        label: 'Miscellaneous',
+        children: [
+            { value: '@guid', label: '@guid' },
+            { value: '@id', label: '@id' },
+            { value: '@increment', label: '@increment' },
+        ],
+    },
+];
+/*
+http://mockjs.com/examples.htm
+
+let result = [];
+$$('.catalog')[1].querySelectorAll('li').forEach(li => {
+    const labels = Array.from(li.querySelectorAll('a')).map(a => a.text);
+
+    const [ category, ...ls ] = labels;
+
+    result.push(`
+        {
+            value: '${category}',
+            label: '${category}',
+            children: [
+                ${ls.map(it => {
+        return `{value: '@${it.trim()}', label: '@${it.trim()}'},`;
+    }).join('\n')}
+            ],
+        }, `);
+});
+
+console.log(result.join('\n'));
+*/

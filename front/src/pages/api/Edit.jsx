@@ -348,7 +348,7 @@ export default config()(props => {
                         >
                             <HttpParams
                                 tabIndexStart={4000}
-                                fields={[ 'field', 'description' ]}
+                                fields={[ 'field', 'defaultValue', 'description' ]}
                             />
                         </FormElement>
                     </div>
@@ -360,7 +360,7 @@ export default config()(props => {
                         >
                             <HttpParams
                                 tabIndexStart={5000}
-                                fields={[ 'field', 'valueType', 'description' ]}
+                                fields={[ 'field', 'valueType', 'mock', 'description' ]}
                             />
                         </FormElement>
                     </div>

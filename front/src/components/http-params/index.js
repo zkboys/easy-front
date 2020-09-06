@@ -5,10 +5,11 @@ import { Operator, Table, tableEditable } from 'src/library/components';
 import { valueTypeOptions } from 'src/commons';
 import YesNoTag from 'src/components/yes-no-tag';
 import { v4 as uuid } from 'uuid';
+import MockStationSelect from '../mock-station-select';
 import './style.less';
 
 
-const handleKeyDown = (e, tabIndex, maxIndex, record, handleAdd, isRowLast) => {
+const handleKeyDown = (e, tabIndex, rowInputCount, record, handleAdd, isRowLast) => {
     const { keyCode, ctrlKey, shiftKey, altKey, metaKey } = e;
     const isUp = keyCode === 38;
     const isDown = keyCode === 40;
@@ -20,14 +21,14 @@ const handleKeyDown = (e, tabIndex, maxIndex, record, handleAdd, isRowLast) => {
 
     if (!isUp && !isDown && !isEnter) return;
 
-    let nextTabIndex = tabIndex + 1;
+    let nextTabIndex = tabIndex + rowInputCount;
 
     if (createNewRow) {
         // 新增一行
         handleAdd(true, record);
     } else {
         // 选中下一个
-        if (isUp) nextTabIndex = tabIndex - 1;
+        if (isUp) nextTabIndex = tabIndex - rowInputCount;
         const nextInput = document.querySelector(`input[tabindex='${nextTabIndex}']`);
 
         if (!nextInput) return;
@@ -61,13 +62,13 @@ const HttpParams = props => {
     } = props;
 
     const [ expandedRowKeys, setExpandedRowKeys ] = useState([]);
-    const [ maxTabIndex, setMaxTabIndex ] = useState(tabIndexStart);
+    const [ /*totalRowCount*/, setTotalRowCount ] = useState(tabIndexStart);
     const [ lastAddId, setLastAddId ] = useState(null);
     const wrapEl = useRef(null);
 
     if (!fields.includes('_add')) fields.unshift('_add');
     if (!fields.includes('_operator')) fields.push('_operator');
-    // if (!fields.includes('_tabIndex')) fields.push('_tabIndex');
+    if (!fields.includes('_tabIndex')) fields.push('_tabIndex');
     if (!value) value = [];
 
 
@@ -98,6 +99,8 @@ const HttpParams = props => {
 
         // 等待渲染
         setTimeout(() => {
+            if (!wrapEl.current) return;
+
             const nextInput = wrapEl.current.querySelector(`input[last='true']`);
 
             if (!nextInput) return;
@@ -123,6 +126,9 @@ const HttpParams = props => {
         onChange([ ...newValue ]);
     };
 
+    // 每一行input个数
+    const rowInputCount = fields.filter(it => [ 'field', 'defaultValue', 'description' ].includes(it)).length;
+
     const columns = [
         {
             title: (
@@ -138,14 +144,14 @@ const HttpParams = props => {
             dataIndex: '_add',
             width: 50,
         },
-        { title: 'tabIndex', dataIndex: '_tabIndex', render: (value, record) => `${value} - ${record._isLastRow}` },
+        // { title: 'tabIndex', dataIndex: '_tabIndex', render: (value, record) => `${value} - ${record._isLastRow}-${rowInputCount}` },
         {
             title: '字段名',
             dataIndex: 'field',
             width: 200,
-            formProps: (record) => {
+            formProps: (record, index) => {
                 if (disabledFields?.includes('field')) return;
-                const tabIndex = record._tabIndex;
+                const tabIndex = tabIndexStart + index * rowInputCount + 1;
                 return {
                     tabIndex,
                     noSpace: true,
@@ -159,17 +165,20 @@ const HttpParams = props => {
                         record.field = e.target.value;
                         await handleChange();
                     },
-                    onKeyDown: (e) => handleKeyDown(e, tabIndex, maxTabIndex, record, handleAdd, record._isLastRow),
+                    onKeyDown: (e) => handleKeyDown(e, tabIndex, rowInputCount, record, handleAdd, record._isLastRow),
                 };
             },
         },
         {
-            title: <span style={{ paddingLeft: 8 }}>字段值</span>,
+            title: <span style={{ paddingLeft: 8 }}>默认值</span>,
             dataIndex: 'defaultValue',
-            formProps: (record) => {
+            width: 200,
+            formProps: (record, index) => {
                 if (disabledFields?.includes('defaultValue')) return;
+                let offset = 1;
+                if (fields.includes('field')) offset++;
 
-                const tabIndex = record._tabIndex + maxTabIndex;
+                const tabIndex = tabIndexStart + index * rowInputCount + offset;
                 return {
                     tabIndex,
                     placeholder: '请输入字段值',
@@ -179,7 +188,7 @@ const HttpParams = props => {
                         record.defaultValue = e.target.value;
                         await handleChange();
                     },
-                    onKeyDown: (e) => handleKeyDown(e, tabIndex, maxTabIndex, record, handleAdd, record._isLastRow),
+                    onKeyDown: (e) => handleKeyDown(e, tabIndex, rowInputCount, record, handleAdd, record._isLastRow),
                 };
             },
         },
@@ -221,12 +230,33 @@ const HttpParams = props => {
             },
         },
         {
+            title: 'Mock',
+            dataIndex: 'mock',
+            width: 180,
+            formProps: (record) => {
+                if (disabledFields?.includes('mock')) return;
+                return {
+                    required: true,
+                    component: MockStationSelect,
+                    placeholder: '请选择Mock占位符',
+                    onChange: (val) => {
+                        record.mock = val;
+                        handleChange();
+                    },
+                };
+            },
+        },
+        {
             title: <span style={{ paddingLeft: 8 }}>描述</span>,
             dataIndex: 'description',
-            formProps: (record) => {
+            formProps: (record, index) => {
                 if (disabledFields?.includes('description')) return;
 
-                const tabIndex = record._tabIndex + maxTabIndex * 2;
+                let offset = 1;
+                if (fields.includes('field')) offset++;
+                if (fields.includes('defaultValue')) offset++;
+
+                const tabIndex = tabIndexStart + index * rowInputCount + offset;
                 return {
                     tabIndex,
                     placeholder: '请输入描述',
@@ -236,7 +266,7 @@ const HttpParams = props => {
                         record.description = e.target.value;
                         await handleChange();
                     },
-                    onKeyDown: (e) => handleKeyDown(e, tabIndex, maxTabIndex, record, handleAdd, record._isLastRow),
+                    onKeyDown: (e) => handleKeyDown(e, tabIndex, rowInputCount, record, handleAdd, record._isLastRow),
                 };
             },
         },
@@ -329,7 +359,7 @@ const HttpParams = props => {
 
         loop(value);
 
-        setMaxTabIndex(max);
+        setTotalRowCount(max);
     }, [ value ]);
     return (
         <div ref={wrapEl} style={{ width: '100%' }}>
