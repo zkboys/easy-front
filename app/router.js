@@ -18,6 +18,7 @@ module.exports = app => {
     category,
     dynamic: dynamicController,
     api: apiController,
+    mock,
   } = controller;
 
   // 登录
@@ -96,12 +97,16 @@ module.exports = app => {
   api.post('/projects/:projectId/apis', permission.project.master, resource.project, dynamic.project.createApi, apiController.create);
   api.put('/projects/:projectId/apis/:id', permission.project.master, resource.project, dynamic.project.updateApi, apiController.update);
   api.del('/projects/:projectId/apis/:id', permission.project.master, resource.project, dynamic.project.destroyApi, apiController.destroy);
-  api.get('/projects/:projectId/apiByName', permission.project.member,apiController.byName)
+  api.get('/projects/:projectId/apiByName', permission.project.member, apiController.byName);
+  api.get('/projects/:projectId/byMethodPath', permission.project.member, apiController.byMethodPath);
 
   // 未捕获请求，返回404
   api.get('/*', async ctx => {
     ctx.status = 404;
   });
+
+  // mock
+  router.get('/mock/:projectId/*', mock.index);
 
   // 文档
   router.get('/docs', async ctx => {

@@ -56,6 +56,7 @@ const HttpParams = props => {
             'field',
             'valueType',
             'required',
+            'defaultValue',
             'description',
         ],
         ...others
@@ -170,29 +171,6 @@ const HttpParams = props => {
             },
         },
         {
-            title: <span style={{ paddingLeft: 8 }}>默认值</span>,
-            dataIndex: 'defaultValue',
-            width: 200,
-            formProps: (record, index) => {
-                if (disabledFields?.includes('defaultValue')) return;
-                let offset = 1;
-                if (fields.includes('field')) offset++;
-
-                const tabIndex = tabIndexStart + index * rowInputCount + offset;
-                return {
-                    tabIndex,
-                    placeholder: '请输入字段值',
-                    onFocus: handleFocus,
-                    last: `${record.id === lastAddId}`,
-                    onBlur: async (e) => {
-                        record.defaultValue = e.target.value;
-                        await handleChange();
-                    },
-                    onKeyDown: (e) => handleKeyDown(e, tabIndex, rowInputCount, record, handleAdd, record._isLastRow),
-                };
-            },
-        },
-        {
             title: '类型',
             dataIndex: 'valueType',
             align: 'center',
@@ -207,6 +185,14 @@ const HttpParams = props => {
                     onChange: (type) => {
                         record.valueType = type;
                         handleChange();
+
+                        if (fields.includes('mock')) {
+
+                            const option = valueTypeOptions.find(item => item.value === type);
+                            if (option?.mock) {
+                                record._form.setFieldsValue({ mock: option.mock });
+                            }
+                        }
                     },
                 };
             },
@@ -236,13 +222,35 @@ const HttpParams = props => {
             formProps: (record) => {
                 if (disabledFields?.includes('mock')) return;
                 return {
-                    required: true,
                     component: MockStationSelect,
                     placeholder: '请选择Mock占位符',
                     onChange: (val) => {
                         record.mock = val;
                         handleChange();
                     },
+                };
+            },
+        },
+        {
+            title: <span style={{ paddingLeft: 8 }}>默认值</span>,
+            dataIndex: 'defaultValue',
+            width: 200,
+            formProps: (record, index) => {
+                if (disabledFields?.includes('defaultValue')) return;
+                let offset = 1;
+                if (fields.includes('field')) offset++;
+
+                const tabIndex = tabIndexStart + index * rowInputCount + offset;
+                return {
+                    tabIndex,
+                    placeholder: '请输入字段值',
+                    onFocus: handleFocus,
+                    last: `${record.id === lastAddId}`,
+                    onBlur: async (e) => {
+                        record.defaultValue = e.target.value;
+                        await handleChange();
+                    },
+                    onKeyDown: (e) => handleKeyDown(e, tabIndex, rowInputCount, record, handleAdd, record._isLastRow),
                 };
             },
         },

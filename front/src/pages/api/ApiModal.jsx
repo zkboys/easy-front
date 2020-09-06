@@ -91,13 +91,15 @@ export default config({
         onOk && onOk(data);
     }
 
-    // 搜索接口
+    // 检测名字
     const checkName = _.debounce(async (rule, name, callback) => {
         if (!name) return callback();
 
         const api = await fetchApiByName({ projectId, name });
 
-        if ((isEdit && api && api.id !== id) || (!isEdit && api)) return callback('接口名称已被占用');
+        if (!api) return callback();
+
+        if ((isEdit && api.id !== id) || !isEdit) return callback('接口名称已被占用');
 
         return callback();
     }, 300);
@@ -158,7 +160,13 @@ export default config({
                                     ]}
                                 />
 
-                                <PathInput formProps={formProps}/>
+                                <PathInput
+                                    form={form}
+                                    formProps={formProps}
+                                    projectId={projectId}
+                                    id={id}
+                                    isEdit={isEdit}
+                                />
 
                                 <FormElement
                                     {...formProps}

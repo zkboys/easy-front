@@ -14,7 +14,7 @@ module.exports = app => {
     parentId: INTEGER, // object array 等多层级结构
     projectId: INTEGER, // 项目参数 所有接口公用参数 如果是api参数，projectId为空
     apiId: INTEGER, // 如果是项目参数，apiId为空
-    type: ENUM('header', 'path', 'query', 'body'),
+    type: ENUM('header', 'path', 'query', 'body', 'response-header', 'response-body'),
     name: STRING(200), // 参数中文名
     field: STRING(200), // 参数字段名
     value: STRING(200),

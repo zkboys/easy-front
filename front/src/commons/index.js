@@ -228,9 +228,10 @@ export const apiStatusOptions = [
 ];
 
 export const valueTypeOptions = [
-    { value: 'string', label: 'String', color: '' },
-    { value: 'number', label: 'Number', color: '' },
-    { value: 'boolean', label: 'Boolean', color: '' },
+    { value: 'string', label: 'String', color: '', mock: '@string' },
+    { value: 'number', label: 'Number', color: '', mock: '@integer' },
+    { value: 'float', label: 'Float', color: '', mock: '@float' },
+    { value: 'boolean', label: 'Boolean', color: '', mock: '@boolean' },
     { value: 'object', label: 'Object', color: '' },
     { value: 'array', label: 'Array', color: '' },
 ];

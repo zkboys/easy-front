@@ -74,6 +74,9 @@ module.exports = class ApiController extends Controller {
 
       const foundApi2 = await Api.findOne({ where: { projectId, method, path } });
       if (foundApi2) return ctx.fail(`${method} ${path} 接口已存在！`);
+
+      const foundApi3 = await ctx.helper.findApiByMethodAndPath(method, path);
+      if (foundApi3) return ctx.fail(`接口地址「${path}」与接口「${foundApi3.name}」地址「${foundApi3.path}」冲突！`);
     };
 
     // 获取path中参数
@@ -217,6 +220,9 @@ module.exports = class ApiController extends Controller {
     const foundApi2 = await Api.findOne({ where: { method, path } });
     if (foundApi2 && foundApi2.id !== id) return ctx.fail(`${method} ${path} 接口已存在！`);
 
+    const foundApi3 = await ctx.helper.findApiByMethodAndPath(method, path);
+    if (foundApi3 && foundApi3.id !== id) return ctx.fail(`接口地址「${path}」与接口「${foundApi3.name}」地址「${foundApi3.path}」冲突！`);
+
     // 处理参数
     const {
       headerParams,
@@ -305,6 +311,18 @@ module.exports = class ApiController extends Controller {
 
     const result = await Api.findOne({ where: { name } });
 
-    ctx.success(result);
+    ctx.success(result || null);
+  }
+
+  async byMethodPath(ctx) {
+    ctx.validate({
+      method: 'string',
+      path: 'string',
+    }, ctx.query);
+
+    const { method, path } = ctx.query;
+
+    const api = await ctx.helper.findApiByMethodAndPath(method, path);
+    ctx.success(api || null);
   }
 };

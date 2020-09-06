@@ -244,7 +244,14 @@ export default config()(props => {
                             ]}
                         />
 
-                        <PathInput formProps={formProps} onBlur={handlePathBlur}/>
+                        <PathInput
+                            form={form}
+                            formProps={formProps}
+                            projectId={projectId}
+                            id={id}
+                            isEdit={true}
+                            onBlur={handlePathBlur}
+                        />
 
                         <FormElement
                             {...formProps}
