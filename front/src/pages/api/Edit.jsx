@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Form, Button, Tooltip, Modal } from 'antd';
+import { Form, Button, Tooltip, Modal, Empty } from 'antd';
 import config from 'src/commons/config-hoc';
 import PageContent from 'src/layouts/page-content';
 import { useGet, usePut } from 'src/commons/ajax';
@@ -15,14 +15,14 @@ import _ from 'lodash';
 import PathInput from './PathInput';
 
 import './EditStyle.less';
-import { QuestionCircleOutlined } from '@ant-design/icons';
+import { ApiOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 
 export default config()(props => {
     const { id, projectId, height, onSubmit } = props;
     const [ form ] = Form.useForm();
 
     const topEl = useRef(null);
-    const [ api, setApi ] = useState({});
+    const [ api, setApi ] = useState(null);
     const [ pathParams, setPathParams ] = useState([]);
     const [ search, setSearch ] = useState({});
 
@@ -145,6 +145,8 @@ export default config()(props => {
     useEffect(() => {
         (async () => {
             const api = await fetchApi({ projectId, id });
+            if (!api) return setApi(null);
+
             const { params } = api;
             const headerParams = params.filter(item => item.type === 'header');
             const pathParams = params.filter(item => item.type === 'path').map(item => {
@@ -225,7 +227,7 @@ export default config()(props => {
 
                         <FormElement
                             {...formProps}
-                            label="后端状态"
+                            label="状态"
                             type="radio-button"
                             name="status"
                             options={apiStatusOptions}

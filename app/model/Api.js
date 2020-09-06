@@ -19,7 +19,7 @@ module.exports = app => {
     method: STRING(20),
     path: STRING(200),
     status: {
-      type: ENUM('00', '01'), // 后端未完成 后端已完成
+      type: ENUM('00', '01'), // 接口未完成 接口已全部配置完成，可以使用了
       defaultValue: '00',
       allowNull: false,
       comment: '后端状态',

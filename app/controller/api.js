@@ -191,6 +191,7 @@ module.exports = class ApiController extends Controller {
       path: 'string',
       method: 'string',
       categoryId: 'int',
+      status: 'boolean',
       description: 'string?',
     }, reqBody);
 

@@ -21,6 +21,7 @@ import Api from 'src/pages/api';
 
 import './indexStyle.less';
 import { getColor, setPrimaryColor } from '@/commons';
+import ApiModal from '@/pages/api/ApiModal';
 
 const { TabPane } = Tabs;
 
@@ -32,7 +33,9 @@ export default config({
 })(props => {
     const { user, match: { params }, query } = props;
     const { projectId } = params;
-    const [ height, setHeight ] = useState();
+
+    const [ apiVisible, setApiVisible ] = useState(false);
+    const [ height, setHeight ] = useState(500);
     const [ apiKeyWord, setApiKeyWord ] = useState(undefined);
 
     const [ activeKey, setActiveKey ] = useState(params.tabId !== ':tabId' ? params.tabId : 'api');
@@ -61,6 +64,7 @@ export default config({
             projectId={projectId}
             categoryId={categoryId}
             onChange={() => setProject({ ...project })}
+            onCreateApi={() => setApiVisible(true)}
             onClick={record => setApiId(record.id)}
         />
     ), [ height, project, categoryId ]);
@@ -70,6 +74,8 @@ export default config({
             id={apiId}
             projectId={projectId}
             height={height}
+            onChange={() => setProject({ ...project })}
+            onCreateApi={() => setApiVisible(true)}
             onTabChange={setApiTabKey}
             activeKey={apiTabKey}
         />
@@ -145,6 +151,8 @@ export default config({
     const isProjectMaster = user.isAdmin || [ 'owner', 'master' ].includes(userProjectRole);
     // const isProjectOwner = user.isAdmin || [ 'owner' ].includes(userProjectRole);
 
+    const showToolCreate = !!apiId;
+
     return (
         <>
             <TabPage
@@ -153,6 +161,15 @@ export default config({
                 activeKey={activeKey}
                 onChange={key => setActiveKey(key)}
                 onHeightChange={setHeight}
+                tool={showToolCreate ? (
+                    <Button
+                        type="primary"
+                        style={{ marginLeft: 8 }}
+                        onClick={() => setApiVisible(true)}
+                    >
+                        <ApiOutlined/> 创建接口
+                    </Button>
+                ) : null}
                 detail={(
                     <>
                         <div styleName="title">
@@ -232,6 +249,23 @@ export default config({
                     setCategoryId(data.id);
                 }}
                 onCancel={() => setCategoryVisible(false)}
+            />
+
+            <ApiModal
+                visible={apiVisible}
+                projectId={projectId}
+                categoryId={categoryId}
+                onOk={data => {
+
+                    // 如果当前url中apiId存在，创建接口之后，跳转到对应的 api页面
+                    if (apiId) {
+                        setApiId(data.id);
+                        setApiTabKey('edit');
+                    }
+                    setApiVisible(false);
+                    setProject({ ...project });
+                }}
+                onCancel={() => setApiVisible(false)}
             />
         </>
     );

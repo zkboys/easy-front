@@ -21,6 +21,7 @@ const TabPage = config({
         detail,
         detailStyle,
         list,
+        tool,
     } = props;
 
     const [ height, setHeight ] = useState(document.documentElement.clientHeight - otherHeight);
@@ -65,6 +66,7 @@ const TabPage = config({
                     </div>
                 </div>
                 <div styleName="tabs-wrap">
+                    <div styleName="tabs-tool">{tool}</div>
                     <Tabs onChange={key => onChange(key)} activeKey={activeKey} type="card">
                         {props.children}
                     </Tabs>

@@ -101,7 +101,7 @@ export default config({})(props => {
             <Menu
                 onClick={({ key }) => onClick(key, 'api')}
                 style={{ width: '100%' }}
-                selectedKeys={[ selectedKey || 'all' ]}
+                selectedKeys={[ `${selectedKey}` || 'all' ]}
                 mode="inline"
             >
                 <Menu.Item key="all"><ApiOutlined/>所有接口</Menu.Item>

@@ -15,6 +15,10 @@ module.exports = class CategoryController extends Controller {
     const result = await Category.findAll({
       where: { projectId },
       include: Api,
+      order: [
+        [ 'updatedAt', 'DESC' ],
+        [ Api, 'updatedAt', 'DESC' ],
+      ],
     });
 
     ctx.success(result);
@@ -32,6 +36,10 @@ module.exports = class CategoryController extends Controller {
     const result = await Category.findOne({
       where: { id },
       include: Api,
+      order: [
+        [ 'updatedAt', 'DESC' ],
+        [ Api, 'updatedAt', 'DESC' ],
+      ],
     });
     ctx.success(result);
   }

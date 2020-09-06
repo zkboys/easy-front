@@ -7,13 +7,11 @@ import { Button, Empty, Input } from 'antd';
 import { ApiOutlined } from '@ant-design/icons';
 import _ from 'lodash';
 import { httpMethodOptions } from 'src/commons';
-import ApiModal from './ApiModal';
 import ApiStatus from 'src/components/api-status';
 
 export default config()(props => {
-    const { height, categoryId = 'all', projectId, project, onChange, onClick } = props;
+    const { height, categoryId = 'all', projectId, project, onChange, onCreateApi, onClick } = props;
     const [ dataSource, setDataSource ] = useState([]);
-    const [ apiVisible, setApiVisible ] = useState(false);
     const [ category, setCategory ] = useState({});
 
     const [ categoryLoading, fetchCategory ] = useGet('/projects/:projectId/categories/:id');
@@ -36,7 +34,7 @@ export default config()(props => {
         { title: '接口分类', dataIndex: 'category', width: 100, render: value => value?.name },
         { title: '接口描述', dataIndex: 'description' },
         {
-            title: '后端状态', dataIndex: 'status', width: 100, render: value => {
+            title: '状态', dataIndex: 'status', width: 100, render: value => {
                 return <ApiStatus status={value}/>;
             },
         },
@@ -110,7 +108,7 @@ export default config()(props => {
                 <Button
                     type="primary"
                     style={{ marginLeft: 8 }}
-                    onClick={() => setApiVisible(true)}
+                    onClick={() => onCreateApi()}
                 >
                     <ApiOutlined/> 创建接口
                 </Button>
@@ -129,23 +127,13 @@ export default config()(props => {
                     >
                         <Button
                             type="primary"
-                            onClick={() => setApiVisible(true)}
+                            onClick={() => onCreateApi()}
                         >
                             <ApiOutlined/> 创建接口
                         </Button>
                     </Empty>
                 )}
             </div>
-            <ApiModal
-                visible={apiVisible}
-                projectId={projectId}
-                categoryId={categoryId}
-                onOk={data => {
-                    setApiVisible(false);
-                    onChange(data, 'add');
-                }}
-                onCancel={() => setApiVisible(false)}
-            />
         </PageContent>
     );
 });

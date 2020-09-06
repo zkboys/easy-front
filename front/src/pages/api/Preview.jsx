@@ -63,7 +63,7 @@ export default config()(props => {
                     </div>
                 </div>
                 <div styleName="item">
-                    <div styleName="label">后端状态</div>
+                    <div styleName="label">状态</div>
                     <div styleName="value"><ApiStatus status={api.status}/></div>
                 </div>
                 <div styleName="item">
