@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Button, Empty, Tabs } from 'antd';
 import config from 'src/commons/config-hoc';
-import PageContent from '@/layouts/page-content';
+import PageContent from 'src/layouts/page-content';
 import {
     DeploymentUnitOutlined,
     EyeOutlined,
@@ -12,7 +12,7 @@ import _ from 'lodash';
 import Preview from './Preview';
 import Edit from './Edit';
 import './indexStyle.less';
-import { useGet } from '@/commons/ajax';
+import { useGet } from 'src/commons/ajax';
 
 const { TabPane } = Tabs;
 

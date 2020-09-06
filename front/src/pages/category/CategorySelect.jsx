@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Select } from 'antd';
 import config from 'src/commons/config-hoc';
-import { useGet } from '@/commons/ajax';
+import { useGet } from 'src/commons/ajax';
 
 export default config({})((props) => {
     const { exclude = [], projectId, ...others } = props;

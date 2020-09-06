@@ -20,8 +20,8 @@ import ApiList from 'src/pages/api/ApiList';
 import Api from 'src/pages/api';
 
 import './indexStyle.less';
-import { getColor, setPrimaryColor } from '@/commons';
-import ApiModal from '@/pages/api/ApiModal';
+import { getColor, setPrimaryColor } from 'src/commons';
+import ApiModal from 'src/pages/api/ApiModal';
 
 const { TabPane } = Tabs;
 
@@ -151,7 +151,7 @@ export default config({
     const isProjectMaster = user.isAdmin || [ 'owner', 'master' ].includes(userProjectRole);
     // const isProjectOwner = user.isAdmin || [ 'owner' ].includes(userProjectRole);
 
-    const showToolCreate = !!apiId;
+    const showToolCreate = activeKey === 'api';
 
     return (
         <>

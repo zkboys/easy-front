@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import config from 'src/commons/config-hoc';
-import { useGet } from '@/commons/ajax';
+import { useGet } from 'src/commons/ajax';
 import _ from 'lodash';
 import { Button, Empty, Input } from 'antd';
 import { AppstoreAddOutlined } from '@ant-design/icons';
 import PageContent from 'src/layouts/page-content';
 import ProjectModal from 'src/pages/project/ProjectModal';
-import ProjectItem from '@/pages/project/ProjectItem';
+import ProjectItem from 'src/pages/project/ProjectItem';
 
 export default config()(props => {
     const { height, teamId, teams } = props;

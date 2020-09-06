@@ -126,6 +126,7 @@ export default config({
                 form={form}
                 onFinish={handleSubmit}
                 initialValues={data}
+                scrollToFirstError
             >
                 {isEdit ? <FormElement {...formProps} type="hidden" name="id"/> : null}
                 <FormElement {...formProps} type="hidden" name="projectId"/>

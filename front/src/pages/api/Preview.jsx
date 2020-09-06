@@ -10,8 +10,8 @@ import UserLink from 'src/components/user-link';
 import Help from 'src/components/help';
 import Copy from 'src/components/copy';
 import YesNoTag from 'src/components/yes-no-tag';
-import ValueType from '@/components/value-type';
-import BlockTitle from '@/components/block-title';
+import ValueType from 'src/components/value-type';
+import BlockTitle from 'src/components/block-title';
 import './PreviewStyle.less';
 
 export default config()(props => {

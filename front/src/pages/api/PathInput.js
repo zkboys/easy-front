@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormElement } from '@/library/components';
-import { httpMethodOptions } from '@/commons';
+import { FormElement } from 'src/library/components';
+import { httpMethodOptions } from 'src/commons';
 import Help from 'src/components/help';
 import './PathInputStyle.less';
 

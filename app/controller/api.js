@@ -196,8 +196,13 @@ module.exports = class ApiController extends Controller {
     }, reqBody);
 
     const { id } = ctx.params;
-    const { Api, Category } = ctx.model;
-    const { categoryId, name, method, path } = reqBody;
+    const { Api, Category, Param } = ctx.model;
+    const {
+      categoryId,
+      name,
+      method,
+      path,
+    } = reqBody;
 
     const foundApi = await Api.findByPk(id);
     if (!foundApi) return ctx.fail('此Api不存在或已删除');
@@ -212,8 +217,68 @@ module.exports = class ApiController extends Controller {
     const foundApi2 = await Api.findOne({ where: { method, path } });
     if (foundApi2 && foundApi2.id !== id) return ctx.fail(`${method} ${path} 接口已存在！`);
 
-    const result = await foundApi.update(reqBody);
-    ctx.success(result);
+    // 处理参数
+    const {
+      headerParams,
+      pathParams = [],
+      queryParams,
+      bodyParams,
+      responseHeaderParams,
+      responseBodyParams,
+      ...others
+    } = reqBody;
+
+    let transaction;
+    try {
+      transaction = await ctx.model.transaction();
+
+      // 先删除所有参数
+      await Param.destroy({ where: { apiId: id }, transaction });
+
+      const idMap = {};
+      const typeMap = {
+        headerParams: 'header',
+        pathParams: 'path',
+        queryParams: 'query',
+        bodyParams: 'body',
+        responseHeaderParams: 'response-header',
+        responseBodyParams: 'response-body',
+      };
+      for (const value of Object.entries({
+        headerParams,
+        pathParams,
+        queryParams,
+        bodyParams,
+        responseHeaderParams,
+        responseBodyParams,
+      })) {
+        const [ key, params ] = value;
+        const type = typeMap[key];
+        const unSavedParams = [ ...params ];
+
+        while (unSavedParams.length) {
+          const param = unSavedParams[0];
+          const { id, parentId, ...others } = param;
+          const realParentId = idMap[parentId];
+
+          // parentId 还不存在
+          if (parentId && !realParentId) continue;
+
+          const savedParam = await foundApi.createParam({ ...others, parentId: realParentId, type }, { transaction });
+          idMap[id] = savedParam.id;
+          // 保存成功 弹出
+          unSavedParams.shift();
+        }
+      }
+
+      const result = await foundApi.update(others, { transaction });
+      await transaction.commit();
+      ctx.success(result);
+    } catch (e) {
+      if (transaction) await transaction.rollback();
+
+      throw e;
+    }
   }
 
   // 删除

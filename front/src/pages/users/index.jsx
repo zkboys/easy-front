@@ -16,7 +16,7 @@ import {
 } from 'src/library/components';
 
 import EditModal from './EditModal';
-import UserLink from '@/components/user-link';
+import UserLink from 'src/components/user-link';
 
 export default config({
     pageHead: true,

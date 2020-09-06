@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import config from 'src/commons/config-hoc';
 import PageContent from 'src/layouts/page-content';
-import UserSelectModal from '@/pages/users/UserSelectModal';
-import { useDel, useGet, usePost, usePut } from '@/commons/ajax';
+import UserSelectModal from 'src/pages/users/UserSelectModal';
+import { useDel, useGet, usePost, usePut } from 'src/commons/ajax';
 import _ from 'lodash';
 import { Button, Empty, Input } from 'antd';
 import { AppstoreAddOutlined, UserAddOutlined } from '@ant-design/icons';

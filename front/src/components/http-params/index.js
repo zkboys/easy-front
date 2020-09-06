@@ -14,7 +14,7 @@ const handleKeyDown = (e, tabIndex, maxIndex, record, handleAdd, isRowLast) => {
     const isDown = keyCode === 40;
     const isEnter = keyCode === 13;
 
-    const createNewRow = (shiftKey || ctrlKey || metaKey) && isEnter;
+    const createNewRow = (shiftKey || ctrlKey || metaKey || isRowLast) && isEnter;
 
     if (!createNewRow && (ctrlKey || shiftKey || altKey || metaKey)) return;
 

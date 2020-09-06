@@ -1,21 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Form, Button, Tooltip, Modal, Empty } from 'antd';
+import { Form, Button, Tooltip, Modal } from 'antd';
+import { SaveOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import config from 'src/commons/config-hoc';
 import PageContent from 'src/layouts/page-content';
 import { useGet, usePut } from 'src/commons/ajax';
 import Help from 'src/components/help';
-import BlockTitle from '@/components/block-title';
+import BlockTitle from 'src/components/block-title';
 import HttpParams from 'src/components/http-params';
 
-import { FormElement } from '@/library/components';
+import { FormElement } from 'src/library/components';
 import { convertToTree } from 'src/library/utils/tree-utils';
-import CategorySelect from '@/pages/category/CategorySelect';
-import { apiStatusOptions, getPathParams } from '@/commons';
+import CategorySelect from 'src/pages/category/CategorySelect';
+import { apiStatusOptions, getPathParams } from 'src/commons';
 import _ from 'lodash';
 import PathInput from './PathInput';
 
 import './EditStyle.less';
-import { ApiOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 
 export default config()(props => {
     const { id, projectId, height, onSubmit } = props;
@@ -181,11 +181,27 @@ export default config()(props => {
             form.setFieldsValue(api);
 
             // 滚动条滚动到顶部
-            topEl.current.scrollTop = 0;
+            // topEl.current.scrollTop = 0;
         })();
 
     }, [ id, search ]);
 
+    async function handleWindowKeyDown(e) {
+        const { keyCode, ctrlKey, metaKey } = e;
+        const isS = keyCode === 83;
+        if ((ctrlKey || metaKey) && isS) {
+            e.preventDefault();
+
+            const values = await form.validateFields();
+            await handleSubmit(values);
+        }
+    }
+
+    useEffect(() => {
+        window.addEventListener('keydown', handleWindowKeyDown);
+
+        return () => window.removeEventListener('keydown', handleWindowKeyDown);
+    }, []);
     const formProps = {
         labelWidth: 100,
     };
@@ -196,8 +212,13 @@ export default config()(props => {
                 form={form}
                 onFinish={handleSubmit}
                 initialValues={api}
+                scrollToFirstError
             >
-                <div ref={topEl} styleName="top" style={{ height: height - 84 }}>
+                <div
+                    ref={topEl}
+                    styleName="top"
+                    style={{ height: height - 84 }}
+                >
                     <FormElement {...formProps} type="hidden" name="id"/>
                     <FormElement {...formProps} type="hidden" name="projectId"/>
 
@@ -345,7 +366,11 @@ export default config()(props => {
                     </div>
                 </div>
                 <div styleName="bottom">
-                    <Button type="primary" onClick={() => form.submit()}>保存</Button>
+                    <Button
+                        type="primary"
+                        icon={<SaveOutlined/>}
+                        onClick={() => form.submit()}
+                    >保存</Button>
                 </div>
             </Form>
         </PageContent>

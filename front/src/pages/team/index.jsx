@@ -20,7 +20,7 @@ import Project from './Project';
 import Member from './Member';
 
 import './style.less';
-import { getColor, setPrimaryColor } from '@/commons';
+import { getColor, setPrimaryColor } from 'src/commons';
 
 const { TabPane } = Tabs;
 

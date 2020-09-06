@@ -6,7 +6,7 @@ import Logo from './logo';
 import HeaderUser from './header-user';
 import HeaderMenu from './header-menu';
 import HeaderFullScreen from './header-full-screen';
-import { connect } from '@/models';
+import { connect } from 'src/models';
 import { PAGE_FRAME_LAYOUT } from 'src/models/settings';
 import Breadcrumb from '../breadcrumb';
 import './style.less';

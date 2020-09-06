@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { UserAvatar } from '@/library/components';
+import { UserAvatar } from 'src/library/components';
 import { Link } from 'react-router-dom';
 
 const UserLink = props => {

@@ -1,7 +1,7 @@
 import { session } from 'src/library/utils/storage';
 import { getNodeByPropertyAndValue, convertToTree } from 'src/library/utils/tree-utils';
 import { pathToRegexp } from 'path-to-regexp';
-import { loadScript } from '@/library/utils';
+import { loadScript } from 'src/library/utils';
 import { ROUTE_BASE_NAME } from 'src/router/AppRouter';
 
 const LOGIN_USER_STORAGE_KEY = 'login-user';

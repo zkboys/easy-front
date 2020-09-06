@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Tag } from 'antd';
-import { httpMethodOptions } from '@/commons';
+import { httpMethodOptions } from 'src/commons';
 
 const ApiMethod = props => {
     let { method, ...others } = props;

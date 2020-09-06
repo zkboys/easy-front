@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Select, Tag } from 'antd';
 import config from 'src/commons/config-hoc';
-import { useGet } from '@/commons/ajax';
-import { getColor } from '@/commons';
+import { useGet } from 'src/commons/ajax';
+import { getColor } from 'src/commons';
 
 export default config({})((props) => {
     const { exclude = [], ...others } = props;

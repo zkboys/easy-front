@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import config from 'src/commons/config-hoc';
 import PageContent from 'src/layouts/page-content';
 import { Table } from 'src/library/components';
-import { useGet } from '@/commons/ajax';
+import { useGet } from 'src/commons/ajax';
 import { Button, Empty, Input } from 'antd';
 import { ApiOutlined } from '@ant-design/icons';
 import _ from 'lodash';
@@ -10,7 +10,7 @@ import { httpMethodOptions } from 'src/commons';
 import ApiStatus from 'src/components/api-status';
 
 export default config()(props => {
-    const { height, categoryId = 'all', projectId, project, onChange, onCreateApi, onClick } = props;
+    const { height, categoryId = 'all', projectId, project, onCreateApi, onClick } = props;
     const [ dataSource, setDataSource ] = useState([]);
     const [ category, setCategory ] = useState({});
 
@@ -105,13 +105,6 @@ export default config()(props => {
                     placeholder="输入关键字进行搜索"
                     onChange={handleSearchApi}
                 />
-                <Button
-                    type="primary"
-                    style={{ marginLeft: 8 }}
-                    onClick={() => onCreateApi()}
-                >
-                    <ApiOutlined/> 创建接口
-                </Button>
             </div>
             <div className="pan-content" style={{ height, padding: 16 }}>
                 {dataSource?.length ? (

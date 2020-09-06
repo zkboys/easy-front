@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import Footer from '../footer';
 import { connect } from 'src/models';
 import './style.less';
-import { PAGE_FRAME_LAYOUT } from '@/models/settings';
+import { PAGE_FRAME_LAYOUT } from 'src/models/settings';
 
 /**
  * 页面内容 容器
