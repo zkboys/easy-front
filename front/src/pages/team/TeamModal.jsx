@@ -73,7 +73,6 @@ export default config({
                     label="团队描述"
                     name="description"
                     rows={6}
-                    required
                 />
             </Form>
         </ModalContent>

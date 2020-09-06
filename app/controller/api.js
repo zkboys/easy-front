@@ -267,13 +267,19 @@ module.exports = class ApiController extends Controller {
           const { id, parentId, ...others } = param;
           const realParentId = idMap[parentId];
 
-          // parentId 还不存在
-          if (parentId && !realParentId) continue;
-
-          const savedParam = await foundApi.createParam({ ...others, parentId: realParentId, type }, { transaction });
-          idMap[id] = savedParam.id;
-          // 保存成功 弹出
-          unSavedParams.shift();
+          // 顶级节点直接保存
+          if (!parentId) {
+            const savedParam = await foundApi.createParam({ ...others, type }, { transaction });
+            idMap[id] = savedParam.id;
+            // 保存成功 弹出
+            unSavedParams.shift();
+          } else if (realParentId) {
+            // 子级节点，并且父级真实id已存在
+            const savedParam = await foundApi.createParam({ ...others, parentId: realParentId, type }, { transaction });
+            idMap[id] = savedParam.id;
+            // 保存成功 弹出
+            unSavedParams.shift();
+          }
         }
       }
 

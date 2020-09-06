@@ -85,7 +85,6 @@ export default config({
                     label="项目描述"
                     name="description"
                     rows={6}
-                    required
                 />
             </Form>
         </ModalContent>

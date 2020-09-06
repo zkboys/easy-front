@@ -18,6 +18,10 @@ module.exports = app => {
     description: STRING(500),
     method: STRING(20),
     path: STRING(200),
+    responseBodyType: {
+      type: ENUM('json-object', 'json-array', 'json-raw'),
+      defaultValue: 'json-object',
+    },
     status: {
       type: ENUM('00', '01'), // 接口未完成 接口已全部配置完成，可以使用了
       defaultValue: '00',

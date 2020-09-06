@@ -73,7 +73,7 @@ const HttpParams = props => {
     if (!value) value = [];
 
 
-    const handleAdd = (append, record) => {
+    const handleAdd = (append, record, parentId) => {
         if (!addable) return;
         let dataSource;
         if (Array.isArray(record)) dataSource = record;
@@ -87,9 +87,10 @@ const HttpParams = props => {
         const id = uuid();
         const newRecord = {
             id,
-            parentId: record?._parent?.id,
+            parentId: record?._parent?.id || parentId,
             required: false,
             valueType: 'string',
+            mock: '@string',
             _isAdd: true,
             _addTime: Date.now(),
         };
@@ -150,7 +151,12 @@ const HttpParams = props => {
             title: '字段名',
             dataIndex: 'field',
             width: 200,
+            render: (value, record) => {
+                if (record?._parent?.valueType === 'array') return <div style={{ textAlign: 'right' }}>元素类型：</div>;
+                return value;
+            },
             formProps: (record, index) => {
+                if (record?._parent?.valueType === 'array') return null;
                 if (disabledFields?.includes('field')) return;
                 const tabIndex = tabIndexStart + index * rowInputCount + 1;
                 return {
@@ -187,11 +193,16 @@ const HttpParams = props => {
                         handleChange();
 
                         if (fields.includes('mock')) {
-
                             const option = valueTypeOptions.find(item => item.value === type);
                             if (option?.mock) {
                                 record._form.setFieldsValue({ mock: option.mock });
+                                record.mock = option.mock;
                             }
+                        }
+
+                        if (type === 'array') {
+                            record._form.setFieldsValue({ mock: 10 });
+                            record.mock = 10;
                         }
                     },
                 };
@@ -221,6 +232,16 @@ const HttpParams = props => {
             width: 180,
             formProps: (record) => {
                 if (disabledFields?.includes('mock')) return;
+                if (record.valueType === 'array') return {
+                    type: 'number',
+                    initialValue: 10,
+                    placeholder: '请输入模拟数量',
+                    onChange: (val) => {
+                        record.mock = val;
+                        handleChange();
+                    },
+                };
+
                 return {
                     component: MockStationSelect,
                     placeholder: '请选择Mock占位符',
@@ -305,7 +326,7 @@ const HttpParams = props => {
                         onClick: () => {
                             if (!children) record.children = [];
 
-                            handleAdd(false, record.children);
+                            handleAdd(false, record.children, record.id);
 
                             // 展开父级
                             if (!expandedRowKeys.includes(id)) {

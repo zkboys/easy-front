@@ -67,6 +67,14 @@
         display: inline-block;
         border-top-right-radius: 5px;
     }
+
+    .body-type {
+        :global {
+            .form-element-flex-root .ant-form-item {
+                margin-bottom: 0;
+            }
+        }
+    }
 }
 
 :global {

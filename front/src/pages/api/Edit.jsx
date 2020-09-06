@@ -46,14 +46,19 @@ export default config()(props => {
     const handleSubmit = async (values) => {
         if (updating) return;
 
-        const {
+        let {
             headerParams,
             pathParams = [],
             queryParams,
             bodyParams,
             responseHeaderParams,
             responseBodyParams,
+            responseBodyRawParams,
         } = values;
+
+        if (!responseBodyParams && responseBodyRawParams) {
+            responseBodyParams = [ { defaultValue: responseBodyRawParams } ];
+        }
 
         const nameMap = {
             headerParams: '请求头',
@@ -99,7 +104,7 @@ export default config()(props => {
             params[key] = convert(value);
 
             // 校验
-            await Promise.all(params[key].map(record => record._form.validateFields())).catch(e => {
+            await Promise.all(params[key].map(record => record?._form?.validateFields())).catch(e => {
                 const name = nameMap[key];
                 Modal.info({
                     title: '提示',
@@ -147,7 +152,7 @@ export default config()(props => {
             const api = await fetchApi({ projectId, id });
             if (!api) return setApi(null);
 
-            const { params } = api;
+            const { params, responseBodyType } = api;
             const headerParams = params.filter(item => item.type === 'header');
             const pathParams = params.filter(item => item.type === 'path').map(item => {
                 item.valueType = item.valueType || undefined;
@@ -156,7 +161,13 @@ export default config()(props => {
             const queryParams = params.filter(item => item.type === 'query');
             const bodyParams = params.filter(item => item.type === 'body');
             const responseHeaderParams = params.filter(item => item.type === 'response-header');
-            const responseBodyParams = params.filter(item => item.type === 'response-body');
+            let responseBodyParams = params.filter(item => item.type === 'response-body');
+
+            let responseBodyRawParams;
+            if ([ 'json-raw' ].includes(responseBodyType)) {
+                responseBodyRawParams = responseBodyParams[0]?.defaultValue;
+                responseBodyParams = [];
+            }
 
             [ pathParams, queryParams, headerParams, bodyParams, responseBodyParams, responseHeaderParams ].forEach(arr => {
                 if (arr?.length) {
@@ -173,6 +184,7 @@ export default config()(props => {
             api.bodyParams = convertToTree(bodyParams);
             api.responseHeaderParams = convertToTree(responseHeaderParams);
             api.responseBodyParams = convertToTree(responseBodyParams);
+            api.responseBodyRawParams = responseBodyRawParams;
 
             setApi(api);
 
@@ -360,16 +372,52 @@ export default config()(props => {
                         </FormElement>
                     </div>
                     <div styleName="params-box">
-                        <h3>响应体（body）</h3>
-                        <FormElement
-                            labelWidth={0}
-                            name="responseBodyParams"
-                        >
-                            <HttpParams
-                                tabIndexStart={5000}
-                                fields={[ 'field', 'valueType', 'mock', 'description' ]}
+                        <h3 styleName="body-type">
+                            <span>响应体（body）</span>
+                            <FormElement
+                                style={{ display: 'inline-block' }}
+                                type="radio-group"
+                                name="responseBodyType"
+                                options={[
+                                    { value: 'json-object', label: 'JSON-Object' },
+                                    { value: 'json-array', label: 'JSON-Array' },
+                                    { value: 'json-raw', label: 'JSON-Raw' },
+                                ]}
                             />
-                        </FormElement>
+                        </h3>
+                        <Form.Item shouldUpdate>
+                            {() => {
+
+                                const bodyType = form.getFieldValue('responseBodyType');
+                                if ([ 'json-object', 'json-array' ].includes(bodyType)) {
+                                    return (
+                                        <FormElement
+                                            labelWidth={0}
+                                            name="responseBodyParams"
+                                        >
+                                            <HttpParams
+                                                tabIndexStart={5000}
+                                                fields={[ 'field', 'valueType', 'mock', 'description' ]}
+                                            />
+                                        </FormElement>
+                                    );
+                                }
+
+                                if ([ 'json-raw' ].includes(bodyType)) {
+                                    return (
+                                        <FormElement
+                                            labelWidth={0}
+                                            type="textarea"
+                                            name="responseBodyRawParams"
+                                            rows={6}
+                                            placeholder="请输入数据"
+                                        />
+                                    );
+                                }
+                                return <pre>{JSON.stringify(form.getFieldsValue(), null, 2)}</pre>;
+                            }}
+                        </Form.Item>
+
                     </div>
                 </div>
                 <div styleName="bottom">
