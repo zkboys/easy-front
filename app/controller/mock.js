@@ -30,9 +30,11 @@ module.exports = class MockController extends Controller {
     const responseHeaderParams = params.filter(item => item.type === 'response-header');
     const responseBodyParams = params.filter(item => item.type === 'response-body');
 
-    const {
-      responseBodyType,
-    } = api;
+    if (pathParams && pathParams.length) {
+      if (path.includes(':') || path.includes('{')) return ctx.fail('缺少地址参数！');
+    }
+
+    const { responseBodyType } = api;
 
     const checkRequired = (params, source, type) => {
       if (!params || !params.length) return;
@@ -56,29 +58,29 @@ module.exports = class MockController extends Controller {
     checkRequired(bodyParams, ctx.query, 'body');
 
     // 设置 响应 header
-    if (headerParams && headerParams.length) {
-      headerParams.forEach(item => {
+    if (responseHeaderParams && responseHeaderParams.length) {
+      responseHeaderParams.forEach(item => {
         const { field, defaultValue } = item;
         ctx.set(field, defaultValue);
       });
     }
 
     // 设置 响应 body
-    if ([ 'json-raw' ].includes(responseBodyType)) {
+    if ([ 'raw' ].includes(responseBodyType)) {
       return ctx.body = responseBodyParams && responseBodyParams[0] && responseBodyParams[0].defaultValue;
     }
 
     if ([ 'json-object', 'json-array' ].includes(responseBodyType)) {
       return ctx.body = getMockBody(responseBodyParams, responseBodyType);
     }
-    // 返回结果
 
+    // 返回结果
     ctx.body = '未完成';
   }
 };
 
 function getMockBody(params, type) {
-  if (!params || !params.length) return null;
+  if (!params || !params.length) return type === 'json-object' ? {} : [];
 
   const loop = (nodes, result = {}) => {
     nodes.forEach(node => {
@@ -115,8 +117,6 @@ function getMockBody(params, type) {
     return result;
   };
 
-  const result = loop(params.filter(item => !item.parentId));
-
-  if (type === 'json-object') return result;
-  if (type === 'json-array') return [ result ]; // mock 多个
+  if (type === 'json-object') return loop(params.filter(item => !item.parentId));
+  if (type === 'json-array') return Array.from({ length: 10 }).map(() => loop(params.filter(item => !item.parentId))); // TODO mock 多个
 }

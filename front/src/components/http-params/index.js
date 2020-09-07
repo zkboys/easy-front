@@ -59,6 +59,7 @@ const HttpParams = props => {
             'defaultValue',
             'description',
         ],
+        fieldType,
         ...others
     } = props;
 
@@ -158,21 +159,41 @@ const HttpParams = props => {
             formProps: (record, index) => {
                 if (record?._parent?.valueType === 'array') return null;
                 if (disabledFields?.includes('field')) return;
+
                 const tabIndex = tabIndexStart + index * rowInputCount + 1;
                 return {
                     tabIndex,
                     noSpace: true,
                     rules: [
                         { required: true, message: '请输入字段名！' },
-                        { pattern: /^[a-zA-Z_][a-zA-Z\d_]*$/, message: '字段名不合法！' },
+                        {
+                            validator: (rule, value) => {
+                                if (!value) return Promise.resolve();
+
+                                if (fieldType === 'header') return Promise.resolve();
+
+                                if (!/^[a-zA-Z_][a-zA-Z\d_]*$/.test(value)) return Promise.reject('字段名不合法！');
+
+                                return Promise.resolve();
+                            },
+                        },
                     ],
                     onFocus: handleFocus,
                     last: `${record.id === lastAddId}`,
-                    onBlur: async (e) => {
+                    onBlur: (e) => {
                         record.field = e.target.value;
-                        await handleChange();
+                        handleChange();
                     },
-                    onKeyDown: (e) => handleKeyDown(e, tabIndex, rowInputCount, record, handleAdd, record._isLastRow),
+                    onKeyDown: (e) => {
+                        const { keyCode, ctrlKey, metaKey } = e;
+                        const isS = keyCode === 83;
+                        if ((ctrlKey || metaKey) && isS) {
+                            record.field = e.target.value;
+                            handleChange();
+                        }
+
+                        handleKeyDown(e, tabIndex, rowInputCount, record, handleAdd, record._isLastRow);
+                    },
                 };
             },
         },
@@ -204,6 +225,10 @@ const HttpParams = props => {
                             record._form.setFieldsValue({ mock: 10 });
                             record.mock = 10;
                         }
+                        if (type === 'object') {
+                            record._form.setFieldsValue({ mock: undefined });
+                            record.mock = undefined;
+                        }
                     },
                 };
             },
@@ -232,6 +257,9 @@ const HttpParams = props => {
             width: 180,
             formProps: (record) => {
                 if (disabledFields?.includes('mock')) return;
+
+                if (record.valueType === 'object') return;
+
                 if (record.valueType === 'array') return {
                     type: 'number',
                     initialValue: 10,
@@ -267,11 +295,20 @@ const HttpParams = props => {
                     placeholder: '请输入字段值',
                     onFocus: handleFocus,
                     last: `${record.id === lastAddId}`,
-                    onBlur: async (e) => {
+                    onBlur: (e) => {
                         record.defaultValue = e.target.value;
-                        await handleChange();
+                        handleChange();
                     },
-                    onKeyDown: (e) => handleKeyDown(e, tabIndex, rowInputCount, record, handleAdd, record._isLastRow),
+                    onKeyDown: (e) => {
+                        const { keyCode, ctrlKey, metaKey } = e;
+                        const isS = keyCode === 83;
+                        if ((ctrlKey || metaKey) && isS) {
+                            record.defaultValue = e.target.value;
+                            handleChange();
+                        }
+
+                        handleKeyDown(e, tabIndex, rowInputCount, record, handleAdd, record._isLastRow);
+                    },
                 };
             },
         },
@@ -291,11 +328,20 @@ const HttpParams = props => {
                     placeholder: '请输入描述',
                     onFocus: handleFocus,
                     last: `${record.id === lastAddId}`,
-                    onBlur: async (e) => {
+                    onBlur: (e) => {
                         record.description = e.target.value;
-                        await handleChange();
+                        handleChange();
                     },
-                    onKeyDown: (e) => handleKeyDown(e, tabIndex, rowInputCount, record, handleAdd, record._isLastRow),
+                    onKeyDown: (e) => {
+                        const { keyCode, ctrlKey, metaKey } = e;
+                        const isS = keyCode === 83;
+                        if ((ctrlKey || metaKey) && isS) {
+                            record.description = e.target.value;
+                            handleChange();
+                        }
+
+                        handleKeyDown(e, tabIndex, rowInputCount, record, handleAdd, record._isLastRow);
+                    },
                 };
             },
         },

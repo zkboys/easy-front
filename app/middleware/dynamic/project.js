@@ -35,12 +35,12 @@ module.exports = {
     const user = ctx.user;
     const { Dynamic, Project } = ctx.model;
     const prevProject = await Project.findByPk(ctx.params.id);
-    const { id: projectId, teamId } = prevProject || {};
+    const { teamId } = prevProject || {};
 
     await next();
 
     const summary = `删除了项目${projectLink(prevProject)}`;
-    await Dynamic.create({ type: 'delete', title: '项目动态', projectId, teamId, summary, userId: user.id });
+    await Dynamic.create({ type: 'delete', title: '项目动态', projectId: null, teamId, summary, userId: user.id });
   },
   addMembers: async (ctx, next) => {
     await next();
@@ -94,6 +94,21 @@ module.exports = {
     const { User } = ctx.model;
     await destroy(ctx, next, { name: '成员', Model: User, link: categoryLink });
   },
+
+  leave: async (ctx, next) => {
+    await next();
+
+    const user = ctx.user;
+    const { Dynamic, Project } = ctx.model;
+
+    const { projectId } = ctx.params;
+
+    const project = await Project.findByPk(projectId);
+
+    const summary = `离开了项目${projectLink(project)}`;
+    await Dynamic.create({ type: 'delete', title: '项目动态', projectId, summary, userId: user.id });
+  },
+
   createCategory: async (ctx, next) => {
     await create(ctx, next, { name: '分类', link: categoryLink });
   },

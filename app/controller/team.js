@@ -123,13 +123,13 @@ module.exports = class TeamController extends Controller {
   // 查询成员
   async members(ctx) {
     ctx.validate({
-      id: 'int',
+      teamId: 'int',
     }, ctx.params);
 
-    const { id } = ctx.params;
+    const { teamId } = ctx.params;
     const { Team } = ctx.model;
 
-    const team = await Team.findByPk(id);
+    const team = await Team.findByPk(teamId);
     if (!team) ctx.fail('团队不存在，或已删除');
 
     const result = await team.getUsers();
@@ -140,7 +140,7 @@ module.exports = class TeamController extends Controller {
   // 添加成员
   async addMembers(ctx) {
     ctx.validate({
-      id: 'int',
+      teamId: 'int',
     }, ctx.params);
 
     ctx.validate({
@@ -148,15 +148,15 @@ module.exports = class TeamController extends Controller {
       role: [ 'master', 'member' ],
     }, ctx.request.body);
 
-    const { id } = ctx.params;
+    const { teamId } = ctx.params;
     const { userIds, role } = ctx.request.body;
 
     const { Team, TeamUser } = ctx.model;
 
-    const team = await Team.findByPk(id);
+    const team = await Team.findByPk(teamId);
     if (!team) ctx.fail('团队不存在，或已删除');
 
-    const users = userIds.map(userId => ({ userId, role, teamId: id }));
+    const users = userIds.map(userId => ({ userId, role, teamId }));
 
     const result = await TeamUser.bulkCreate(users);
 
@@ -166,23 +166,23 @@ module.exports = class TeamController extends Controller {
   // 修改成员
   async updateMember(ctx) {
     ctx.validate({
-      id: 'int',
-      memberId: 'string',
+      teamId: 'int',
+      id: 'string',
     }, ctx.params);
 
     ctx.validate({
       role: [ 'master', 'member' ],
     }, ctx.request.body);
 
-    const { id, memberId } = ctx.params;
+    const { teamId, id } = ctx.params;
     const { role } = ctx.request.body;
 
     const { TeamUser } = ctx.model;
 
     const teamUser = await TeamUser.findOne({
       where: {
-        teamId: id,
-        userId: memberId,
+        teamId,
+        userId: id,
       },
     });
 
@@ -195,16 +195,36 @@ module.exports = class TeamController extends Controller {
   // 删除成员
   async destroyMember(ctx) {
     ctx.validate({
-      id: 'int',
-      memberId: 'string',
+      teamId: 'int',
+      id: 'string',
     }, ctx.params);
 
-    const { id, memberId } = ctx.params;
+    const { teamId, id } = ctx.params;
     const { TeamUser } = ctx.model;
 
     const result = await TeamUser.destroy({
       where: {
-        teamId: id,
+        teamId: teamId,
+        userId: id,
+      },
+    });
+
+    ctx.success(result);
+  }
+
+  // 离开团队
+  async leave(ctx) {
+    ctx.validate({
+      teamId: 'int',
+    }, ctx.params);
+
+    const memberId = ctx.user.id;
+    const { teamId } = ctx.params;
+    const { TeamUser } = ctx.model;
+
+    const result = await TeamUser.destroy({
+      where: {
+        teamId,
         userId: memberId,
       },
     });

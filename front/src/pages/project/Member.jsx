@@ -9,19 +9,20 @@ import { AppstoreAddOutlined, UserAddOutlined } from '@ant-design/icons';
 import MemberItem from 'src/components/member-item';
 
 export default config({ router: true })(props => {
-    const { height, teamId, team, teams, user, onChange } = props;
+    const { height, projectId, project, user, onChange } = props;
     const [ members, setMembers ] = useState([]);
     const [ memberVisible, setMemberVisible ] = useState(false);
 
-    const [ memberLoading, fetchMembers ] = useGet('/teams/:teamId/members');
-    const [ addMemberLoading, addMembers ] = usePost('/teams/:teamId/members');
-    const [ updateMemberLoading, updateMember ] = usePut('/teams/:teamId/members/:id');
-    const [ deleteMemberLoading, deleteMember ] = useDel('/teams/:teamId/members/:id');
-    const [ leaving, memberLeave ] = useDel('/teams/:teamId/membersLeave');
+    const [ memberLoading, fetchMembers ] = useGet('/projects/:projectId/members');
+    const [ addMemberLoading, addMembers ] = usePost('/projects/:projectId/members');
+    const [ updateMemberLoading, updateMember ] = usePut('/projects/:projectId/members/:id');
+    const [ deleteMemberLoading, deleteMember ] = useDel('/projects/:projectId/members/:id');
+    const [ leaving, memberLeave ] = useDel('/projects/:projectId/membersLeave');
 
     async function getMembers() {
-        if (!teamId || teamId === ':teamId') return;
-        const members = await fetchMembers(teamId);
+        if (!projectId || projectId === ':projectId') return;
+
+        const members = await fetchMembers(projectId);
         // 将自己放在第一个
         const index = members.findIndex(item => item.id === user.id);
         if (index > -1) {
@@ -37,7 +38,7 @@ export default config({ router: true })(props => {
         if (addMemberLoading) return;
         const { userId, role } = values;
 
-        const data = await addMembers({ teamId, userIds: userId, role }, { successTip: '添加成员成功！' });
+        const data = await addMembers({ projectId, userIds: userId, role }, { successTip: '添加成员成功！' });
 
         await getMembers();
 
@@ -49,7 +50,7 @@ export default config({ router: true })(props => {
     async function handleMemberChange(memberId, role) {
         if (updateMemberLoading) return;
 
-        const data = await updateMember({ teamId, id: memberId, role }, { successTip: '角色修改成功！' });
+        const data = await updateMember({ projectId, id: memberId, role }, { successTip: '角色修改成功！' });
 
         await getMembers();
 
@@ -60,7 +61,7 @@ export default config({ router: true })(props => {
     async function handleMemberDelete(memberId) {
         if (deleteMemberLoading) return;
 
-        const data = await deleteMember({ teamId, id: memberId }, { successTip: '删除成功！' });
+        const data = await deleteMember({ projectId, id: memberId }, { successTip: '删除成功！' });
         await getMembers();
 
         onChange && onChange(data, 'delete');
@@ -70,7 +71,7 @@ export default config({ router: true })(props => {
     async function handleMemberLeave() {
         if (leaving) return;
 
-        await memberLeave(teamId, { successTip: '离开成功！' });
+        await memberLeave(projectId, { successTip: '离开成功！' });
 
         props.history.replace('/');
     }
@@ -94,11 +95,11 @@ export default config({ router: true })(props => {
         (async () => {
             await getMembers();
         })();
-    }, [ teamId ]);
+    }, [ projectId ]);
 
     const showMembers = members.filter(item => !item._hide);
-    const userTeamRole = team?.users?.find(item => item.id === user.id)?.team_user.role;
-    const isTeamMaster = user.isAdmin || [ 'owner', 'master' ].includes(userTeamRole);
+    const userProjectRole = project?.users?.find(item => item.id === user.id)?.project_user.role;
+    const isProjectMaster = user.isAdmin || [ 'owner', 'master' ].includes(userProjectRole);
 
     return (
         <PageContent
@@ -122,7 +123,7 @@ export default config({ router: true })(props => {
                     placeholder="输入成员名称、账号进行搜索"
                     onChange={handleSearchMember}
                 />
-                {isTeamMaster && teams?.length ? (
+                {isProjectMaster ? (
                     <Button
                         type="primary"
                         style={{ marginLeft: 8 }}
@@ -137,7 +138,7 @@ export default config({ router: true })(props => {
                     showMembers.map(member => {
                         return (
                             <MemberItem
-                                isMaster={isTeamMaster}
+                                isMaster={isProjectMaster}
                                 data={member}
                                 onRoleChange={handleMemberChange}
                                 onDelete={handleMemberDelete}
@@ -150,7 +151,7 @@ export default config({ router: true })(props => {
                         style={{ marginTop: 100 }}
                         description={members?.length ? '无匹配成员' : '此团队还没有成员'}
                     >
-                        {members?.length || !teams?.length ? null : <Button type="primary" onClick={UserAddOutlined}> <AppstoreAddOutlined/> 添加成员</Button>}
+                        {members?.length ? null : <Button type="primary" onClick={UserAddOutlined}> <AppstoreAddOutlined/> 添加成员</Button>}
                     </Empty>
                 )}
             </div>

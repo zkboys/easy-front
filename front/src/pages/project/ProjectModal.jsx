@@ -38,7 +38,9 @@ export default config({
     }
 
     useEffect(() => {
-        if (isEdit) fetchData();
+        (async () => {
+            if (isEdit) await fetchData();
+        })();
     }, []);
 
     const formProps = {

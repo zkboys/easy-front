@@ -164,7 +164,7 @@ export default config()(props => {
             let responseBodyParams = params.filter(item => item.type === 'response-body');
 
             let responseBodyRawParams;
-            if ([ 'json-raw' ].includes(responseBodyType)) {
+            if ([ 'raw' ].includes(responseBodyType)) {
                 responseBodyRawParams = responseBodyParams[0]?.defaultValue;
                 responseBodyParams = [];
             }
@@ -310,6 +310,7 @@ export default config()(props => {
                             name="headerParams"
                         >
                             <HttpParams
+                                fieldType="header"
                                 tabIndexStart={1}
                                 fields={[ 'field', 'defaultValue', 'required', 'description' ]}
                             />
@@ -366,6 +367,7 @@ export default config()(props => {
                             name="responseHeaderParams"
                         >
                             <HttpParams
+                                fieldType="header"
                                 tabIndexStart={4000}
                                 fields={[ 'field', 'defaultValue', 'description' ]}
                             />
@@ -381,7 +383,7 @@ export default config()(props => {
                                 options={[
                                     { value: 'json-object', label: 'JSON-Object' },
                                     { value: 'json-array', label: 'JSON-Array' },
-                                    { value: 'json-raw', label: 'JSON-Raw' },
+                                    { value: 'raw', label: 'Raw' },
                                 ]}
                             />
                         </h3>
@@ -403,7 +405,7 @@ export default config()(props => {
                                     );
                                 }
 
-                                if ([ 'json-raw' ].includes(bodyType)) {
+                                if ([ 'raw' ].includes(bodyType)) {
                                     return (
                                         <FormElement
                                             labelWidth={0}

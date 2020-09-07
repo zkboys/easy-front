@@ -71,10 +71,15 @@ module.exports = app => {
   api.post('/teams', dynamic.team.create, team.create);
   api.put('/teams/:id', permission.team.master, dynamic.team.update, team.update);
   api.del('/teams/:id', permission.team.master, dynamic.team.destroy, team.destroy);
-  api.get('/teams/:id/members', permission.team.member, team.members);
-  api.post('/teams/:id/members', permission.team.master, dynamic.team.addMembers, team.addMembers);
-  api.put('/teams/:id/members/:memberId', permission.team.master, dynamic.team.updateMember, team.updateMember);
-  api.del('/teams/:id/members/:memberId', permission.team.master, dynamic.team.destroyMember, team.destroyMember);
+
+  // 团队成员
+  api.get('/teams/:teamId/members', permission.team.member, team.members);
+  api.post('/teams/:teamId/members', permission.team.master, dynamic.team.addMembers, team.addMembers);
+  api.put('/teams/:teamId/members/:id', permission.team.master, dynamic.team.updateMember, team.updateMember);
+  api.del('/teams/:teamId/members/:id', permission.team.master, dynamic.team.destroyMember, team.destroyMember);
+  api.del('/teams/:teamId/membersLeave', permission.team.member, dynamic.team.leave, team.leave);
+
+  // 团队动态
   api.get('/teams/:id/dynamics', permission.team.member, dynamicController.index);
 
   // 项目 crud
@@ -83,7 +88,16 @@ module.exports = app => {
   api.post('/projects', dynamic.project.create, project.create);
   api.put('/projects/:id', permission.project.master, dynamic.project.update, project.update);
   api.del('/projects/:id', permission.project.master, dynamic.project.destroy, project.destroy);
+
+  // 项目动态
   api.get('/projects/:id/dynamics', dynamicController.index);
+
+  // 项目成员
+  api.get('/projects/:projectId/members', permission.project.member, project.members);
+  api.post('/projects/:projectId/members', permission.project.master, dynamic.project.addMembers, project.addMembers);
+  api.put('/projects/:projectId/members/:id', permission.project.master, dynamic.project.updateMember, project.updateMember);
+  api.del('/projects/:projectId/members/:id', permission.project.master, dynamic.project.destroyMember, project.destroyMember);
+  api.del('/projects/:projectId/membersLeave', permission.project.member, dynamic.project.leave, project.leave);
 
   // 项目分类 用于判断 project是否存在 并且扩展出ctx.project
   api.get('/projects/:projectId/categories', permission.project.master, resource.project, category.index);
@@ -92,6 +106,7 @@ module.exports = app => {
   api.put('/projects/:projectId/categories/:id', permission.project.master, resource.project, dynamic.project.updateCategory, category.update);
   api.del('/projects/:projectId/categories/:id', permission.project.master, resource.project, dynamic.project.destroyCategory, category.destroy);
 
+  // 项目接口
   api.get('/projects/:projectId/apis', permission.project.member, resource.project, apiController.index);
   api.get('/projects/:projectId/apis/:id', permission.project.member, resource.project, apiController.show);
   api.post('/projects/:projectId/apis', permission.project.master, resource.project, dynamic.project.createApi, apiController.create);

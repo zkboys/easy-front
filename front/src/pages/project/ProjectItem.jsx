@@ -1,21 +1,41 @@
 import React, { useState } from 'react';
-import { Tooltip } from 'antd';
+import { Popconfirm, Tooltip } from 'antd';
 import { Link } from 'react-router-dom';
-import { FormOutlined, TeamOutlined, StarOutlined, DeleteOutlined, LogoutOutlined } from '@ant-design/icons';
+import { FormOutlined, TeamOutlined, DeleteOutlined, LogoutOutlined } from '@ant-design/icons';
 import config from 'src/commons/config-hoc';
 import { getColor } from 'src/commons';
 import RoleTag from 'src/components/role-tag';
 import ProjectModal from './ProjectModal';
 import './ProjectItemStyle.less';
+import confirm from '@/components/confirm';
+import { useDel } from '@/commons/ajax';
 
 export default config({})(props => {
-    const { data = {}, onEdit, user } = props;
+    const { data = {}, onChange, user } = props;
+    const { id, name, description, team = {}, users = [] } = data;
+
     const [ visible, setVisible ] = useState(false);
 
-    const { id, name, description, team = {}, users = [] } = data;
+    const [ deleting, deleteProject ] = useDel('/projects/:id', { successTip: '删除成功！' });
+    const [ leaving, leaveProject ] = useDel('/projects/:id/membersLeave', { successTip: '离开成功！' });
+
+
+    const handleDelete = async () => {
+        if (deleting) return;
+        await deleteProject(id);
+        onChange();
+    };
+
+    const handleLeave = async () => {
+        if (leaving) return;
+        await leaveProject(id);
+        onChange();
+    };
+
     const color = getColor(data.name);
     const role = users.find(item => item.id === user.id)?.project_user?.role;
     const isMaster = user.isAdmin || [ 'owner', 'master' ].includes(role);
+    const isSelf = users.some(item => item.id === user.id);
 
     return (
         <div styleName="root">
@@ -27,18 +47,28 @@ export default config({})(props => {
                                 <FormOutlined onClick={() => setVisible(true)}/>
                             </Tooltip>
                             <Tooltip title="删除项目">
-                                <DeleteOutlined/>
+                                <DeleteOutlined
+                                    disabled={deleting}
+                                    onClick={async () => {
+                                        await confirm(
+                                            `您确定要删除项目「${name}」吗?`,
+                                            `「${name}」项目下的所有接口、成员等信息也将被删除，请谨慎操作！`,
+                                        );
+                                        await handleDelete();
+                                    }}/>
                             </Tooltip>
                         </>
                     ) : null}
 
-                    <Tooltip title="收藏项目">
-                        <StarOutlined/>
-                    </Tooltip>
-
-                    <Tooltip title="离开项目">
-                        <LogoutOutlined/>
-                    </Tooltip>
+                    {isSelf ? (
+                        <Popconfirm
+                            okType="danger"
+                            title="您确定要离开吗？之后可以联系管理员重新加入"
+                            onConfirm={handleLeave}
+                        >
+                            <LogoutOutlined/>
+                        </Popconfirm>
+                    ) : null}
                 </div>
 
                 <div styleName="title">
@@ -64,7 +94,7 @@ export default config({})(props => {
                 disabledTeam
                 onOk={async (data) => {
                     setVisible(false);
-                    onEdit && onEdit(data);
+                    onChange(data);
                 }}
                 onCancel={() => setVisible(false)}
             />

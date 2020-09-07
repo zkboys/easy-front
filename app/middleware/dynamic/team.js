@@ -40,7 +40,7 @@ module.exports = {
     await next();
 
     const summary = `删除了团队${teamLink(prevTeam)}`;
-    await Dynamic.create({ type: 'delete', title: '团队动态', teamId: prevTeam.id, summary, userId: user.id });
+    await Dynamic.create({ type: 'delete', title: '团队动态', teamId: null, summary, userId: user.id });
   },
   addMembers: async (ctx, next) => {
     await next();
@@ -96,6 +96,19 @@ module.exports = {
     const member = await User.findByPk(memberId);
 
     const summary = `移除了团队成员${userLink(member)}`;
+    await Dynamic.create({ type: 'delete', title: '团队动态', teamId, summary, userId: user.id });
+  },
+  leave: async (ctx, next) => {
+    await next();
+
+    const user = ctx.user;
+    const { Dynamic, Team } = ctx.model;
+
+    const { id: teamId } = ctx.params;
+
+    const team = await Team.findByPk(teamId);
+
+    const summary = `离开了团队${teamLink(team)}`;
     await Dynamic.create({ type: 'delete', title: '团队动态', teamId, summary, userId: user.id });
   },
 };

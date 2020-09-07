@@ -18,6 +18,8 @@ import CategoryModal from 'src/pages/category/CategoryModal';
 import CategoryMenu from 'src/pages/category/CategoryMenu';
 import ApiList from 'src/pages/api/ApiList';
 import Api from 'src/pages/api';
+import Member from './Member';
+import Edit from './Edit';
 
 import './indexStyle.less';
 import { getColor, setPrimaryColor } from 'src/commons';
@@ -37,6 +39,7 @@ export default config({
     const [ apiVisible, setApiVisible ] = useState(false);
     const [ height, setHeight ] = useState(500);
     const [ apiKeyWord, setApiKeyWord ] = useState(undefined);
+    const [ refresh, setRefresh ] = useState({});
 
     const [ activeKey, setActiveKey ] = useState(params.tabId !== ':tabId' ? params.tabId : 'api');
     const [ categoryId, setCategoryId ] = useState(query.categoryId);
@@ -80,6 +83,30 @@ export default config({
             activeKey={apiTabKey}
         />
     ), [ height, apiId, apiTabKey ]);
+
+    const editComponent = useMemo(() => (
+        <div className="pan-content" style={{ height: height + 50 }}>
+            <Edit id={projectId}/>
+        </div>
+    ), [ height, project ]);
+
+    const memberComponent = useMemo(() => (
+        <Member
+            height={height}
+            projectId={projectId}
+            project={project}
+            onChange={async (data, type) => {
+                // 团队成员的改变，间接的也是团队的改变，重新设置team，出发动态组件更新
+                setProject({ ...project });
+                if (type === 'updateSelf') {
+                    const project = await fetchProject(projectId);
+                    setProject(project);
+                }
+
+                setRefresh({});
+            }}
+        />
+    ), [ height, projectId, project ]);
 
     // 搜索接口
     const handleSearchApi = _.debounce((e) => {
@@ -143,7 +170,7 @@ export default config({
                 }
             }
         })();
-    }, [ projectId ]);
+    }, [ projectId, refresh ]);
 
     const color = getColor(project.name);
 
@@ -230,8 +257,12 @@ export default config({
                 <TabPane tab={<span><ApiOutlined/> 接口</span>} key="api">
                     {apiId ? apiComponent : apiListComponent}
                 </TabPane>
-                <TabPane tab={<span><TeamOutlined/> 项目成员</span>} key="member"></TabPane>
-                <TabPane tab={<span><SettingOutlined/> 设置</span>} key="setting"></TabPane>
+                <TabPane tab={<span><TeamOutlined/> 项目成员</span>} key="member">
+                    {memberComponent}
+                </TabPane>
+                <TabPane tab={<span><SettingOutlined/> 设置</span>} key="setting">
+                    {editComponent}
+                </TabPane>
                 <TabPane tab={<span><SolutionOutlined/> 项目动态</span>} key="dynamic">
                     {dynamicComponent}
                 </TabPane>

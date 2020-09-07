@@ -12,8 +12,10 @@ export default config()(props => {
     const { height, teamId, teams } = props;
     const [ projects, setProjects ] = useState([]);
     const [ projectVisible, setProjectVisible ] = useState(false);
+    const [refresh, setRefresh] = useState({});
 
     const [ projectLoading, fetchProjects ] = useGet('/projects');
+
 
 
     async function getProjects() {
@@ -40,7 +42,7 @@ export default config()(props => {
         (async () => {
             await getProjects();
         })();
-    }, [ teamId ]);
+    }, [ teamId, refresh ]);
 
     const showProjects = projects.filter(item => !item._hide);
     return (
@@ -73,11 +75,8 @@ export default config()(props => {
                             <ProjectItem
                                 key={project.id}
                                 data={project}
-                                onEdit={data => {
-                                    Object.entries(data).forEach(([ key, value ]) => {
-                                        if (key in project) project[key] = value;
-                                    });
-                                    setProjects([ ...projects ]);
+                                onChange={() => {
+                                    setRefresh({});
                                 }}
                             />
                         ))}

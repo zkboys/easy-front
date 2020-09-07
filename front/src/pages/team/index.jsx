@@ -31,7 +31,7 @@ export default config({
 })(props => {
     const { user, match: { params } } = props;
 
-    const [ height, setHeight ] = useState();
+    const [ height, setHeight ] = useState(0);
     const [ activeKey, setActiveKey ] = useState(params.tabId !== ':tabId' ? params.tabId : 'project');
     const [ teamId, setTeamId ] = useState(params.teamId);
     const [ teams, setTeams ] = useState([]);
@@ -42,7 +42,6 @@ export default config({
     const [ teamLoading, fetchTeam ] = useGet('/teams/:id');
     const [ teamsLoading, fetchTeams ] = useGet('/teams');
     const [ teamDeleteLoading, deleteTeam ] = useDel('/teams/:id');
-
 
     // 只用teamId 更新之后，Project才重新渲染
     const projectComponent = useMemo(() => (

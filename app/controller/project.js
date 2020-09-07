@@ -84,6 +84,9 @@ module.exports = class ProjectController extends Controller {
 
       await ProjectUser.bulkCreate(users, { transaction });
 
+      // 创建一个默认分类
+      await savedProject.createCategory({ name: '默认分类' }, { transaction });
+
       await transaction.commit();
       ctx.success(savedProject);
     } catch (e) {
@@ -131,6 +134,118 @@ module.exports = class ProjectController extends Controller {
     const { Project } = ctx.model;
 
     const result = await Project.destroy({ where: { id } });
+
+    ctx.success(result);
+  }
+
+// 查询成员
+  async members(ctx) {
+    ctx.validate({
+      projectId: 'int',
+    }, ctx.params);
+
+    const { projectId } = ctx.params;
+    const { Project } = ctx.model;
+
+    const project = await Project.findByPk(projectId);
+    if (!project) ctx.fail('项目不存在，或已删除');
+
+    const result = await project.getUsers();
+
+    ctx.success(result);
+  }
+
+  // 添加成员
+  async addMembers(ctx) {
+    ctx.validate({
+      projectId: 'int',
+    }, ctx.params);
+
+    ctx.validate({
+      userIds: 'array',
+      role: [ 'master', 'member' ],
+    }, ctx.request.body);
+
+    const { projectId } = ctx.params;
+    const { userIds, role } = ctx.request.body;
+
+    const { Project, ProjectUser } = ctx.model;
+
+    const project = await Project.findByPk(projectId);
+    if (!project) ctx.fail('项目不存在，或已删除');
+
+    const users = userIds.map(userId => ({ userId, role, projectId }));
+
+    const result = await ProjectUser.bulkCreate(users);
+
+    ctx.success(result);
+  }
+
+  // 修改成员
+  async updateMember(ctx) {
+    ctx.validate({
+      projectId: 'int',
+      id: 'string',
+    }, ctx.params);
+
+    ctx.validate({
+      role: [ 'master', 'member' ],
+    }, ctx.request.body);
+
+    const { projectId, id } = ctx.params;
+    const { role } = ctx.request.body;
+
+    const { ProjectUser } = ctx.model;
+
+    const projectUser = await ProjectUser.findOne({
+      where: {
+        projectId,
+        userId: id,
+      },
+    });
+
+    if (!projectUser) ctx.fail('记录不存在，或已删除');
+
+    const result = await projectUser.update({ role });
+    ctx.success(result);
+  }
+
+  // 删除成员
+  async destroyMember(ctx) {
+    ctx.validate({
+      id: 'string',
+      projectId: 'string',
+    }, ctx.params);
+
+    const { id, projectId } = ctx.params;
+    const { ProjectUser } = ctx.model;
+
+    const result = await ProjectUser.destroy({
+      where: {
+        projectId,
+        userId: id,
+      },
+    });
+
+    ctx.success(result);
+  }
+
+  // 离开项目
+  async leave(ctx) {
+    ctx.validate({
+      projectId: 'int',
+    }, ctx.params);
+
+    const memberId = ctx.user.id;
+    const { projectId } = ctx.params;
+    const { ProjectUser } = ctx.model;
+
+    const result = await ProjectUser.destroy({
+      where: {
+        projectId,
+        userId: memberId,
+      },
+    });
 
     ctx.success(result);
   }

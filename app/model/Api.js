@@ -19,7 +19,7 @@ module.exports = app => {
     method: STRING(20),
     path: STRING(200),
     responseBodyType: {
-      type: ENUM('json-object', 'json-array', 'json-raw'),
+      type: ENUM('json-object', 'json-array', 'raw'),
       defaultValue: 'json-object',
     },
     status: {
