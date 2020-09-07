@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Form, Button, Tooltip, Modal } from 'antd';
-import { SaveOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import { Form, Button, Modal } from 'antd';
+import { SaveOutlined } from '@ant-design/icons';
 import config from 'src/commons/config-hoc';
 import PageContent from 'src/layouts/page-content';
 import { useGet, usePut } from 'src/commons/ajax';
@@ -136,7 +136,7 @@ export default config()(props => {
         setSearch({});
     };
 
-    // 搜索接口
+    // 检测名称是否重复
     const checkName = _.debounce(async (rule, name, callback) => {
         if (!name) return callback();
 
@@ -284,25 +284,7 @@ export default config()(props => {
                         />
                     </div>
 
-                    <BlockTitle>
-                        请求参数
-                        <Tooltip
-                            overlayClassName="edit-param-help"
-                            overlayStyle={{ width: 500 }}
-                            title={(
-                                <div>
-                                    <div>编辑说明：</div>
-                                    <div>1. 点击Tab键，进入下一个输入框；</div>
-                                    <div>2. 点击Enter键，编辑下一个输入框；</div>
-                                    <div>3. 点击上、下方向键，编辑上、下一个输入框；</div>
-                                    <div>4. 按住Ctrl 或 Command 或 Shift + Enter键，新增一行；</div>
-                                    <div>5. 按住Ctrl 或 Command键 + 点击删除，直接删除无提示；</div>
-                                </div>
-                            )}
-                        >
-                            <QuestionCircleOutlined style={{ margin: '0 4px' }}/>
-                        </Tooltip>
-                    </BlockTitle>
+                    <BlockTitle>请求参数</BlockTitle>
                     <div styleName="params-box">
                         <h3>请求头（header）<Help type="paramHeader"/></h3>
                         <FormElement

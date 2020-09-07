@@ -13,6 +13,7 @@ module.exports = app => {
     },
     name: STRING(200),
     description: STRING(500),
+    apiPrefix: STRING(50),
     teamId: INTEGER,
   });
 
@@ -23,6 +24,7 @@ module.exports = app => {
     app.model.Project.hasMany(app.model.Dynamic);
     app.model.Project.hasMany(app.model.Category);
     app.model.Project.hasMany(app.model.Api);
+    app.model.Project.hasMany(app.model.Param);
 
     // 与User表是多对多关系
     app.model.Project.belongsToMany(app.model.User, {

@@ -32,6 +32,7 @@ module.exports = app => {
 
   Param.associate = function() {
     app.model.Param.belongsTo(app.model.Api, { onDelete: 'CASCADE' });
+    app.model.Param.belongsTo(app.model.Project, { onDelete: 'CASCADE' });
   };
 
   return Param;

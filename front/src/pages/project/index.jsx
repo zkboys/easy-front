@@ -37,7 +37,7 @@ export default config({
     const { projectId } = params;
 
     const [ apiVisible, setApiVisible ] = useState(false);
-    const [ height, setHeight ] = useState(500);
+    const [ height, setHeight ] = useState(0);
     const [ apiKeyWord, setApiKeyWord ] = useState(undefined);
     const [ refresh, setRefresh ] = useState({});
 
@@ -86,7 +86,7 @@ export default config({
 
     const editComponent = useMemo(() => (
         <div className="pan-content" style={{ height: height + 50 }}>
-            <Edit id={projectId}/>
+            <Edit id={projectId} height={height} onSubmit={() => setProject({ ...project })}/>
         </div>
     ), [ height, project ]);
 
@@ -116,13 +116,6 @@ export default config({
 
         setApiKeyWord(value);
     }, 100);
-
-    // 组件加载完成
-    useEffect(() => {
-        (async () => {
-
-        })();
-    }, []);
 
     // 改变浏览器地址
     useEffect(() => {

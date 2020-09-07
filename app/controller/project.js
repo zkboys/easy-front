@@ -40,9 +40,27 @@ module.exports = class ProjectController extends Controller {
     }, ctx.params);
 
     const { id } = ctx.params;
-    const { Project, Team, User } = ctx.model;
+    const { Project, Team, User, Param } = ctx.model;
 
-    const result = await Project.findByPk(id, { include: [ Team, User ] });
+    const result = await Project.findByPk(id, { include: [ Team, User, Param ] });
+
+    ctx.success(result);
+  }
+
+  // 根据名称查询
+  async byName(ctx) {
+    ctx.validate({
+      teamId: 'int',
+    }, ctx.params);
+    ctx.validate({
+      name: 'string',
+    }, ctx.query);
+
+    const { teamId } = ctx.params;
+    const { name } = ctx.query;
+    const { Project } = ctx.model;
+
+    const result = await Project.findOne({ where: { teamId, name } });
 
     ctx.success(result);
   }
@@ -110,18 +128,47 @@ module.exports = class ProjectController extends Controller {
       description: 'string?',
     }, requestBody);
 
-    const { id } = ctx.params;
-    const { name } = requestBody;
-    const { Project } = ctx.model;
+    const { id: projectId } = ctx.params;
+    const {
+      name,
+      headerParams,
+      responseHeaderParams,
+    } = requestBody;
+    const { Project, Param } = ctx.model;
 
-    const project = await Project.findByPk(id);
+    const project = await Project.findByPk(projectId);
     if (!project) return ctx.fail('项目不存在或已删除！');
 
     const exitName = await Project.findOne({ where: { name } });
-    if (exitName && exitName.id !== id) return ctx.fail('此项目名已被占用！');
+    if (exitName && exitName.id !== projectId) return ctx.fail('此项目名已被占用！');
 
-    const result = await project.update({ ...requestBody });
-    ctx.success(result);
+    // 多次数据库操作，进行事务处理
+    let transaction;
+    try {
+      transaction = await ctx.model.transaction();
+
+      // 删除参数
+      await Param.destroy({ where: { projectId, type: 'header' }, transaction });
+      await Param.destroy({ where: { projectId, type: 'response-header' }, transaction });
+
+      const params = [];
+      if (headerParams && headerParams.length) {
+        headerParams.forEach(({ id, ...others }) => params.push({ ...others, type: 'header', projectId }));
+      }
+      if (responseHeaderParams && responseHeaderParams.length) {
+        responseHeaderParams.forEach(({ id, ...others }) => params.push({ ...others, type: 'response-header', projectId }));
+      }
+      await Param.bulkCreate(params, { transaction });
+
+      const result = await project.update({ ...requestBody }, { transaction });
+      await transaction.commit();
+      ctx.success(result);
+
+    } catch (e) {
+      if (transaction) await transaction.rollback();
+
+      throw e;
+    }
   }
 
   // 删除

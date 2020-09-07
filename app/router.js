@@ -85,6 +85,7 @@ module.exports = app => {
   // 项目 crud
   api.get('/projects', project.index);
   api.get('/projects/:id', permission.project.member, project.show);
+  api.get('/teams/:teamId/projects/byName', permission.team.member, project.byName);
   api.post('/projects', dynamic.project.create, project.create);
   api.put('/projects/:id', permission.project.master, dynamic.project.update, project.update);
   api.del('/projects/:id', permission.project.master, dynamic.project.destroy, project.destroy);
