@@ -20,7 +20,7 @@ function beforeUpload(file) {
     }
     const isLt2M = file.size / 1024 < 200;
     if (!isLt2M) {
-        message.error('图片大小不能超过2KB');
+        message.error('图片大小不能超过200KB');
     }
     return isJpgOrPng && isLt2M;
 }
@@ -109,13 +109,14 @@ export default config({
                     <div styleName="avatar-box">
                         {isSelf ? (
                             <Upload
+                                accept="image/png, image/jpeg"
                                 name="avatar"
                                 showUploadList={false}
                                 action="/api/uploadUserAvatar"
                                 beforeUpload={beforeUpload}
                                 onChange={handleChange}
                             >
-                                <Tooltip placement="right" title="点击上传头像，支持 jpg、png格式，大小2M以内，长宽比1:1效果最佳">
+                                <Tooltip placement="right" title="点击上传头像，支持 jpg、png格式，大小200K以内，长宽比1:1效果最佳">
                                     <img styleName="avatar" src={avatar} alt="头像"/>
                                 </Tooltip>
                             </Upload>

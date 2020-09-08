@@ -19,6 +19,8 @@ module.exports = app => {
     dynamic: dynamicController,
     api: apiController,
     mock,
+    upload,
+    wiki,
   } = controller;
 
   // 登录
@@ -116,6 +118,13 @@ module.exports = app => {
   api.get('/projects/:projectId/apiByName', permission.project.member, apiController.byName);
   api.get('/projects/:projectId/byMethodPath', permission.project.member, apiController.byMethodPath);
 
+  api.post('/upload', upload.index);
+
+  // 获取wiki目录
+  api.get('/projects/:projectId/wikiContents', wiki.contents);
+  // 创建wiki目录
+  api.post('/projects/:projectId/wikiContents', wiki.writeContents);
+
   // 未捕获请求，返回404
   api.get('/*', async ctx => {
     ctx.status = 404;
@@ -123,6 +132,10 @@ module.exports = app => {
 
   // mock
   router.get('/mock/:projectId/*', mock.index);
+
+  // wiki 文档
+  router.get('/projects/:projectId/wiki', wiki.index);
+
 
   // 文档
   router.get('/docs', async ctx => {

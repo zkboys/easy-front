@@ -1,7 +1,48 @@
 'use strict';
+const path = require('path');
+const fs = require('fs');
+const uuid = require('uuid/v4');
 const { pathToRegexp } = require('path-to-regexp');
 
 module.exports = {
+  async streamToBase64(stream) {
+    return new Promise((resolve, reject) => {
+      const chunks = [];
+      stream.on('data', function(chunk) {
+        chunks.push(chunk);
+      });
+      stream.on('end', async function() {
+        const buffer = Buffer.concat(chunks);
+
+        const base64Str = buffer.toString('base64');
+        resolve(base64Str);
+      });
+      stream.on('error', (err) => {
+        reject(err);
+      });
+    });
+  },
+  async streamToUploadFile(stream, folder) {
+    return new Promise((resolve, reject) => {
+      const uploadPath = 'upload';
+      const fileFolder = path.join(this.app.baseDir, 'app', uploadPath, folder);
+
+      mkdirsSync(fileFolder);
+
+      const ext = path.extname(stream.filename);
+      const filename = `${uuid()}${ext}`;
+      const filePath = path.join(fileFolder, filename);
+
+      const write = fs.createWriteStream(filePath);
+      stream.pipe(write);
+      stream.on('end', async function() {
+        resolve(`/${uploadPath}/${folder}/${filename}`);
+      });
+      stream.on('error', (err) => {
+        reject(err);
+      });
+    });
+  },
   async findApiByMethodAndPath(method, path) {
     const { Api } = this.app.model;
 
@@ -42,3 +83,15 @@ module.exports = {
   },
 };
 
+//递归创建目录 同步方法
+function mkdirsSync(dirname) {
+  //console.log(dirname);
+  if (fs.existsSync(dirname)) {
+    return true;
+  } else {
+    if (mkdirsSync(path.dirname(dirname))) {
+      fs.mkdirSync(dirname);
+      return true;
+    }
+  }
+}

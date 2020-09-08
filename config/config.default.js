@@ -41,6 +41,14 @@ module.exports = appInfo => {
         prefix: '/docs',
         dir: path.join(appInfo.baseDir, 'docs'),
       },
+      {
+        prefix: '/upload',
+        dir: path.join(appInfo.baseDir, 'app/upload'),
+      },
+      {
+        prefix: '/wiki',
+        dir: path.join(appInfo.baseDir, 'app/wiki'),
+      },
     ],
   };
 

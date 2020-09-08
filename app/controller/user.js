@@ -2,6 +2,8 @@
 const { Op } = require('sequelize');
 const Controller = require('egg').Controller;
 const jwt = require('jsonwebtoken');
+const fs = require('fs');
+const path = require('path');
 const { getWeChatUsers } = require('../util/index');
 
 module.exports = class UserController extends Controller {
@@ -406,36 +408,17 @@ module.exports = class UserController extends Controller {
     ctx.success(menus);
   }
 
-  async streamToBase64(stream) {
-    return new Promise((resolve, reject) => {
-      const chunks = [];
-      stream.on('data', function(chunk) {
-        chunks.push(chunk);
-      });
-      stream.on('end', async function() {
-        const buffer = Buffer.concat(chunks);
-
-        const base64Str = buffer.toString('base64');
-        resolve(base64Str);
-      });
-      stream.on('error', (err) => {
-        reject(err);
-      });
-    });
-  }
-
   // 上传用户头像
   async uploadUserAvatar(ctx) {
     const user = ctx.user;
 
     // 获取文件流
     const stream = await this.ctx.getFileStream();
-    const { mimeType } = stream;
-    const base64 = await this.streamToBase64(stream);
-    const avatar = `data:${mimeType};base64,${base64}`;
+
+    const avatar = await ctx.helper.streamToUploadFile(stream, 'avatar');
 
     await user.update({ avatar });
 
-    ctx.success();
+    ctx.success(avatar);
   }
 };

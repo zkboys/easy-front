@@ -20,6 +20,7 @@ import ApiList from 'src/pages/api/ApiList';
 import Api from 'src/pages/api';
 import Member from './Member';
 import Edit from './Edit';
+import Wiki from './Wiki';
 
 import './indexStyle.less';
 import { getColor, setPrimaryColor } from 'src/commons';
@@ -107,6 +108,12 @@ export default config({
             }}
         />
     ), [ height, projectId, project ]);
+
+    const wikiComponent = useMemo(() => (
+        <div className="pan-content" style={{ height: height + 50 }}>
+            <Wiki projectId={projectId} height={height + 50} onSubmit={() => setProject({ ...project })}/>
+        </div>
+    ), [ height, project ]);
 
     // 搜索接口
     const handleSearchApi = _.debounce((e) => {
@@ -259,7 +266,9 @@ export default config({
                 <TabPane tab={<span><SolutionOutlined/> 项目动态</span>} key="dynamic">
                     {dynamicComponent}
                 </TabPane>
-                <TabPane tab={<span><BookOutlined/> Wiki</span>} key="wiki"></TabPane>
+                <TabPane tab={<span><BookOutlined/> Wiki</span>} key="wiki">
+                    {wikiComponent}
+                </TabPane>
             </TabPage>
 
             <CategoryModal

@@ -78,6 +78,7 @@ $ npm run deploy
 - [校验 egg-validate](https://github.com/eggjs/egg-validate)
 - [测试 mochajs](https://mochajs.org/)
 - [Mock Mock.js](http://mockjs.com/)
+- [Markdown编辑器 rich-markdown-editor](https://github.com/outline/rich-markdown-editor)
 
 ## TODO
 - [x] 同一路由规则下，浏览器前进后退无效

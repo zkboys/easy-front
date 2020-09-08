@@ -24,7 +24,7 @@ module.exports = {
     const { id: projectId, teamId } = ctx.body;
 
     const summary = `更新了项目${projectLink(prevProject)}`;
-    const map = { name: '接口名称', description: '接口描述' };
+    const map = { name: '接口名称', apiPrefix: '接口前缀', description: '接口描述' };
     const detail = getUpdateDetail(map, prevProject, ctx.body);
 
     if (detail) {
