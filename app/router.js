@@ -124,6 +124,10 @@ module.exports = app => {
   api.get('/projects/:projectId/wikiContents', wiki.contents);
   // 创建wiki目录
   api.post('/projects/:projectId/wikiContents', wiki.writeContents);
+  // 获取文章
+  api.get('/projects/:projectId/wiki/:id', wiki.article);
+  // 保存文章
+  api.post('/projects/:projectId/wiki/:id', wiki.saveArticle);
 
   // 未捕获请求，返回404
   api.get('/*', async ctx => {
@@ -134,8 +138,7 @@ module.exports = app => {
   router.get('/mock/:projectId/*', mock.index);
 
   // wiki 文档
-  router.get('/projects/:projectId/wiki', wiki.index);
-
+  router.get('/wiki/projects/:projectId', wiki.index);
 
   // 文档
   router.get('/docs', async ctx => {

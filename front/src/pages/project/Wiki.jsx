@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import config from 'src/commons/config-hoc';
 import { Tree, Input } from 'antd';
-import { convertToTree, renderNode, addNodeChildByKey } from 'src/library/utils/tree-utils';
-import { useGet } from '@/commons/ajax';
+import { convertToTree, renderNode } from 'src/library/utils/tree-utils';
+import { useGet, usePost } from '@/commons/ajax';
 import PageContent from '@/layouts/page-content';
 import { v4 as uuid } from 'uuid';
 import MarkDownEditor from 'src/pages/markdown-editor';
@@ -13,15 +13,10 @@ import Link from '@/layouts/page-link';
 
 const { TreeNode } = Tree;
 
-const testContents = [
-    { id: 1, title: '简介' },
-    { id: 2, title: '快速开始' },
-    { id: 3, parentId: 2, title: '安装' },
-    { id: 4, parentId: 2, title: '开发' },
-];
-
 function getMarkDownContents(contents) {
     const arr = [];
+
+    if (!contents?.length) return '';
 
     const loop = (nodes, level = 0) => {
         if (!nodes?.length) return;
@@ -30,20 +25,26 @@ function getMarkDownContents(contents) {
             if (!title) return;
 
             const space = Array.from({ length: level * 4 }).map(() => ' ').join('');
-            arr.push(`${space}* [${title}](${id}.md)`);
+            arr.push({
+                content: `${space}* [${title}](${id}.md)`,
+                id,
+                title,
+                spaceCount: level * 4,
+            });
 
-            const children = nodes.filter(item => item.parentId === id);
+            const children = contents.filter(item => item.parentId === id);
 
             loop(children, level + 1);
         });
     };
 
-    loop(contents);
+    loop(contents.filter(item => !item.parentKey));
     return arr;
 }
 
 function convertContents(markdown) {
     if (!markdown) return;
+
     const arr = markdown.split('\n');
     const result = [];
     for (let i = 0; i < arr.length; i++) {
@@ -71,6 +72,7 @@ function convertContents(markdown) {
             parentId,
         });
     }
+
     return result;
 }
 
@@ -80,21 +82,35 @@ export default config()(props => {
     const [ currentContent, setCurrentContent ] = useState(null);
     const [ markdown, setMarkdown ] = useState('');
     const [ contents, setContents ] = useState([]);
-    const [ fileName, setFileName ] = useState(null);
+    const [ blurToSave, setBlurToSave ] = useState(false);
     const [ expandedKeys, setExpandedKeys ] = useState([]);
-    const [ treeNodes, setTreeNodes ] = useState([]);
+    const contentEl = useRef(null);
 
     const [ loading, fetchContents ] = useGet('/projects/:projectId/wikiContents');
-
+    const [ saving, saveContents ] = usePost('/projects/:projectId/wikiContents', { successTip: '目录保存成功！' });
+    const [ articleLoading, fetchArticle ] = useGet('/projects/:projectId/wiki/:id');
+    const [ articleSaving, saveArticle ] = usePost('/projects/:projectId/wiki/:id', { successTip: '文章保存成功！' });
 
     function handleMarkdownChange(getValue) {
         const markdown = getValue();
         setMarkdown(markdown);
     }
 
-    const handleMarkdownSave = useCallback(() => {
-        console.log('保存', markdown);
+    const handleMarkdownSave = useCallback(async () => {
+        if (!currentContent) return;
+
+        await saveArticle({ projectId, id: currentContent.key, article: markdown });
+
     }, [ markdown ]);
+
+    async function handleSaveContent(nodes) {
+        const conts = nodes || contents;
+        const markdownContents = getMarkDownContents(conts);
+        await saveContents({ projectId, contents: markdownContents });
+        // 重新获取目录
+        await getContents();
+        setBlurToSave(false);
+    }
 
     // 目录点击回车事件
     async function handlePressEnter(e, node) {
@@ -102,20 +118,14 @@ export default config()(props => {
 
         const { id, parentId } = node;
 
+        node.title = value;
+
         if (!value) return;
 
         // 保存当前目录
         if (!metaKey && !ctrlKey && !shiftKey) {
-
-            console.log(node.title);
-            console.log('保存目录');
-
-            const markdownContents = getMarkDownContents(contents);
-            console.log(markdownContents);
-
-            // 重新获取目录
-            await getContents();
-
+            await handleSaveContent();
+            await handleClick(e, node);
             return;
         }
 
@@ -126,24 +136,42 @@ export default config()(props => {
             contents.push({
                 id: newId,
                 parentId: shiftKey ? id : parentId,
-                title: '',
+                title: '新建文档',
                 autoFocus: true,
                 isNew: true,
             });
+
+            // 添加子级的时候，展开父级节点
+            if (shiftKey && !expandedKeys.includes(id)) {
+                setExpandedKeys([ ...expandedKeys, id ]);
+            }
+
+            await handleSaveContent(contents);
 
             setContents([ ...contents ]);
         }
     }
 
     // 目录失去焦点
-    function handleBlur(e, node) {
+    async function handleBlur(e, node) {
         const { value } = e.target;
-        // 如果value不存在 删除node
+        if (!value) {
+            const nodes = contents.filter(item => item.key !== node.key);
+            setContents(nodes);
+        }
+
+        if (blurToSave) {
+            node.title = value;
+            // 保存目录
+            await handleSaveContent();
+        }
     }
 
-    // 添加节点
-    function handleAddContent(node) {
-
+    // 目录获取焦点
+    async function handleClick(e, node) {
+        const markdown = await fetchArticle({ projectId, id: node.key });
+        setMarkdown(markdown);
+        setCurrentContent(node);
     }
 
     async function getContents() {
@@ -153,86 +181,89 @@ export default config()(props => {
 
         const contents = convertContents(dataSource);
 
-        console.log(contents);
-
         setContents(contents);
+        return contents;
     }
-
-    // 获取树
-    useEffect(() => {
-        contents.forEach(item => {
-            const { id, parentId } = item;
-            item.key = `${id}`;
-            item.parentKey = `${parentId}`;
-        });
-
-        const treeData = convertToTree(contents);
-        let expandedKeys = [];
-        const treeNodes = renderNode(treeData, (item, children) => {
-            const {
-                key,
-                title,
-                autoFocus,
-            } = item;
-            expandedKeys.push(key);
-
-            let nodeTitle = (
-                <Input
-                    autoFocus={autoFocus}
-                    id={`input_${key}`}
-                    styleName="content-input"
-                    defaultValue={title}
-                    onPressEnter={e => handlePressEnter(e, item)}
-                    onBlur={e => handleBlur(e, item)}
-                    onFocus={() => {
-                        setCurrentContent(item);
-                        const markdown = item?.markdown || `# ${item?.title || '标题'}`;
-                        setMarkdown(markdown);
-                    }}
-                />
-            );
-
-            if (children) {
-                return (
-                    <TreeNode key={key} title={nodeTitle}>
-                        {children}
-                    </TreeNode>
-                );
-            }
-
-            return (
-                <TreeNode key={key} title={nodeTitle}/>
-            );
-        });
-
-        setTreeNodes(treeNodes);
-        setExpandedKeys(expandedKeys);
-        console.log(expandedKeys);
-    }, [ contents ]);
 
     useEffect(() => {
         (async () => {
-            await getContents();
+            const contents = await getContents();
+            if (contents?.length) {
+                await handleClick(null, contents[0]);
+            }
         })();
     }, [ projectId ]);
 
+    let treeNodes = null;
+    if (contents?.length) {
+        contents.forEach(item => {
+            const { id, parentId } = item;
+            item.key = `${id}`;
+            item.parentKey = parentId ? `${parentId}` : undefined;
+        });
+
+        const loop = nodes => {
+            return nodes.map(node => {
+                const {
+                    key,
+                    title,
+                    autoFocus,
+                } = node;
+                const children = contents.filter(item => item.parentKey === key);
+                const active = currentContent?.key === key;
+
+
+                let nodeTitle = (
+                    <Input
+                        autoFocus={autoFocus}
+                        id={`input_${key}`}
+                        styleName={`content-input ${active ? 'active' : ''}`}
+                        defaultValue={title}
+                        onPressEnter={e => handlePressEnter(e, node)}
+                        onChange={() => setBlurToSave(true)}
+                        onBlur={e => handleBlur(e, node)}
+                        onClick={e => handleClick(e, node)}
+                        onFocus={e => handleClick(e, node)}
+                    />
+                );
+
+                if (children?.length) {
+                    return (
+                        <TreeNode
+                            key={key}
+                            title={nodeTitle}
+                        >
+                            {loop(children)}
+                        </TreeNode>
+                    );
+                }
+
+                return (
+                    <TreeNode key={key} title={nodeTitle}/>
+                );
+            });
+        };
+
+        treeNodes = loop(contents.filter(item => !item.parentKey));
+    }
+
     return (
-        <PageContent styleName="root" loading={loading}>
+        <PageContent styleName="root" loading={loading || saving || articleLoading || articleSaving}>
             <div style={{ height: TOP_HEIGHT }}>
             </div>
             <div styleName="box" style={{ height: height - TOP_HEIGHT }}>
-                <div styleName="contents">
+                <div styleName="contents" ref={contentEl}>
                     <Tree
                         selectable={false}
                         defaultExpandAll
                         expandedKeys={expandedKeys}
+                        onExpand={expandedKeys => setExpandedKeys(expandedKeys)}
                     >
                         {treeNodes}
                     </Tree>
                 </div>
-                <div styleName="content">
+                <div styleName="content" key={currentContent?.key}>
                     <MarkDownEditor
-                        key={currentContent?.key}
                         defaultValue={markdown}
                         onChange={handleMarkdownChange}
                         onSave={handleMarkdownSave}

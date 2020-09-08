@@ -8,6 +8,13 @@
 module.exports = () => {
   const exports = {};
 
+  exports.development = {
+    ignoreDirs: [
+      'app/upload',
+      'app/wiki',
+    ],
+  };
+
   // 数据库配置
   exports.sequelize = {
     dialect: 'mysql',
