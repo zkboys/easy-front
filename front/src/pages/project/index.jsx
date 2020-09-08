@@ -267,7 +267,7 @@ export default config({
                     {dynamicComponent}
                 </TabPane>
                 <TabPane tab={<span><BookOutlined/> Wiki</span>} key="wiki">
-                    {wikiComponent}
+                    {activeKey === 'wiki' ? wikiComponent : null}
                 </TabPane>
             </TabPage>
 

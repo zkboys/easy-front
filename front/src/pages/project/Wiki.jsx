@@ -1,15 +1,11 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import config from 'src/commons/config-hoc';
 import { Tree, Input } from 'antd';
-import { convertToTree, renderNode } from 'src/library/utils/tree-utils';
 import { useGet, usePost } from '@/commons/ajax';
 import PageContent from '@/layouts/page-content';
 import { v4 as uuid } from 'uuid';
 import MarkDownEditor from 'src/pages/markdown-editor';
 import './WikiStyle.less';
-import { Icon } from '@/library/components';
-import { HomeOutlined } from '@ant-design/icons';
-import Link from '@/layouts/page-link';
 
 const { TreeNode } = Tree;
 
@@ -85,6 +81,7 @@ export default config()(props => {
     const [ blurToSave, setBlurToSave ] = useState(false);
     const [ expandedKeys, setExpandedKeys ] = useState([]);
     const contentEl = useRef(null);
+    const markdownValue = useRef({});
 
     const [ loading, fetchContents ] = useGet('/projects/:projectId/wikiContents');
     const [ saving, saveContents ] = usePost('/projects/:projectId/wikiContents', { successTip: '目录保存成功！' });
@@ -94,14 +91,21 @@ export default config()(props => {
     function handleMarkdownChange(getValue) {
         const markdown = getValue();
         setMarkdown(markdown);
+        markdownValue.current.markdown = markdown;
     }
 
-    const handleMarkdownSave = useCallback(async () => {
-        if (!currentContent) return;
+    // window获取不到 markdown 需要用ref方式保存
+    async function handleWindowSave(e) {
+        const { keyCode, ctrlKey, metaKey } = e;
+        const isS = keyCode === 83;
 
-        await saveArticle({ projectId, id: currentContent.key, article: markdown });
+        if ((ctrlKey || metaKey) && isS) {
+            e.preventDefault();
 
-    }, [ markdown ]);
+            if (!markdownValue?.current?.markdown) return;
+            await saveArticle({ projectId, id: markdownValue.current.currentContent.key, article: markdownValue.current.markdown });
+        }
+    }
 
     async function handleSaveContent(nodes) {
         const conts = nodes || contents;
@@ -172,6 +176,9 @@ export default config()(props => {
         const markdown = await fetchArticle({ projectId, id: node.key });
         setMarkdown(markdown);
         setCurrentContent(node);
+
+        markdownValue.current.markdown = markdown;
+        markdownValue.current.currentContent = node;
     }
 
     async function getContents() {
@@ -247,6 +254,14 @@ export default config()(props => {
         treeNodes = loop(contents.filter(item => !item.parentKey));
     }
 
+    useEffect(() => {
+        window.addEventListener('keydown', handleWindowSave);
+
+        return () => {
+            window.removeEventListener('keydown', handleWindowSave);
+        };
+    }, []);
+
     return (
         <PageContent styleName="root" loading={loading || saving || articleLoading || articleSaving}>
             <div style={{ height: TOP_HEIGHT }}>
@@ -266,7 +281,6 @@ export default config()(props => {
                     <MarkDownEditor
                         defaultValue={markdown}
                         onChange={handleMarkdownChange}
-                        onSave={handleMarkdownSave}
                     />
                 </div>
             </div>

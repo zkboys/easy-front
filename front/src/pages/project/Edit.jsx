@@ -103,7 +103,7 @@ export default config()(props => {
         labelWidth: 100,
     };
     return (
-        <PageContent styleName="root" loading={loading}>
+        <PageContent styleName="root" loading={loading || updating}>
             <Form
                 name="api-edit"
                 form={form}

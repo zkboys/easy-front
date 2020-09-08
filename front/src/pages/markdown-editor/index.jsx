@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import Editor from 'rich-markdown-editor';
 import config from 'src/commons/config-hoc';
 import PageContent from 'src/layouts/page-content';
 import { usePost } from '@/commons/ajax';
-
 
 export default config({ path: '/markdown' })(props => {
     const [ , upload ] = usePost('/upload');
