@@ -5,7 +5,9 @@ import PageContent from 'src/layouts/page-content';
 import { usePost } from '@/commons/ajax';
 
 export default config({ path: '/markdown' })(props => {
-    const [ , upload ] = usePost('/upload');
+    const { uploadUrl = '/upload' } = props;
+
+    const [ , upload ] = usePost(uploadUrl);
 
     async function handleUploadImage(file) {
         const formData = new FormData();

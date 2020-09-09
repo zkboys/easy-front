@@ -3,8 +3,37 @@ const path = require('path');
 const fs = require('fs');
 const uuid = require('uuid/v4');
 const { pathToRegexp } = require('path-to-regexp');
+const util = require('util');
+
+const readFile = util.promisify(fs.readFile);
+const writeFile = util.promisify(fs.writeFile);
+const fileExists = util.promisify(fs.exists);
+const unlinkFile = util.promisify(fs.unlink);
 
 module.exports = {
+  mkdirsSync: mkdirsSync,
+  async copyDir(from, to) {
+    return new Promise((resolve, reject) => {
+      copyDir(from, to, err => {
+        if (err) return reject(err);
+        resolve();
+      });
+    });
+  },
+
+  async unlinkFile(filePath) {
+    const exist = await fileExists(filePath);
+    if (exist) await unlinkFile(filePath);
+  },
+  async writeFile(filePath, content) {
+    await writeFile(filePath, content, 'UTF-8');
+  },
+  async readFile(filePath) {
+    return await readFile(filePath, 'UTF-8');
+  },
+  async fileExists(filePath) {
+    return await fileExists(filePath);
+  },
   async streamToBase64(stream) {
     return new Promise((resolve, reject) => {
       const chunks = [];
@@ -22,10 +51,10 @@ module.exports = {
       });
     });
   },
-  async streamToUploadFile(stream, folder) {
+  // upload/file
+  async streamToUploadFile(stream, uploadPath) {
     return new Promise((resolve, reject) => {
-      const uploadPath = 'upload';
-      const fileFolder = path.join(this.app.baseDir, 'app', uploadPath, folder);
+      const fileFolder = path.join(this.app.baseDir, 'app', uploadPath);
 
       mkdirsSync(fileFolder);
 
@@ -36,7 +65,7 @@ module.exports = {
       const write = fs.createWriteStream(filePath);
       stream.pipe(write);
       stream.on('end', async function() {
-        resolve(`/${uploadPath}/${folder}/${filename}`);
+        resolve(`/${uploadPath}/${filename}`);
       });
       stream.on('error', (err) => {
         reject(err);
@@ -92,6 +121,51 @@ function mkdirsSync(dirname) {
     if (mkdirsSync(path.dirname(dirname))) {
       fs.mkdirSync(dirname);
       return true;
+    }
+  }
+}
+
+/*
+ * 复制目录、子目录，及其中的文件
+ * @param src {String} 要复制的目录
+ * @param dist {String} 复制到目标目录
+ */
+function copyDir(src, dist, callback) {
+  fs.access(dist, function(err) {
+    if (err) {
+      // 目录不存在时创建目录
+      fs.mkdirSync(dist);
+    }
+    _copy(null, src, dist);
+  });
+
+  function _copy(err, src, dist) {
+    if (err) {
+      callback(err);
+    } else {
+      fs.readdir(src, function(err, paths) {
+        if (err) {
+          callback(err);
+        } else {
+          paths.forEach(function(path) {
+            const _src = src + '/' + path;
+            const _dist = dist + '/' + path;
+            fs.stat(_src, function(err, stat) {
+              if (err) {
+                callback(err);
+              } else {
+                // 判断是文件还是目录
+                if (stat.isFile()) {
+                  fs.writeFileSync(_dist, fs.readFileSync(_src));
+                } else if (stat.isDirectory()) {
+                  // 当是目录是，递归复制
+                  copyDir(_src, _dist, callback);
+                }
+              }
+            });
+          });
+        }
+      });
     }
   }
 }

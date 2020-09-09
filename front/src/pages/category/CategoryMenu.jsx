@@ -37,7 +37,10 @@ export default config({})(props => {
     }
 
     async function handleDelete(id, name) {
-        await confirm(`您确定要删除分类「${name}」吗?`, `「${name}」分类下的所有接口等信息也将被删除，请谨慎操作！`);
+        await confirm({
+            title: `您确定要删除分类「${name}」吗?`,
+            content: `「${name}」分类下的所有接口等信息也将被删除，请谨慎操作！`,
+        });
 
         await deleteCategory({ projectId, id });
 

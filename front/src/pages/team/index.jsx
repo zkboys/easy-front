@@ -209,10 +209,10 @@ export default config({
                                     <DeleteOutlined
                                         styleName="operator"
                                         onClick={async () => {
-                                            await confirm(
-                                                `您确定要删除团队「${team.name}」吗?`,
-                                                `「${team.name}」团队下的所有项目、成员等信息也将被删除，请谨慎操作！`,
-                                            );
+                                            await confirm({
+                                                title: `您确定要删除团队「${team.name}」吗?`,
+                                                content: `「${team.name}」团队下的所有项目、成员等信息也将被删除，请谨慎操作！`,
+                                            });
                                             await handleDeleteTeam();
                                         }}
                                     />

@@ -1,6 +1,7 @@
 'use strict';
 const { Op } = require('sequelize');
 const Controller = require('egg').Controller;
+const path = require('path');
 
 module.exports = class ProjectController extends Controller {
   // 查询
@@ -104,6 +105,12 @@ module.exports = class ProjectController extends Controller {
 
       // 创建一个默认分类
       await savedProject.createCategory({ name: '默认分类' }, { transaction });
+
+      // 创建 wiki
+      const wikiPath = path.join(ctx.app.baseDir, `app/wiki/projects/${savedProject.id}`);
+
+      ctx.helper.mkdirsSync(wikiPath);
+      ctx.helper.copyDir(path.join(ctx.app.baseDir, `app/wiki/template`), wikiPath);
 
       await transaction.commit();
       ctx.success(savedProject);

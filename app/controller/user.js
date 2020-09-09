@@ -2,8 +2,6 @@
 const { Op } = require('sequelize');
 const Controller = require('egg').Controller;
 const jwt = require('jsonwebtoken');
-const fs = require('fs');
-const path = require('path');
 const { getWeChatUsers } = require('../util/index');
 
 module.exports = class UserController extends Controller {
@@ -415,7 +413,7 @@ module.exports = class UserController extends Controller {
     // 获取文件流
     const stream = await this.ctx.getFileStream();
 
-    const avatar = await ctx.helper.streamToUploadFile(stream, 'avatar');
+    const avatar = await ctx.helper.streamToUploadFile(stream, 'upload/avatar');
 
     await user.update({ avatar });
 

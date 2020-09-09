@@ -2,7 +2,7 @@ import React from 'react';
 import { Modal } from 'antd';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 
-export default async (title, content) => {
+export default async ({ title, content }) => {
 
     return new Promise((resolve, reject) => {
         Modal.confirm({

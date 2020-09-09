@@ -1,12 +1,6 @@
 'use strict';
 const Controller = require('egg').Controller;
-const fs = require('fs');
 const path = require('path');
-const util = require('util');
-
-const readFile = util.promisify(fs.readFile);
-const writeFile = util.promisify(fs.writeFile);
-const fileExists = util.promisify(fs.exists);
 
 module.exports = class CategoryController extends Controller {
 
@@ -15,7 +9,7 @@ module.exports = class CategoryController extends Controller {
     const { projectId } = ctx.params;
 
     const docFile = path.join(__dirname, '../wiki', 'projects', projectId, 'index.html');
-    ctx.body = await readFile(docFile, 'UTF-8');
+    ctx.body = await ctx.helper.readFile(docFile, 'UTF-8');
   }
 
   // 获取文档目录
@@ -24,7 +18,7 @@ module.exports = class CategoryController extends Controller {
 
     const docFile = path.join(__dirname, '../wiki', 'projects', projectId, '_sidebar.md');
 
-    const result = await readFile(docFile, 'UTF-8');
+    const result = await ctx.helper.readFile(docFile, 'UTF-8');
 
     ctx.success(result);
   }
@@ -35,7 +29,7 @@ module.exports = class CategoryController extends Controller {
 
     const docFile = path.join(__dirname, '../wiki', 'projects', projectId, `${id}.md`);
 
-    const result = await readFile(docFile, 'UTF-8');
+    const result = await ctx.helper.readFile(docFile, 'UTF-8');
 
     ctx.success(result);
   }
@@ -47,7 +41,7 @@ module.exports = class CategoryController extends Controller {
 
     const docFile = path.join(__dirname, '../wiki', 'projects', projectId, `${id}.md`);
 
-    await writeFile(docFile, article, 'UTF-8');
+    await ctx.helper.writeFile(docFile, article, 'UTF-8');
 
     ctx.success();
   }
@@ -68,9 +62,9 @@ module.exports = class CategoryController extends Controller {
       const filePath = path.join(folder, fileName);
 
       // 对应文章不存在，创建
-      const exist = await fileExists(filePath);
+      const exist = await ctx.helper.fileExists(filePath);
       if (!exist) {
-        await writeFile(filePath, `# ${title}`, 'UTF-8');
+        await ctx.helper.writeFile(filePath, `# ${title}`, 'UTF-8');
       }
 
       arr.push(content);
@@ -78,8 +72,50 @@ module.exports = class CategoryController extends Controller {
 
     // 更新目录
     const contentPath = path.join(__dirname, '../wiki', 'projects', projectId, '_sidebar.md');
-    await writeFile(contentPath, arr.join('\n'), 'UTF-8');
+    await ctx.helper.writeFile(contentPath, arr.join('\n'), 'UTF-8');
 
     return ctx.success();
   }
+
+  // 删除目录及对应的文章
+  async deleteContents(ctx) {
+    ctx.validate({
+      projectId: 'int',
+    }, ctx.params);
+    ctx.validate({
+      keys: 'array',
+    }, ctx.request.body);
+
+    const { projectId } = ctx.params;
+    const { keys } = ctx.request.body;
+
+    const contentPath = path.join(__dirname, '../wiki', 'projects', `${projectId}`, '_sidebar.md');
+    const oldContents = await ctx.helper.readFile(contentPath);
+    const arr = oldContents.split('\n');
+    const newArr = arr.filter(item => {
+      const found = keys.find(key => item.includes(`${key}.md`));
+      return !found;
+    });
+
+    await ctx.helper.writeFile(contentPath, newArr.join('\n'));
+
+    for (const key of keys) {
+      const filePath = path.join(__dirname, '../wiki', 'projects', `${projectId}`, `${key}.md`);
+      await ctx.helper.unlinkFile(filePath);
+    }
+
+    ctx.success();
+  }
+
+  // 上传图片
+  async upload(ctx) {
+    const { projectId } = ctx.params;
+    // 获取文件流
+    const stream = await this.ctx.getFileStream();
+    const folder = `wiki/projects/${projectId}/imgs`;
+
+    const url = await ctx.helper.streamToUploadFile(stream, folder);
+    ctx.success(url);
+  }
+
 };

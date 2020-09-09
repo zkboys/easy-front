@@ -13,4 +13,4 @@ run/
 typings/
 .nyc_output/
 app/upload
-app/wiki
+app/wiki/projects

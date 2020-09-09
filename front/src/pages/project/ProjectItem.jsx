@@ -50,10 +50,10 @@ export default config({})(props => {
                                 <DeleteOutlined
                                     disabled={deleting}
                                     onClick={async () => {
-                                        await confirm(
-                                            `您确定要删除项目「${name}」吗?`,
-                                            `「${name}」项目下的所有接口、成员等信息也将被删除，请谨慎操作！`,
-                                        );
+                                        await confirm({
+                                            title:`您确定要删除项目「${name}」吗?`,
+                                            content:`「${name}」项目下的所有接口、成员等信息也将被删除，请谨慎操作！`,
+                                        });
                                         await handleDelete();
                                     }}/>
                             </Tooltip>

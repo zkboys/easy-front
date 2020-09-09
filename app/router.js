@@ -124,10 +124,13 @@ module.exports = app => {
   api.get('/projects/:projectId/wikiContents', wiki.contents);
   // 创建wiki目录
   api.post('/projects/:projectId/wikiContents', wiki.writeContents);
+  api.post('/projects/:projectId/wikiContents/delete', wiki.deleteContents);
   // 获取文章
   api.get('/projects/:projectId/wiki/:id', wiki.article);
   // 保存文章
   api.post('/projects/:projectId/wiki/:id', wiki.saveArticle);
+  // 文件上传
+  api.post('/projects/:projectId/upload', wiki.upload);
 
   // 未捕获请求，返回404
   api.get('/*', async ctx => {
