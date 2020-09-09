@@ -89,6 +89,7 @@ module.exports = class CategoryController extends Controller {
     const { projectId } = ctx.params;
     const { keys } = ctx.request.body;
 
+    // 更新目录
     const contentPath = path.join(__dirname, '../wiki', 'projects', `${projectId}`, '_sidebar.md');
     const oldContents = await ctx.helper.readFile(contentPath);
     const arr = oldContents.split('\n');
@@ -100,19 +101,26 @@ module.exports = class CategoryController extends Controller {
     await ctx.helper.writeFile(contentPath, newArr.join('\n'));
 
     for (const key of keys) {
+      // 删除文章
       const filePath = path.join(__dirname, '../wiki', 'projects', `${projectId}`, `${key}.md`);
       await ctx.helper.unlinkFile(filePath);
-    }
 
+      // 删除文章对应的图片
+      const imgsPath = path.join(__dirname, '../wiki', 'projects', `${projectId}`, 'imgs', `${key}`);
+      const exist = ctx.helper.fileExists(imgsPath);
+      if (exist) {
+        await ctx.helper.unlinkDir(imgsPath);
+      }
+    }
     ctx.success();
   }
 
   // 上传图片
   async upload(ctx) {
-    const { projectId } = ctx.params;
+    const { projectId, key } = ctx.params;
     // 获取文件流
     const stream = await this.ctx.getFileStream();
-    const folder = `wiki/projects/${projectId}/imgs`;
+    const folder = `wiki/projects/${projectId}/imgs/${key}`;
 
     const url = await ctx.helper.streamToUploadFile(stream, folder);
     ctx.success(url);

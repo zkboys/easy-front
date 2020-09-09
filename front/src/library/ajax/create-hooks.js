@@ -1,4 +1,4 @@
-import {useState, useEffect, useRef, useCallback} from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 /**
  * ajax hooks
@@ -30,7 +30,7 @@ import {useState, useEffect, useRef, useCallback} from 'react';
 export default function createHooks(ajax) {
     const create = (method) => (url, initOptions = {}) => {
         const ajaxHandler = useRef(null);
-        const [loading, setLoading] = useState(false);
+        const [ loading, setLoading ] = useState(false);
 
         /**
          * 发起ajax请求的方法
@@ -63,22 +63,26 @@ export default function createHooks(ajax) {
                 return value;
             }).join('/');
 
-            setLoading(true);
+            const mergedOptions = { ...initOptions, ...options };
+
+            const { withLoading = true } = mergedOptions;
+
+            withLoading && setLoading(true);
 
             // ajaxToken 是一个promise
             // 此处真正发起的ajax请求
-            const ajaxToken = ajax[method](_url, params, {reject: true, ...initOptions, ...options});
+            const ajaxToken = ajax[method](_url, params, { reject: true, ...mergedOptions });
 
             ajaxHandler.current = ajaxToken;
 
             // 结束时，清除loading、清除token
             ajaxToken.finally(() => {
-                setLoading(false);
+                withLoading && setLoading(false);
                 ajaxHandler.current = null;
             });
 
             return ajaxToken;
-        }, [url]);
+        }, [ url ]);
 
         useEffect(() => {
             return () => {
@@ -90,7 +94,7 @@ export default function createHooks(ajax) {
             };
         }, []);
 
-        return [loading, handleAjax];
+        return [ loading, handleAjax ];
     };
 
     return {

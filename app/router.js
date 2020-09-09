@@ -130,7 +130,7 @@ module.exports = app => {
   // 保存文章
   api.post('/projects/:projectId/wiki/:id', wiki.saveArticle);
   // 文件上传
-  api.post('/projects/:projectId/upload', wiki.upload);
+  api.post('/projects/:projectId/upload/:key', wiki.upload);
 
   // 未捕获请求，返回404
   api.get('/*', async ctx => {

@@ -13,14 +13,14 @@ const map = {
 };
 
 const Help = props => {
-    const { title, type, style } = props;
+    const { title, type, style, ...others } = props;
     const label = map[type];
 
     if (!title && !label) return null;
 
     return (
         <Tooltip title={title || label}>
-            <QuestionCircleOutlined {...props} style={{ margin: '0 4px', ...style }}/>
+            <QuestionCircleOutlined {...others} style={{ margin: '0 4px', ...style }}/>
         </Tooltip>
     );
 };

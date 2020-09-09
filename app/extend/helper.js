@@ -21,6 +21,9 @@ module.exports = {
     });
   },
 
+  async unlinkDir(dirPath) {
+    await unlinkDir(dirPath);
+  },
   async unlinkFile(filePath) {
     const exist = await fileExists(filePath);
     if (exist) await unlinkFile(filePath);
@@ -111,6 +114,27 @@ module.exports = {
     return `$ ${val}`;
   },
 };
+
+// 删除文件夹及文件
+function unlinkDir(dir) {
+  return new Promise(function(resolve, reject) {
+    //先读文件夹
+    fs.stat(dir, function(err, stat) {
+      if (stat && stat.isDirectory()) {
+        fs.readdir(dir, function(err, files) {
+          files = files.map(file => path.join(dir, file)); // a/b  a/m
+          files = files.map(file => unlinkDir(file)); //这时候变成了promise
+          Promise.all(files).then(function() {
+            fs.rmdir(dir, resolve);
+          });
+        });
+      } else {
+        fs.unlink(dir, resolve);
+      }
+    });
+
+  });
+}
 
 //递归创建目录 同步方法
 function mkdirsSync(dirname) {

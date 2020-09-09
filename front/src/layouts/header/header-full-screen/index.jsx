@@ -1,12 +1,24 @@
-import React, {Component} from 'react';
-import {FullscreenExitOutlined, FullscreenOutlined} from '@ant-design/icons';
-import {Tooltip} from 'antd';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import { FullscreenExitOutlined, FullscreenOutlined } from '@ant-design/icons';
+import { Tooltip } from 'antd';
 import config from 'src/commons/config-hoc';
 
 @config({
     event: true,
 })
 export default class HeaderFullScreen extends Component {
+    static propTypes = {
+        element: PropTypes.any,
+        toFullTip: PropTypes.any,
+        exitFullTip: PropTypes.any,
+
+    };
+    static defaultProps = {
+        element: document.documentElement,
+        toFullTip: '全屏',
+        exitFullTip: '退出全屏',
+    };
     state = {
         fullScreen: false,
         toolTipVisible: false,
@@ -20,11 +32,13 @@ export default class HeaderFullScreen extends Component {
         this.props.addEventListener(document, 'webkitfullscreenchange', this.handleFullScreenChange);
         this.props.addEventListener(document, 'msfullscreenchange', this.handleFullScreenChange);
         this.props.addEventListener(document, 'click', () => this.handleToolTipHide(0));
-        this.setState({fullScreen: !!fullScreen});
+        this.setState({ fullScreen: !!fullScreen });
     }
 
     handleFullScreenClick = () => {
-        const {fullScreen} = this.state;
+        const { element } = this.props;
+
+        const { fullScreen } = this.state;
         if (fullScreen) {
             if (document.exitFullscreen) {
                 document.exitFullscreen();
@@ -36,7 +50,6 @@ export default class HeaderFullScreen extends Component {
                 document.webkitExitFullscreen();
             }
         } else {
-            const element = document.documentElement;
             if (element.requestFullscreen) {
                 element.requestFullscreen();
             } else if (element.mozRequestFullScreen) {
@@ -50,24 +63,24 @@ export default class HeaderFullScreen extends Component {
     };
 
     handleFullScreenChange = () => {
-        const {fullScreen} = this.state;
-        this.setState({fullScreen: !fullScreen});
+        const { fullScreen } = this.state;
+        this.setState({ fullScreen: !fullScreen });
     };
 
     handleToolTipShow = () => {
         if (this.ST) clearTimeout(this.ST);
-        this.setState({toolTipVisible: true});
+        this.setState({ toolTipVisible: true });
     };
 
     handleToolTipHide = (time = 300) => {
         this.ST = setTimeout(() => {
-            this.setState({toolTipVisible: false});
+            this.setState({ toolTipVisible: false });
         }, time);
     };
 
     render() {
-        const {className} = this.props;
-        const {fullScreen, toolTipVisible} = this.state;
+        const { className, toFullTip, exitFullTip } = this.props;
+        const { fullScreen, toolTipVisible } = this.state;
         return (
             <div
                 className={className}
@@ -78,7 +91,7 @@ export default class HeaderFullScreen extends Component {
                 onMouseEnter={this.handleToolTipShow}
                 onMouseLeave={() => this.handleToolTipHide()}
             >
-                <Tooltip visible={toolTipVisible} placement="bottom" title={fullScreen ? '退出全屏' : '全屏'}>
+                <Tooltip visible={toolTipVisible} placement="bottom" title={fullScreen ? exitFullTip : toFullTip}>
                     {fullScreen ? (
                         <FullscreenExitOutlined/>
                     ) : (

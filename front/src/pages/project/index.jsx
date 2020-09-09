@@ -53,6 +53,10 @@ export default config({
 
     const [ projectLoading, fetchProject ] = useGet('/projects/:id');
 
+    const userProjectRole = project?.users?.find(item => item.id === user.id)?.project_user.role;
+    const isProjectMaster = user.isAdmin || [ 'owner', 'master' ].includes(userProjectRole);
+    // const isProjectOwner = user.isAdmin || [ 'owner' ].includes(userProjectRole);
+
 
     // 只用projectId, project 更新之后，Dynamic才重新渲染
     const dynamicComponent = useMemo(() => (
@@ -111,9 +115,9 @@ export default config({
 
     const wikiComponent = useMemo(() => (
         <div className="pan-content" style={{ height: height + 50 }}>
-            <Wiki projectId={projectId} height={height + 50} onSubmit={() => setProject({ ...project })}/>
+            <Wiki readOnly={!isProjectMaster} projectId={projectId} height={height + 50} onSubmit={() => setProject({ ...project })}/>
         </div>
-    ), [ height, project ]);
+    ), [ height, project, isProjectMaster ]);
 
     // 搜索接口
     const handleSearchApi = _.debounce((e) => {
@@ -173,10 +177,6 @@ export default config({
     }, [ projectId, refresh ]);
 
     const color = getColor(project.name);
-
-    const userProjectRole = project?.users?.find(item => item.id === user.id)?.project_user.role;
-    const isProjectMaster = user.isAdmin || [ 'owner', 'master' ].includes(userProjectRole);
-    // const isProjectOwner = user.isAdmin || [ 'owner' ].includes(userProjectRole);
 
     const showToolCreate = activeKey === 'api';
 
