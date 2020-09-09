@@ -31,6 +31,8 @@ module.exports = class CategoryController extends Controller {
 
     const result = await ctx.helper.readFile(docFile, 'UTF-8');
 
+    // TODO 处理图片路径
+
     ctx.success(result);
   }
 
@@ -39,8 +41,12 @@ module.exports = class CategoryController extends Controller {
     const { projectId, id } = ctx.params;
     const { article } = ctx.request.body;
 
+    // TODO 处理图片路径
+    const str = `](/wiki/projects/${projectId}/imgs`;
+    const re = new RegExp(str, 'g');
+    console.log(re);
+    article.replace(re, 'imgs');
     const docFile = path.join(__dirname, '../wiki', 'projects', projectId, `${id}.md`);
-
     await ctx.helper.writeFile(docFile, article, 'UTF-8');
 
     ctx.success();
