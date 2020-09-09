@@ -189,6 +189,13 @@ module.exports = class ProjectController extends Controller {
 
     const result = await Project.destroy({ where: { id } });
 
+    // 删除wiki
+    const wikiPath = path.join(__dirname, '../wiki', 'projects', `${id}`);
+    const exist = ctx.helper.fileExists(wikiPath);
+    if (exist) {
+      await ctx.helper.unlinkDir(wikiPath);
+    }
+
     ctx.success(result);
   }
 
