@@ -30,4 +30,12 @@ module.exports = function(app) {
             ws: true, // 启用websocket
         },
     ));
+    app.use(proxy('/projects/*/imgs',
+        {
+            target: 'http://localhost:3000/wiki/projects/*/imgs',
+            changeOrigin: true,
+            secure: false, // 是否验证证书
+            ws: true, // 启用websocket
+        },
+    ));
 };
