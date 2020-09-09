@@ -91,7 +91,11 @@ export default config({
 
     const editComponent = useMemo(() => (
         <div className="pan-content" style={{ height: height + 50 }}>
-            <Edit id={projectId} height={height} onSubmit={() => setProject({ ...project })}/>
+            <Edit id={projectId} height={height} onSubmit={async () => {
+                const project = await fetchProject(projectId);
+                setProject(project);
+                setRefresh({});
+            }}/>
         </div>
     ), [ height, project ]);
 
@@ -267,7 +271,7 @@ export default config({
                     {dynamicComponent}
                 </TabPane>
                 <TabPane tab={<span><BookOutlined/> Wiki</span>} key="wiki">
-                    {activeKey === 'wiki' ? wikiComponent : null}
+                    {wikiComponent}
                 </TabPane>
             </TabPage>
 

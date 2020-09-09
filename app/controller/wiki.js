@@ -29,9 +29,13 @@ module.exports = class CategoryController extends Controller {
 
     const docFile = path.join(__dirname, '../wiki', 'projects', projectId, `${id}.md`);
 
-    const result = await ctx.helper.readFile(docFile, 'UTF-8');
+    let result = await ctx.helper.readFile(docFile, 'UTF-8');
 
-    // TODO 处理图片路径
+    const str = '](imgs';
+    const s = `](/wiki/projects/${projectId}/imgs`;
+    while (result.includes(str)) {
+      result = result.replace(str, s);
+    }
 
     ctx.success(result);
   }
@@ -39,13 +43,13 @@ module.exports = class CategoryController extends Controller {
   // 保存文章
   async saveArticle(ctx) {
     const { projectId, id } = ctx.params;
-    const { article } = ctx.request.body;
+    let { article } = ctx.request.body;
 
     // TODO 处理图片路径
     const str = `](/wiki/projects/${projectId}/imgs`;
-    const re = new RegExp(str, 'g');
-    console.log(re);
-    article.replace(re, 'imgs');
+    while (article.includes(str)) {
+      article = article.replace(str, '](imgs');
+    }
     const docFile = path.join(__dirname, '../wiki', 'projects', projectId, `${id}.md`);
     await ctx.helper.writeFile(docFile, article, 'UTF-8');
 

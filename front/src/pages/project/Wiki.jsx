@@ -93,6 +93,13 @@ export default config({ router: true, query: true })(props => {
     const [ articleLoading, fetchArticle ] = useGet('/projects/:projectId/wiki/:id');
     const [ articleSaving, saveArticle ] = usePost('/projects/:projectId/wiki/:id', { successTip: '文章保存成功！' });
 
+    function formatMarkdown(markdown) {
+        if (markdown) {
+            return markdown.split('\n').filter(item => item.trim() !== '\\').join('\n');
+        }
+        return markdown;
+    }
+
 
     function handleMarkdownChange(getValue) {
         const markdown = getValue();
@@ -102,7 +109,8 @@ export default config({ router: true, query: true })(props => {
         }
 
         saveIt.current = window.setTimeout(async () => {
-            await saveArticle({ projectId, id: currentContent?.key, article: markdown }, { successTip: false, errorTip: false, withLoading: false });
+            const article = formatMarkdown(markdown);
+            await saveArticle({ projectId, id: currentContent?.key, article }, { successTip: false, errorTip: false, withLoading: false });
         }, 300);
     }
 
@@ -116,7 +124,8 @@ export default config({ router: true, query: true })(props => {
         if ((ctrlKey || metaKey) && isS) {
             e.preventDefault();
 
-            await saveArticle({ projectId, id: currentContent?.key, article: markdown });
+            const article = formatMarkdown(markdown);
+            await saveArticle({ projectId, id: currentContent?.key, article });
         }
     }
 

@@ -20,7 +20,7 @@ const PathInput = props => {
 
         if (!api) return callback();
 
-        if ((isEdit && api.id !== id) || !isEdit) return callback(`与接口「${api.name}」地址「${api.path}」冲突`);
+        if ((isEdit && `${api.id}` !== `${id}`) || !isEdit) return callback(`与接口「${api.name}」地址「${api.path}」冲突`);
 
         return callback();
     }, 300);
