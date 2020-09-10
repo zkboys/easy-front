@@ -21,6 +21,7 @@ import Api from 'src/pages/api';
 import Member from './Member';
 import Edit from './Edit';
 import Wiki from './Wiki';
+import Mind from './Mind';
 
 import './indexStyle.less';
 import { getColor, setPrimaryColor } from 'src/commons';
@@ -120,6 +121,16 @@ export default config({
     const wikiComponent = useMemo(() => (
         <div className="pan-content" style={{ height: height + 50 }}>
             <Wiki readOnly={!isProjectMaster} projectId={projectId} height={height + 50} onSubmit={() => setProject({ ...project })}/>
+        </div>
+    ), [ height, project, isProjectMaster ]);
+    const mindComponent = useMemo(() => (
+        <div className="pan-content" style={{ height: height + 50 }}>
+            <Mind
+                readOnly={!isProjectMaster}
+                projectId={projectId}
+                height={height + 50}
+                onSubmit={() => setProject({ ...project })}
+            />
         </div>
     ), [ height, project, isProjectMaster ]);
 
@@ -270,8 +281,11 @@ export default config({
                 <TabPane tab={<span><SolutionOutlined/> 项目动态</span>} key="dynamic">
                     {dynamicComponent}
                 </TabPane>
-                <TabPane tab={<span><BookOutlined/> Wiki</span>} key="wiki">
+                <TabPane tab={<span><BookOutlined/> 文档</span>} key="wiki">
                     {wikiComponent}
+                </TabPane>
+                <TabPane tab={<span><BookOutlined/> 脑图</span>} key="mind">
+                    {mindComponent}
                 </TabPane>
             </TabPage>
 

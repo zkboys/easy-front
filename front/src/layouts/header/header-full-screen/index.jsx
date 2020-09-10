@@ -12,16 +12,23 @@ export default class HeaderFullScreen extends Component {
         element: PropTypes.any,
         toFullTip: PropTypes.any,
         exitFullTip: PropTypes.any,
+        onFull: PropTypes.func,
+        onExit: PropTypes.func,
+        inFrame: PropTypes.bool,
 
     };
     static defaultProps = {
         element: document.documentElement,
         toFullTip: '全屏',
         exitFullTip: '退出全屏',
+        onFull: () => void 0,
+        onExit: () => void 0,
+        inFrame: false,
     };
     state = {
         fullScreen: false,
         toolTipVisible: false,
+        prevStyle: {},
     };
 
     componentDidMount() {
@@ -33,12 +40,55 @@ export default class HeaderFullScreen extends Component {
         this.props.addEventListener(document, 'msfullscreenchange', this.handleFullScreenChange);
         this.props.addEventListener(document, 'click', () => this.handleToolTipHide(0));
         this.setState({ fullScreen: !!fullScreen });
+
+        this.props.addEventListener(document, 'keydown', this.handleKeyDown);
     }
 
-    handleFullScreenClick = () => {
-        const { element } = this.props;
+    handleKeyDown = (e) => {
+        const { keyCode } = e;
+        const { element, inFrame, onExit } = this.props;
+        const { fullScreen, prevStyle } = this.state;
+        if (keyCode === 27 && fullScreen && inFrame) {
+            Object.entries(prevStyle).forEach(([ key, value ]) => {
+                element.style[key] = value;
+            });
+            onExit && onExit();
+        }
+    };
 
-        const { fullScreen } = this.state;
+    handleFullScreenClick = () => {
+        const { element, inFrame, onFull, onExit } = this.props;
+        const { fullScreen, prevStyle } = this.state;
+        if (inFrame) {
+            if (fullScreen) {
+                Object.entries(prevStyle).forEach(([ key, value ]) => {
+                    element.style[key] = value;
+                });
+                onExit && onExit();
+
+                this.setState({ fullScreen: false });
+
+            } else {
+                const prevStyle = {};
+                [ 'position', 'top', 'right', 'bottom', 'left' ].forEach(key => {
+                    prevStyle[key] = element.style[key];
+                });
+                this.setState({ prevStyle });
+
+                Object.entries({
+                    position: 'fixed',
+                    top: '50px',
+                    right: 0,
+                    bottom: 0,
+                    left: 0,
+                }).forEach(([ key, value ]) => {
+                    element.style[key] = value;
+                });
+                onFull && onFull();
+                this.setState({ fullScreen: true });
+            }
+            return;
+        }
         if (fullScreen) {
             if (document.exitFullscreen) {
                 document.exitFullscreen();
@@ -63,7 +113,9 @@ export default class HeaderFullScreen extends Component {
     };
 
     handleFullScreenChange = () => {
+        const { onFull, onExit } = this.props;
         const { fullScreen } = this.state;
+        !fullScreen ? onFull() : onExit();
         this.setState({ fullScreen: !fullScreen });
     };
 

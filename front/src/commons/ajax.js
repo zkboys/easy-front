@@ -58,6 +58,6 @@ export const mockInstance = ajax.mockInstance = _ajax.mockInstance;
 
 // 判断请求是否是mock
 function isMock(url /* url, data, method, options */) {
-    return mockUrls.indexOf(url) > -1 || url.startsWith('/mock');
+    return mockUrls.indexOf(url) > -1 || url.startsWith('/mock1');
 }
 

@@ -138,7 +138,7 @@ module.exports = app => {
   });
 
   // mock
-  router.get('/mock/:projectId/*', mock.index);
+  [ 'get', 'put', 'post', 'del', 'options', 'head', 'patch' ].forEach(method => router[method]('/mock/:projectId/*', mock.index));
 
   // wiki 文档
   router.get('/wiki/projects/:projectId', wiki.index);

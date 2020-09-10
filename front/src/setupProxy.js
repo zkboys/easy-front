@@ -14,6 +14,14 @@ module.exports = function(app) {
             ws: true, // 启用websocket
         },
     ));
+    app.use(proxy('/mock',
+        {
+            target: 'http://localhost:3000/',
+            changeOrigin: true,
+            secure: false, // 是否验证证书
+            ws: true, // 启用websocket
+        },
+    ));
     app.use(proxy('/upload',
         {
             target: 'http://localhost:3000/',

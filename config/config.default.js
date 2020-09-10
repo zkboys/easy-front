@@ -49,6 +49,10 @@ module.exports = appInfo => {
         prefix: '/wiki',
         dir: path.join(appInfo.baseDir, 'app/wiki'),
       },
+      {
+        prefix: '/kityminder-editor',
+        dir: path.join(appInfo.baseDir, 'app/kityminder-editor'),
+      },
     ],
   };
 
