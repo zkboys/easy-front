@@ -104,7 +104,7 @@ module.exports = {
     const user = ctx.user;
     const { Dynamic, Team } = ctx.model;
 
-    const { id: teamId } = ctx.params;
+    const { teamId } = ctx.params;
 
     const team = await Team.findByPk(teamId);
 

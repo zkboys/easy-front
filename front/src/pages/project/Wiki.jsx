@@ -361,6 +361,7 @@ export default config({ router: true, query: true })(props => {
 
     const TOP_HEIGHT = 50;
 
+    console.log(readOnly);
     return (
         <PageContent styleName="root" loading={loading || saving || articleLoading || articleSaving || deleting}>
             <div styleName="top" style={{ height: TOP_HEIGHT }}>

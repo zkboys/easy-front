@@ -9,7 +9,7 @@ import { AppstoreAddOutlined, UserAddOutlined } from '@ant-design/icons';
 import MemberItem from 'src/components/member-item';
 
 export default config({ router: true })(props => {
-    const { height, teamId, team, teams, user, onChange } = props;
+    const { height, team, showAdd, user, onChange } = props;
     const [ members, setMembers ] = useState([]);
     const [ memberVisible, setMemberVisible ] = useState(false);
 
@@ -19,9 +19,13 @@ export default config({ router: true })(props => {
     const [ deleteMemberLoading, deleteMember ] = useDel('/teams/:teamId/members/:id');
     const [ leaving, memberLeave ] = useDel('/teams/:teamId/membersLeave');
 
+    const teamId = team?.id;
+
     async function getMembers() {
-        if (!teamId || teamId === ':teamId') return;
+        if (!teamId) return;
+
         const members = await fetchMembers(teamId);
+
         // 将自己放在第一个
         const index = members.findIndex(item => item.id === user.id);
         if (index > -1) {
@@ -122,7 +126,7 @@ export default config({ router: true })(props => {
                     placeholder="输入成员名称、账号进行搜索"
                     onChange={handleSearchMember}
                 />
-                {isTeamMaster && teams?.length ? (
+                {isTeamMaster && showAdd ? (
                     <Button
                         type="primary"
                         style={{ marginLeft: 8 }}
@@ -150,7 +154,7 @@ export default config({ router: true })(props => {
                         style={{ marginTop: 100 }}
                         description={members?.length ? '无匹配成员' : '此团队还没有成员'}
                     >
-                        {members?.length || !teams?.length ? null : <Button type="primary" onClick={UserAddOutlined}> <AppstoreAddOutlined/> 添加成员</Button>}
+                        {showAdd ? <Button type="primary" onClick={UserAddOutlined}> <AppstoreAddOutlined/> 添加成员</Button> : null}
                     </Empty>
                 )}
             </div>

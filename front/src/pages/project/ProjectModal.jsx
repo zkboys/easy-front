@@ -4,6 +4,7 @@ import { FormElement } from 'src/library/components';
 import config from 'src/commons/config-hoc';
 import { ModalContent } from 'src/library/components';
 import { useGet, usePost, usePut } from 'src/commons/ajax';
+import TeamSelect from '@/pages/team/TeamSelect';
 
 export default config({
     modal: {
@@ -11,7 +12,7 @@ export default config({
         width: 500,
     },
 })(props => {
-    const { teamId, teams, disabledTeam } = props;
+    const { teamId, disabledTeam } = props;
     const [ data, setData ] = useState({ teamId });
     const { isEdit, id, onOk } = props;
     const [ form ] = Form.useForm();
@@ -66,14 +67,14 @@ export default config({
 
                 <FormElement
                     {...formProps}
-                    type="select"
                     label="所属团队"
                     name="teamId"
                     required
                     autoFocus
                     disabled={disabledTeam}
-                    options={teams.map(item => ({ value: item.id, label: item.name }))}
-                />
+                >
+                    <TeamSelect/>
+                </FormElement>
                 <FormElement
                     {...formProps}
                     label="项目名称"

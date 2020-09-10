@@ -9,13 +9,14 @@ import ProjectModal from 'src/pages/project/ProjectModal';
 import ProjectItem from 'src/pages/project/ProjectItem';
 
 export default config()(props => {
-    const { height, teamId, teams } = props;
+    const { height, team, showAdd, onChange } = props;
     const [ projects, setProjects ] = useState([]);
     const [ projectVisible, setProjectVisible ] = useState(false);
-    const [refresh, setRefresh] = useState({});
+    const [ refresh, setRefresh ] = useState({});
 
     const [ projectLoading, fetchProjects ] = useGet('/projects');
 
+    const teamId = team?.id;
 
 
     async function getProjects() {
@@ -58,7 +59,7 @@ export default config()(props => {
                     placeholder="输入项目名称进行搜索"
                     onChange={handleSearchProject}
                 />
-                {teams?.length ? (
+                {showAdd ? (
                     <Button
                         type="primary"
                         style={{ marginLeft: 8 }}
@@ -77,6 +78,7 @@ export default config()(props => {
                                 data={project}
                                 onChange={() => {
                                     setRefresh({});
+                                    onChange && onChange();
                                 }}
                             />
                         ))}
@@ -86,18 +88,18 @@ export default config()(props => {
                         style={{ marginTop: 100 }}
                         description={projects?.length ? '无匹配项目' : '您未加入任何团队项目'}
                     >
-                        {projects?.length || !teams?.length ? null : <Button type="primary" onClick={() => setProjectVisible(true)}> <AppstoreAddOutlined/> 创建项目</Button>}
+                        {showAdd ? <Button type="primary" onClick={() => setProjectVisible(true)}> <AppstoreAddOutlined/> 创建项目</Button> : null}
                     </Empty>
                 )}
             </div>
             <ProjectModal
                 visible={projectVisible}
                 teamId={teamId}
-                teams={teams}
                 disabledTeam
                 onOk={async () => {
                     setProjectVisible(false);
                     await getProjects();
+                    onChange && onChange();
                 }}
                 onCancel={() => setProjectVisible(false)}
             />

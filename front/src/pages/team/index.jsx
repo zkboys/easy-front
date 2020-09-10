@@ -16,7 +16,7 @@ import RoleTag from 'src/components/role-tag';
 import TabPage from 'src/components/tab-page';
 import Dynamic from 'src/components/dynamic';
 import confirm from 'src/components/confirm';
-import Project from './Project';
+import ProjectList from './ProjectList';
 import Member from './Member';
 
 import './style.less';
@@ -45,20 +45,20 @@ export default config({
 
     // 只用teamId 更新之后，Project才重新渲染
     const projectComponent = useMemo(() => (
-        <Project
+        <ProjectList
             height={height}
-            teamId={teamId}
-            teams={teams}
+            showAdd={!!team}
+            team={team}
+            onChange={() => setTeam({ ...team })}
         />
-    ), [ height, teamId, teams ]);
+    ), [ height, team ]);
 
     // 只用teamId 更新之后，Member才重新渲染
     const memberComponent = useMemo(() => (
         <Member
             height={height}
-            teamId={teamId}
+            showAdd={!!team}
             team={team}
-            teams={teams}
             onChange={async (data, type) => {
                 // 团队成员的改变，间接的也是团队的改变，重新设置team，出发动态组件更新
                 setTeam({ ...team });
@@ -68,14 +68,14 @@ export default config({
                 }
             }}
         />
-    ), [ height, teamId, team, teams ]);
+    ), [ height, team ]);
 
     // 只用teamId, team 更新之后，Dynamic才重新渲染
     const dynamicComponent = useMemo(() => (
         <div className="pan-content" style={{ height: height + 50 }}>
-            <Dynamic url={`/teams/${teamId}/dynamics`} team={team}/>
+            <Dynamic url={`/teams/${team?.id ? team.id : ':teamId'}/dynamics`} team={team}/>
         </div>
-    ), [ height, teamId, team ]);
+    ), [ height, team ]);
 
     async function getTeams() {
         const teams = await fetchTeams();
