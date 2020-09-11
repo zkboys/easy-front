@@ -9,6 +9,7 @@ import config from 'src/commons/config-hoc';
 })
 export default class HeaderFullScreen extends Component {
     static propTypes = {
+        placement: PropTypes.any,
         element: PropTypes.any,
         toFullTip: PropTypes.any,
         exitFullTip: PropTypes.any,
@@ -24,6 +25,7 @@ export default class HeaderFullScreen extends Component {
         onFull: () => void 0,
         onExit: () => void 0,
         inFrame: false,
+        placement: 'bottom',
     };
     state = {
         fullScreen: false,
@@ -131,7 +133,7 @@ export default class HeaderFullScreen extends Component {
     };
 
     render() {
-        const { className, toFullTip, exitFullTip } = this.props;
+        const { className, toFullTip, exitFullTip, placement } = this.props;
         const { fullScreen, toolTipVisible } = this.state;
         return (
             <div
@@ -143,7 +145,7 @@ export default class HeaderFullScreen extends Component {
                 onMouseEnter={this.handleToolTipShow}
                 onMouseLeave={() => this.handleToolTipHide()}
             >
-                <Tooltip visible={toolTipVisible} placement="bottom" title={fullScreen ? exitFullTip : toFullTip}>
+                <Tooltip visible={toolTipVisible} placement={placement} title={fullScreen ? exitFullTip : toFullTip}>
                     {fullScreen ? (
                         <FullscreenExitOutlined/>
                     ) : (

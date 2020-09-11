@@ -150,7 +150,7 @@ class FormElement extends Component {
         labelCol: PropTypes.any,
         name: PropTypes.any,
         normalize: PropTypes.any,
-        required: PropTypes.any,
+        required: PropTypes.bool,
         rules: PropTypes.any,
         shouldUpdate: PropTypes.any,
         trigger: PropTypes.any,

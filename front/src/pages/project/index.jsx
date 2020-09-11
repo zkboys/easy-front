@@ -8,6 +8,7 @@ import {
     ApiOutlined,
     TeamOutlined,
     BookOutlined,
+    ShareAltOutlined,
 } from '@ant-design/icons';
 import _ from 'lodash';
 import { useGet } from 'src/commons/ajax';
@@ -284,7 +285,7 @@ export default config({
                 <TabPane tab={<span><BookOutlined/> 文档</span>} key="wiki">
                     {wikiComponent}
                 </TabPane>
-                <TabPane tab={<span><BookOutlined/> 脑图</span>} key="mind">
+                <TabPane tab={<span><ShareAltOutlined/> 脑图</span>} key="mind">
                     {mindComponent}
                 </TabPane>
             </TabPage>

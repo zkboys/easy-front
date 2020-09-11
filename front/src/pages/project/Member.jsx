@@ -151,7 +151,7 @@ export default config({ router: true })(props => {
                         style={{ marginTop: 100 }}
                         description={members?.length ? '无匹配成员' : '此团队还没有成员'}
                     >
-                        {members?.length ? null : <Button type="primary" onClick={UserAddOutlined}> <AppstoreAddOutlined/> 添加成员</Button>}
+                        {members?.length ? null : <Button type="primary" onClick={() => setMemberVisible(true)}> <AppstoreAddOutlined/> 添加成员</Button>}
                     </Empty>
                 )}
             </div>

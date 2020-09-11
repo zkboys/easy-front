@@ -31,6 +31,7 @@ export default config({
 })(props => {
     const { user, match: { params } } = props;
 
+    const [ refresh, setRefresh ] = useState(0);
     const [ height, setHeight ] = useState(0);
     const [ activeKey, setActiveKey ] = useState(params.tabId !== ':tabId' ? params.tabId : 'project');
     const [ teamId, setTeamId ] = useState(params.teamId);
@@ -61,7 +62,7 @@ export default config({
             team={team}
             onChange={async (data, type) => {
                 // 团队成员的改变，间接的也是团队的改变，重新设置team，出发动态组件更新
-                setTeam({ ...team });
+                setRefresh({});
                 if (type === 'updateSelf') {
                     const team = await fetchTeam(teamId);
                     setTeam(team);
@@ -164,7 +165,7 @@ export default config({
                 }
             }
         })();
-    }, [ teamId ]);
+    }, [ teamId, refresh ]);
 
     const userTeamRole = team?.users?.find(item => item.id === user.id)?.team_user.role;
     const isTeamMaster = user.isAdmin || [ 'owner', 'master' ].includes(userTeamRole);

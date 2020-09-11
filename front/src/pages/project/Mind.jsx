@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { SaveOutlined } from '@ant-design/icons';
+import { Tooltip, Modal, Button } from 'antd';
 import config from 'src/commons/config-hoc';
 import PageContent from 'src/layouts/page-content';
 import './MindStyle.less';
@@ -8,20 +10,42 @@ import { useGet, usePost } from '@/commons/ajax';
 
 const PUBLIC_URL = process.env.PUBLIC_URL;
 
+function download(filename, type = '', text) {
+    const element = document.createElement('a');
+    element.setAttribute('href', type + encodeURIComponent(text));
+    element.setAttribute('download', filename);
+
+    element.style.display = 'none';
+    document.body.appendChild(element);
+
+    element.click();
+
+    document.body.removeChild(element);
+}
+
+const exportOptions = [
+    { value: 'json', label: 'JSON 字符串', ext: '.json', type: 'data:text/plain;charset=utf-8,' },
+    { value: 'text', label: '纯文本格式', ext: '.txt', type: 'data:text/plain;charset=utf-8,' },
+    { value: 'markdown', label: 'Markdown 格式', ext: '.md', type: 'data:text/plain;charset=utf-8,' },
+    { value: 'svg', label: 'SVG 矢量格式', ext: '.svg', type: 'data:text/plain;charset=utf-8,' },
+    { value: 'png', label: 'PNG 位图格式', ext: '.png', type: 'data:image/png;base64,' },
+];
+
 export default config({ router: true, query: true })(props => {
     const { projectId, height, readOnly } = props;
 
     const rightEl = useRef(null);
     const [ frameHeight, setFrameHeight ] = useState(height - 8);
-    const [ currentContent, setCurrentContent ] = useState({});
+    const [ currentContent, setCurrentContent ] = useState(null);
 
+    const [ visible, setVisible ] = useState(false);
     const [ frameReady, setFrameReady ] = useState(false);
     const [ isFull, setIsFull ] = useState(false);
     const [ contents, setContents ] = useState([]);
 
-    const [ loading, fetchContents ] = useGet('/projects/:projectId/mindContents');
-    const [ saving, saveContents ] = usePost('/projects/:projectId/mindContents', { successTip: '目录保存成功！' });
-    const [ deleting, deleteContents ] = usePost('/projects/:projectId/mindContents/delete', { successTip: '删除成功！' });
+    const [ /*loading*/, fetchContents ] = useGet('/projects/:projectId/mindContents');
+    const [ /*saving*/, saveContents ] = usePost('/projects/:projectId/mindContents', { successTip: '目录保存成功！' });
+    const [ /*deleting*/, deleteContents ] = usePost('/projects/:projectId/mindContents/delete', { successTip: '删除成功！' });
 
     async function getContents() {
         let dataSource = await fetchContents(projectId);
@@ -81,6 +105,18 @@ export default config({ router: true, query: true })(props => {
         return savedNode;
     }
 
+    async function handleExport(item) {
+        const frameWindow = document.getElementById('mindIFrame').contentWindow;
+        const { value, ext, type } = item;
+        const title = currentContent.title;
+        let result = await frameWindow.editor.minder.exportData(value);
+        if (value === 'png') result = result.replace(type, '');
+
+        download(title + ext, type, result);
+
+        setVisible(false);
+    }
+
     useEffect(() => {
         setFrameHeight(isFull ? '100%' : height - 8);
     }, [ height, isFull ]);
@@ -119,9 +155,13 @@ export default config({ router: true, query: true })(props => {
                 return;
             }
 
+            if (readOnly) {
+                frameWindow.minder.fire('readonly');
+            }
+
             frameWindow.init(currentContent?.key);
         });
-    }, [ frameReady, currentContent, isFull ]);
+    }, [ frameReady, currentContent, isFull, readOnly ]);
 
     return (
         <PageContent styleName="root">
@@ -131,12 +171,18 @@ export default config({ router: true, query: true })(props => {
                         <div>
                             目录
                         </div>
-                        <FullScreen
-                            inFrame
-                            element={rightEl.current}
-                            onFull={() => setIsFull(true)}
-                            onExit={() => setIsFull(false)}
-                        />
+                        <div>
+                            <Tooltip title={`导出脑图「${currentContent?.title}」`}>
+                                <SaveOutlined disabled={!currentContent} onClick={() => setVisible(true)}/>
+                            </Tooltip>
+                            <FullScreen
+                                placement="top"
+                                inFrame
+                                element={rightEl.current}
+                                onFull={() => setIsFull(true)}
+                                onExit={() => setIsFull(false)}
+                            />
+                        </div>
                     </div>
                     <div styleName="contents">
                         <TreeEditor
@@ -161,6 +207,25 @@ export default config({ router: true, query: true })(props => {
                     />
                 </div>
             </div>
+            <Modal
+                title={`导出脑图「${currentContent?.title}」`}
+                visible={visible}
+                onCancel={() => setVisible(false)}
+                footer={<Button onClick={() => setVisible(false)}>取消</Button>}
+            >
+
+                {exportOptions.map(item => {
+                    const { label, ext } = item;
+                    return (
+                        <div
+                            styleName="export-item"
+                            onClick={() => handleExport(item)}
+                        >
+                            {label}（{ext}）
+                        </div>
+                    );
+                })}
+            </Modal>
         </PageContent>
     );
 });

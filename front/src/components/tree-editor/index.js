@@ -47,9 +47,9 @@ const TreeEditor = props => {
 
             // 添加节点 按住shift 添加的是子节点
             if (metaKey || ctrlKey) {
-                const parentKey = shiftKey ? key : parentKey;
+                const _parentKey = shiftKey ? key : parentKey;
                 dataSource.forEach(item => item.autoFocus = false);
-                onAdd && await onAdd(e, parentKey);
+                onAdd && await onAdd(e, _parentKey);
 
                 // 添加子级的时候，展开父级节点
                 if (shiftKey && !expandedKeys.includes(key)) {
