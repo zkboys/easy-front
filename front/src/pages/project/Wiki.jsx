@@ -1,15 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import config from 'src/commons/config-hoc';
-import { Tree, Input, Modal, Switch } from 'antd';
+import { Modal, Switch } from 'antd';
 import { useGet, usePost } from '@/commons/ajax';
 import PageContent from '@/layouts/page-content';
 import MarkDownEditor from 'src/pages/markdown-editor';
-import confirm from 'src/components/confirm';
 import FullScreen from 'src/layouts/header/header-full-screen';
 import './WikiStyle.less';
 import { QuestionCircleOutlined } from '@ant-design/icons';
-
-const { TreeNode } = Tree;
+import TreeEditor from '@/components/tree-editor';
 
 function getMarkDownContents(contents) {
     const arr = [];
@@ -81,8 +79,6 @@ export default config({ router: true, query: true })(props => {
     const [ currentContent, setCurrentContent ] = useState(null);
     const [ markdown, setMarkdown ] = useState('');
     const [ contents, setContents ] = useState([]);
-    const [ blurToSave, setBlurToSave ] = useState(false);
-    const [ expandedKeys, setExpandedKeys ] = useState([]);
     const [ innerReadOnly, setInnerReadOnly ] = useState(false);
     const boxEl = useRef(null);
     const saveIt = useRef(0);
@@ -99,7 +95,6 @@ export default config({ router: true, query: true })(props => {
         }
         return markdown;
     }
-
 
     function handleMarkdownChange(getValue) {
         const markdown = getValue();
@@ -129,147 +124,46 @@ export default config({ router: true, query: true })(props => {
         }
     }
 
-    async function handleSaveContent(nodes) {
-        const conts = nodes || contents;
-        const markdownContents = getMarkDownContents(conts);
+    async function handleSaveContent() {
+        const markdownContents = getMarkDownContents(contents);
         await saveContents({ projectId, contents: markdownContents });
         // 重新获取目录
         await getContents();
-        setBlurToSave(false);
     }
 
-    async function handleDeleteContent(node) {
-        if (contents?.length === 1) {
-            return Modal.info({
-                title: '提示',
-                content: '必须保留一篇文章！',
-            });
-        }
-        await confirm({
-            title: '提示',
-            content: `您确定删除「${node.title}」?如果存在子级，也全部删除，请谨慎操作！`,
-        });
-
-        const nodes = [];
-        const loop = node => {
-            nodes.push(node);
-            const children = contents.filter(item => item.parentKey === node.key);
-            if (children?.length) {
-                children.forEach(item => loop(item));
-            }
-        };
-
-        loop(node);
-
-        const keys = nodes.map(item => item.key);
-
+    async function handleDeleteContent(keys) {
         await deleteContents({ projectId, keys });
-
-        const cs = await getContents();
-        if (cs?.length) {
-            // 选中
-            const children = contents.filter(item => item.parentKey === node.parentKey);
-            let selectedNode = cs[0];
-
-            if (children?.length === 1) {
-                if (node.parentKey) {
-                    selectedNode = cs.find(item => item.key === node.parentKey);
-                } else {
-                    selectedNode = cs[0];
-                }
-            }
-
-            if (children?.length > 1) {
-                const deletedIndex = contents.findIndex(item => item.key === node.key);
-                if (deletedIndex === children.length - 1) {
-                    selectedNode = cs[deletedIndex - 1];
-                } else {
-                    selectedNode = cs[deletedIndex];
-                }
-            }
-
-            await handleClick(null, selectedNode);
-        }
+        await getContents();
     }
 
-    // 目录点击回车事件
-    async function handleKeyDown(e, node) {
-        const { target: { value }, keyCode, metaKey, ctrlKey, shiftKey } = e;
-        const isEnter = keyCode === 13;
-        const isDelete = keyCode === 46;
-        const { id, parentId } = node;
-
-        if ((metaKey || ctrlKey) && isDelete) {
-            // 删除
-            await handleDeleteContent(node);
-            return;
-        }
-
-        if (isEnter) {
-            node.title = value;
-
-            if (!value) return;
-
-            // 保存当前目录
-            if (!metaKey && !ctrlKey && !shiftKey) {
-                await handleSaveContent();
-                await handleClick(e, node);
-                return;
-            }
-
-            // 添加节点 按住shift 添加的是子节点
-            if (metaKey || ctrlKey) {
-                const newId = `article_${Date.now()}`;
-                const parentKey = shiftKey ? id : parentId;
-                contents.forEach(item => item.autoFocus = false);
-                const newNode = {
-                    id: newId,
-                    parentId: parentKey,
-                    key: newId,
-                    parentKey,
-                    title: '新建文档',
-                    autoFocus: true,
-                    isNew: true,
-                };
-
-                contents.push(newNode);
-
-                // 添加子级的时候，展开父级节点
-                if (shiftKey && !expandedKeys.includes(id)) {
-                    setExpandedKeys([ ...expandedKeys, id ]);
-                }
-
-                await handleSaveContent(contents);
-
-                setContents([ ...contents ]);
-
-                await handleClick(null, newNode);
-            }
-        }
-    }
-
-    // 目录失去焦点
-    async function handleBlur(e, node) {
-        const { value } = e.target;
-        if (!value) {
-            const nodes = contents.filter(item => item.key !== node.key);
-            setContents(nodes);
-        }
-
-        if (blurToSave) {
-            node.title = value;
-            // 保存目录
-            await handleSaveContent();
-        }
-    }
-
-    // 目录获取焦点
+    // 目录点击
     async function handleClick(e, node) {
         if (node?.key === currentContent?.key) return;
 
         const markdown = await fetchArticle({ projectId, id: node.key });
         setMarkdown(markdown);
         setCurrentContent(node);
+    }
+
+    // 添加目录
+    async function handleAdd(e, parentKey) {
+        const newId = `article_${Date.now()}`;
+        contents.forEach(item => item.autoFocus = false);
+        const newNode = {
+            id: newId,
+            parentId: parentKey,
+            key: newId,
+            parentKey,
+            title: '新建文档',
+            autoFocus: true,
+            isNew: true,
+        };
+
+        contents.push(newNode);
+
+        await handleSaveContent(contents);
+
+        await handleClick(null, newNode);
     }
 
     async function getContents() {
@@ -300,53 +194,6 @@ export default config({ router: true, query: true })(props => {
         })();
     }, [ projectId ]);
 
-    let treeNodes = null;
-    if (contents?.length) {
-        const loop = nodes => {
-            return nodes.map(node => {
-                const {
-                    key,
-                    title,
-                    autoFocus,
-                } = node;
-                const children = contents.filter(item => item.parentKey === key);
-                const active = currentContent?.key === key;
-
-                let nodeTitle = (readOnly || innerReadOnly) ? (
-                    <span onClick={e => handleClick(e, node)}>{title}</span>
-                ) : (
-                    <Input
-                        autoFocus={autoFocus}
-                        id={`input_${key}`}
-                        styleName={`content-input ${active ? 'active' : ''}`}
-                        defaultValue={title}
-                        onKeyDown={e => handleKeyDown(e, node)}
-                        onChange={() => setBlurToSave(true)}
-                        onBlur={e => handleBlur(e, node)}
-                        onClick={e => handleClick(e, node)}
-                    />
-                );
-
-                if (children?.length) {
-                    return (
-                        <TreeNode
-                            key={key}
-                            title={nodeTitle}
-                        >
-                            {loop(children)}
-                        </TreeNode>
-                    );
-                }
-
-                return (
-                    <TreeNode key={key} title={nodeTitle}/>
-                );
-            });
-        };
-
-        treeNodes = loop(contents.filter(item => !item.parentKey));
-    }
-
     useEffect(() => {
         window.addEventListener('keydown', handleWindowSave);
         return () => {
@@ -361,7 +208,6 @@ export default config({ router: true, query: true })(props => {
 
     const TOP_HEIGHT = 50;
 
-    console.log(readOnly);
     return (
         <PageContent styleName="root" loading={loading || saving || articleLoading || articleSaving || deleting}>
             <div styleName="top" style={{ height: TOP_HEIGHT }}>
@@ -402,14 +248,15 @@ export default config({ router: true, query: true })(props => {
             </div>
             <div styleName="box" ref={boxEl} style={{ height: height - TOP_HEIGHT }}>
                 <div styleName="contents">
-                    <Tree
-                        selectable={false}
-                        defaultExpandAll
-                        expandedKeys={expandedKeys}
-                        onExpand={expandedKeys => setExpandedKeys(expandedKeys)}
-                    >
-                        {treeNodes}
-                    </Tree>
+                    <TreeEditor
+                        dataSource={contents}
+                        readOnly={readOnly || innerReadOnly}
+                        selectedKey={currentContent?.key}
+                        onClick={handleClick}
+                        onAdd={handleAdd}
+                        onDelete={handleDeleteContent}
+                        onSave={handleSaveContent}
+                    />
                 </div>
                 <div styleName="content" key={currentContent?.key}>
                     <MarkDownEditor

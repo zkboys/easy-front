@@ -21,6 +21,7 @@ module.exports = app => {
     mock,
     upload,
     wiki,
+    mind,
   } = controller;
 
   // 登录
@@ -124,6 +125,7 @@ module.exports = app => {
   api.get('/projects/:projectId/wikiContents', wiki.contents);
   // 创建wiki目录
   api.post('/projects/:projectId/wikiContents', wiki.writeContents);
+  // 删除wiki目录
   api.post('/projects/:projectId/wikiContents/delete', wiki.deleteContents);
   // 获取文章
   api.get('/projects/:projectId/wiki/:id', wiki.article);
@@ -131,6 +133,21 @@ module.exports = app => {
   api.post('/projects/:projectId/wiki/:id', wiki.saveArticle);
   // 文件上传
   api.post('/projects/:projectId/upload/:key', wiki.upload);
+
+
+  // 获取脑图
+  api.get('/mind/:id', mind.mind);
+  // 跟新脑图
+  api.put('/mind/:id', mind.updateMind);
+  // 上传图片
+  api.post('/mind/upload', mind.upload);
+
+  // 获取脑图目录
+  api.get('/projects/:projectId/mindContents', mind.contents);
+  // 创建脑图目录
+  api.post('/projects/:projectId/mindContents', mind.writeContents);
+  // 删除脑图目录
+  api.post('/projects/:projectId/mindContents/delete', mind.deleteContents);
 
   // 未捕获请求，返回404
   api.get('/*', async ctx => {

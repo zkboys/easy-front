@@ -25,6 +25,7 @@ module.exports = app => {
     app.model.Project.hasMany(app.model.Category);
     app.model.Project.hasMany(app.model.Api);
     app.model.Project.hasMany(app.model.Param);
+    app.model.Project.hasMany(app.model.Mind);
 
     // 与User表是多对多关系
     app.model.Project.belongsToMany(app.model.User, {
