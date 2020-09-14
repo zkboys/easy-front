@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>KityMinder Editor - Powered By FEX</title>
+
+    <link href="favicon.ico" type="image/x-icon" rel="shortcut icon">
+
+    <!-- bower:css -->
+    <link rel="stylesheet" href="../bower_components/bootstrap/dist/css/bootstrap.css"/>
+    <link rel="stylesheet" href="../bower_components/codemirror/lib/codemirror.css"/>
+    <link rel="stylesheet" href="../bower_components/hotbox/hotbox.css"/>
+    <link rel="stylesheet" href="../node_modules/kityminder-core/dist/kityminder.core.css"/>
+    <link rel="stylesheet" href="../bower_components/color-picker/dist/color-picker.min.css"/>
+    <!-- endbower -->
+
+    <link rel="stylesheet" href="kityminder.editor.min.css">
+
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        h1.editor-title {
+            background: #393F4F;
+            color: white;
+            margin: 0;
+            height: 40px;
+            font-size: 14px;
+            line-height: 40px;
+            font-family: 'Hiragino Sans GB', 'Arial', 'Microsoft Yahei';
+            font-weight: normal;
+            padding: 0 20px;
+        }
+
+        .resource-editor .resource-dropdown .km-resource {
+            overflow: auto;
+        }
+
+        .resource-editor .resource-dropdown .km-resource li {
+            padding: 0;
+        }
+
+        .km-resource > li > label {
+            padding: 2px 4px;
+            display: flex;
+            align-items: center;
+        }
+
+        .km-resource > li > label > input {
+            margin: 0 4px 0 0;
+        }
+
+        .resource-editor .resource-dropdown .resource-caret {
+            padding-top: 10px
+        }
+    </style>
+</head>
+<body ng-app="kityminderDemo" ng-controller="MainController">
+<kityminder-editor on-init="initEditor(editor, minder)"></kityminder-editor>
+</body>
+
+<!-- bower:js -->
+<script src="../bower_components/jquery/dist/jquery.js"></script>
+<script src="../bower_components/bootstrap/dist/js/bootstrap.js"></script>
+<script src="../bower_components/angular/angular.js"></script>
+<script src="../bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
+<script src="../bower_components/codemirror/lib/codemirror.js"></script>
+<script src="../bower_components/codemirror/mode/xml/xml.js"></script>
+<script src="../bower_components/codemirror/mode/javascript/javascript.js"></script>
+<script src="../bower_components/codemirror/mode/css/css.js"></script>
+<script src="../bower_components/codemirror/mode/htmlmixed/htmlmixed.js"></script>
+<script src="../bower_components/codemirror/mode/markdown/markdown.js"></script>
+<script src="../bower_components/codemirror/addon/mode/overlay.js"></script>
+<script src="../bower_components/codemirror/mode/gfm/gfm.js"></script>
+<script src="../bower_components/angular-ui-codemirror/ui-codemirror.js"></script>
+<script src="../bower_components/marked/lib/marked.js"></script>
+<script src="../bower_components/kity/dist/kity.min.js"></script>
+<script src="../bower_components/hotbox/hotbox.js"></script>
+<script src="../bower_components/json-diff/json-diff.js"></script>
+<script src="../node_modules/kityminder-core/dist/kityminder.core.min.js"></script>
+<script src="../bower_components/color-picker/dist/color-picker.min.js"></script>
+<!-- endbower -->
+
+<script src="kityminder.editor.min.js"></script>
+
+
+<script>
+    angular.module('kityminderDemo', [ 'kityminderEditor' ])
+        .config(function(configProvider) {
+            configProvider.set('imageUpload', '/api/mind/upload');
+        })
+        .controller('MainController', function($scope) {
+            $scope.initEditor = function(editor, minder) {
+                window.editor = editor;
+                window.minder = minder;
+
+
+                let st = 0;
+                minder.on('contentchange', function(e) {
+                    if (st) clearTimeout(st);
+                    st = setTimeout(function() {
+                        saveJson(editor);
+                    }, 300);
+                });
+            };
+        });
+
+    function init(mindId) {
+        console.log('init', mindId);
+        window.mindId = mindId;
+        importJson(window.editor);
+
+        // 定位到中心点
+        window.minder.execCommand('camera', window.minder.getRoot(), 600);
+    }
+
+    function importJson(editor) {
+        const url = getUrl();
+
+        if (!url) return;
+
+        $.ajax({
+            method: 'get',
+            url,
+            success: function(res) {
+                let { value, title } = res;
+                if (!value) value = `{"root":{"data":{"id":"c5kchce93jk0","created":"1599807649933","text":"${title || '中心主题'}"}},"template":"default","theme":"fresh-blue","version":"1.4.43"}`;
+                editor.minder.importJson(JSON.parse(value));
+            },
+            error: function(err) {
+                console.log(err);
+            },
+            complete: function() {
+
+            },
+        });
+    }
+
+    function saveJson(editor) {
+        /*
+            json - JSON 字符串，支持导入和导出
+            text - 纯文本格式，支持导入和导出
+            markdown - Markdown 格式，支持导入和导出
+            svg - SVG 矢量格式，仅支持导出
+            png - PNG 位图格式，仅支持导出
+        * */
+        // editor.minder.exportData('png').then(res => {
+        //     console.log(999, res);
+        // });
+        const json = editor.minder.exportJson();
+        const url = getUrl();
+
+        if (!url) return;
+
+        $.ajax({
+            method: 'put',
+            url,
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(json),
+            success: function(res) {
+                console.log('保存脑图成功');
+            },
+            complete: function() {
+
+            },
+        });
+    }
+
+    function getUrl() {
+        const mindId = window.mindId;
+
+        if (!mindId) return;
+
+        return `/api/mind/${mindId}`;
+    }
+</script>
+
+</html>

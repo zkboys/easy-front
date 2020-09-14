@@ -50,8 +50,8 @@ module.exports = appInfo => {
         dir: path.join(appInfo.baseDir, 'app/wiki'),
       },
       {
-        prefix: '/kityminder-editor',
-        dir: path.join(appInfo.baseDir, 'app/kityminder-editor'),
+        prefix: '/minder-editor',
+        dir: path.join(appInfo.baseDir, 'app/minder-editor'),
       },
     ],
   };

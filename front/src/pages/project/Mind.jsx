@@ -202,7 +202,7 @@ export default config({ router: true, query: true })(props => {
                         title="脑图"
                         width="100%"
                         height={frameHeight}
-                        src={`${PUBLIC_URL}/kityminder-editor/dist/index.html?${isFull}`}
+                        src={`${PUBLIC_URL}/minder-editor/dist/index.html?${isFull}`}
                         frameBorder="0"
                     />
                 </div>
