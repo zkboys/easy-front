@@ -347,13 +347,13 @@ class FormElement extends Component {
         };
 
         if (layout) {
-            formLabel = formLabel || '';
+            formLabel = formLabel || ' ';
             colon = false;
         } else {
-            if (children && !shouldUpdate) {
-                children = children ? React.cloneElement(children, elementProps) : null;
-            } else {
+            if (!children) {
                 children = getElement({ type, ...elementProps });
+            } else if (!shouldUpdate) {
+                children = children ? React.cloneElement(children, elementProps) : null;
             }
         }
 

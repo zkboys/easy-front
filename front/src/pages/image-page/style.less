@@ -1,0 +1,117 @@
+@other-height: 82px;
+.root {
+    display: flex;
+
+    :global {
+        .table-row-active {
+            background: lighten(@primary-color, 30%);
+        }
+    }
+}
+
+.img-root-outer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1 1 50%;
+    height: calc(100vh - @other-height);
+
+    border-right: 1px solid #e8e8e8;
+    /* 格子背景 */
+    background-color: #e8e8e8;
+    background-image: linear-gradient(rgba(255, 255, 255, .3) 1px, transparent 0),
+    linear-gradient(90deg, rgba(255, 255, 255, .3) 1px, transparent 0),
+    linear-gradient(white 1px, transparent 0),
+    linear-gradient(90deg, white 1px, transparent 0);
+    background-size: 15px 15px, 15px 15px, 75px 75px, 75px 75px;
+}
+
+.tip-block {
+    overflow-y: scroll;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 45px;
+}
+
+.width-tip {
+    text-align: center;
+    border-left: 1px solid #999;
+    border-right: 1px solid #999;
+    position: relative;
+    margin-top: 10px;
+    padding-bottom: 10px;
+
+    &:after {
+        content: '';
+        display: block;
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 10px;
+        border-bottom: 1px solid #999;
+    }
+}
+
+.img-root {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    overflow-y: scroll;
+
+    .empty {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+.img-container {
+    position: relative;
+    padding: 0;
+
+    .base-img {
+        width: 100%;
+        height: auto;
+    }
+
+    .block {
+        position: absolute;
+        border: 1px solid #135d10;
+        background: #c6f892;
+        opacity: .5;
+        cursor: pointer;
+
+        &.active {
+        }
+
+        &.active,
+        &:hover {
+            opacity: .7;
+        }
+
+    }
+
+    .base-block {
+        position: absolute;
+        display: none;
+        top: 20px;
+        left: 20px;
+        width: 100px;
+        height: 200px;
+        border: 1px solid #f53030;
+        background: #f5bcbc;
+        opacity: .5;
+    }
+}
+
+.operator-root {
+    flex: 1 1 50%;
+    padding: 16px;
+    height: calc(100vh - @other-height);
+}

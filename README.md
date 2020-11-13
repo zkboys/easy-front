@@ -82,8 +82,9 @@ $ npm run deploy
 
 ## TODO
 - [x] 同一路由规则下，浏览器前进后退无效
-- [ ] 项目 统一 设置 params
-- [ ] 项目 统一 设置 prefix
-- [ ] 
-- [ ] 
+- [x] 项目 统一 设置 params
+- [x] 项目 统一 设置 prefix
+- [ ] 复制项目、复制接口
+- [ ] 接口列表拖拽排序、跟换分类
+- [ ] 参数编辑，支持 json5、sql视图
 [egg]: https://eggjs.org

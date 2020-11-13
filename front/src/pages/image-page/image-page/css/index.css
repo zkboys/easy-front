@@ -1,0 +1,47 @@
+* {
+    /*禁止文字被鼠标选中*/
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+    /*解决点击背景闪烁一下*/
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    padding: 0;
+    margin: 0;
+}
+
+.image-container {
+    position: relative;
+    width: 100%;
+    font-size: 0;
+}
+
+.image-container > img {
+    width: 100%;
+    height: auto;
+}
+
+.image-container > .block {
+    position: absolute;
+    cursor: pointer;
+    opacity: .5;
+}
+
+.debug .image-container > .block {
+    border: 1px solid red;
+    background: rosybrown;
+}
+
+.image-container > .block > a {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.debug .image-container > .block > a {
+    background: green;
+}

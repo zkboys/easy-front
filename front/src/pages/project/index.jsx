@@ -9,6 +9,7 @@ import {
     TeamOutlined,
     BookOutlined,
     ShareAltOutlined,
+    BuildOutlined,
 } from '@ant-design/icons';
 import _ from 'lodash';
 import { useGet } from 'src/commons/ajax';
@@ -21,6 +22,7 @@ import ApiList from 'src/pages/api/ApiList';
 import Api from 'src/pages/api';
 import Member from './Member';
 import Edit from './Edit';
+import Entity from './Entity';
 import Wiki from './Wiki';
 import Mind from './Mind';
 
@@ -93,11 +95,28 @@ export default config({
 
     const editComponent = useMemo(() => (
         <div className="pan-content" style={{ height: height + 50 }}>
-            <Edit id={projectId} height={height} onSubmit={async () => {
-                const project = await fetchProject(projectId);
-                setProject(project);
-                setRefresh({});
-            }}/>
+            <Edit
+                id={projectId}
+                height={height}
+                onSubmit={async () => {
+                    const project = await fetchProject(projectId);
+                    setProject(project);
+                    setRefresh({});
+                }}/>
+        </div>
+    ), [ height, project ]);
+
+
+    const entityComponent = useMemo(() => (
+        <div className="pan-content" style={{ height: height + 50 }}>
+            <Entity
+                id={projectId}
+                height={height}
+                onSubmit={async () => {
+                    const project = await fetchProject(projectId);
+                    setProject(project);
+                    setRefresh({});
+                }}/>
         </div>
     ), [ height, project ]);
 
@@ -278,6 +297,9 @@ export default config({
                 </TabPane>
                 <TabPane tab={<span><SettingOutlined/> 设置</span>} key="setting">
                     {editComponent}
+                </TabPane>
+                <TabPane tab={<span><BuildOutlined /> 实体管理</span>} key="entity">
+                    {entityComponent}
                 </TabPane>
                 <TabPane tab={<span><SolutionOutlined/> 项目动态</span>} key="dynamic">
                     {dynamicComponent}
