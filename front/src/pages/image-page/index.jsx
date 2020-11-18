@@ -21,7 +21,7 @@ const EditTable = tableEditable(Table);
 
 const BASE_WIDTH = 400;
 
-export default config({ path: '/image-page' })(props => {
+export default config({ path: '/image-page', noAuth: true })(props => {
     const blockRef = useRef(null);
     const containerRef = useRef(null);
     const [ form ] = Form.useForm();
@@ -243,7 +243,7 @@ export default config({ path: '/image-page' })(props => {
                 minHeight: 400,
             }}
         >
-            <PageContent styleName="root">
+            <PageContent styleName="root" fitHeight>
                 <div styleName="img-root-outer">
                     <div styleName="tip-block">
                         {disabled ? null : (<div style={{ width: BASE_WIDTH }} styleName="width-tip">{BASE_WIDTH}px</div>)}

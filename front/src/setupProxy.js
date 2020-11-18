@@ -3,6 +3,19 @@ const proxy = require('http-proxy-middleware');
 const prefix = process.env.AJAX_PREFIX || '/api';
 
 module.exports = function(app) {
+
+    // 调用主应用接口
+    app.use(proxy('/mainApp',
+        {
+            target: 'http://localhost:3030/',
+            pathRewrite: {
+                ['^/mainApp']: '/api',
+            },
+            changeOrigin: true,
+            secure: false, // 是否验证证书
+            ws: true, // 启用websocket
+        },
+    ));
     app.use(proxy(prefix,
         {
             target: 'http://localhost:3000/',

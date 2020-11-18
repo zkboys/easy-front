@@ -37,5 +37,9 @@ module.exports = () => {
     logging: false,
   };
 
+  exports.mainApp = {
+    server: 'http://localhost:3030',
+  };
+
   return exports;
 };

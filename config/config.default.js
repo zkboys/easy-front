@@ -68,6 +68,7 @@ module.exports = appInfo => {
   exports.security = {
     domainWhiteList: [
       'localhost:4200',
+      '172.16.40.72:4000',
     ],
     csrf: {
       enable: false,
@@ -75,6 +76,7 @@ module.exports = appInfo => {
   };
 
   exports.cors = {
+    origin: '*', // 'Access-Control-Allow-Origin': '*',
     credentials: true,
     allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH,OPTIONS',
   };

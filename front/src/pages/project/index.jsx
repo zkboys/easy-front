@@ -27,7 +27,7 @@ import Wiki from './Wiki';
 import Mind from './Mind';
 
 import './indexStyle.less';
-import { getColor, setPrimaryColor } from 'src/commons';
+import { getColor } from 'src/commons';
 import ApiModal from 'src/pages/api/ApiModal';
 
 const { TabPane } = Tabs;
@@ -194,8 +194,6 @@ export default config({
                 }
 
                 setProject(project);
-                const color = getColor(project.name);
-                setPrimaryColor(color);
             } catch (e) {
                 if (e?.response?.status === 403) {
                     Modal.confirm({

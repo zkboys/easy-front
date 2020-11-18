@@ -5,6 +5,7 @@ import Footer from '../footer';
 import { connect } from 'src/models';
 import './style.less';
 import { PAGE_FRAME_LAYOUT } from 'src/models/settings';
+import { getElementTop } from '@/library/utils';
 
 /**
  * 页面内容 容器
@@ -25,15 +26,38 @@ export default class PageContent extends Component {
         loadingTip: PropTypes.any,
         pageLoading: PropTypes.bool,
         footer: PropTypes.bool,
+        fitHeight: PropTypes.bool,
     };
 
     static defaultProps = {
         footer: false,
     };
 
+    state = {
+        height: 'auto',
+    };
+
     componentWillUnmount() {
         this.props.action.page.hideLoading();
+
+        this.props.fitHeight && window.removeEventListener('resize', this.setHeight);
     }
+
+    componentDidMount() {
+        if (this.props.fitHeight) {
+            this.setHeight();
+            window.addEventListener('resize', this.setHeight);
+        }
+    }
+
+    setHeight = () => {
+        if (!this.contentDom) return;
+        const offsetTop = getElementTop(this.contentDom);
+        const windowHeight = document.documentElement.clientHeight;
+
+        const height = windowHeight - offsetTop - 8;
+        this.setState({ height });
+    };
 
     render() {
         const {
@@ -48,8 +72,12 @@ export default class PageContent extends Component {
             sideWidth,
             showSide,
             layout,
+            fitHeight,
+            style,
             ...others
         } = this.props;
+
+        const { height } = this.state;
 
         let hasFixBottom = false;
         React.Children.map(children, item => {
@@ -69,6 +97,17 @@ export default class PageContent extends Component {
         const isSideMenu = layout === PAGE_FRAME_LAYOUT.SIDE_MENU;
         const hasSide = isTopSideMenu || isSideMenu;
 
+        let contentStyle = {};
+
+        if (fitHeight) {
+
+            contentStyle = {
+                flex: `0 0 ${height}px`,
+                height: height,
+                overflowY: 'auto',
+            };
+        }
+
         return (
             <div ref={node => this.root = node} style={rootStyle} styleName="page-content-root">
                 <div
@@ -82,8 +121,10 @@ export default class PageContent extends Component {
                     <Spin spinning tip={tip}/>
                 </div>
                 <div
+                    ref={node => this.contentDom = node}
                     className={`${className} page-content`}
                     styleName="page-content"
+                    style={{ ...contentStyle, ...style }}
                     {...others}
                 >
                     {children}

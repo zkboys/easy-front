@@ -190,10 +190,13 @@ module.exports = function(webpackEnv) {
                 (info => path.resolve(info.absoluteResourcePath).replace(/\\/g, '/')),
             // Prevents conflicts when multiple webpack runtimes (from different apps)
             // are used on the same page.
-            jsonpFunction: `webpackJsonp${appPackageJson.name}`,
+            jsonpFunction: `webpackJsonp_${appPackageJson.name}`,
             // this defaults to 'window', but by setting it to 'this' then
             // module chunks which are built will work in web workers as well.
             globalObject: 'this',
+
+            library: `${appPackageJson.name}-[name]`,
+            libraryTarget: 'umd',
         },
         optimization: {
             minimize: isEnvProduction,

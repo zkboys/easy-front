@@ -7,9 +7,9 @@ import config from 'src/commons/config-hoc';
 import KeepAuthRoute from './KeepAuthRoute';
 import KeepPage from './KeepPage';
 import routes, { noFrameRoutes, noAuthRoutes /*commonPaths*/ } from './routes';
+import cfg from 'src/config';
 
-// 直接挂载到域名根目录
-export const ROUTE_BASE_NAME = process.env.BASE_NAME || '';
+const { baseName, poweredByQianKun } = cfg;
 
 @config({
     query: true,
@@ -33,10 +33,13 @@ export default class AppRouter extends Component {
         const { noFrame: queryNoFrame, noAuth } = this.props.query;
         const { systemNoFrame } = this.props;
         const userRoutes = this.getUserRoutes();
+        const style = { display: 'flex', flexDirection: 'column', flex: 1, position: 'relative' };
+
+        if (!poweredByQianKun) style.minHeight = '100vh';
 
         return (
-            <BrowserRouter basename={ROUTE_BASE_NAME}>
-                <div style={{ display: 'flex', flexDirection: 'column', position: 'relative', minHeight: '100vh' }}>
+            <BrowserRouter basename={baseName}>
+                <div style={style}>
                     <Route path="/" render={props => {
                         // 框架组件单独渲染，与其他页面成为兄弟节点，框架组件和具体页面组件渲染互不影响
 

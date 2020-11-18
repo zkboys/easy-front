@@ -20,7 +20,7 @@ import ProjectList from './ProjectList';
 import Member from './Member';
 
 import './style.less';
-import { getColor, setPrimaryColor } from 'src/commons';
+import { getColor } from 'src/commons';
 
 const { TabPane } = Tabs;
 
@@ -122,7 +122,6 @@ export default config({
                 const teamId = teams[0].id;
                 setTeamId(teamId);
             }
-            if (!teams?.length) setPrimaryColor(getColor());
         })();
     }, []);
 
@@ -150,8 +149,6 @@ export default config({
                 }
 
                 setTeam(team);
-                const color = getColor(team.name);
-                setPrimaryColor(color);
             } catch (e) {
                 if (e?.response?.status === 403) {
                     Modal.confirm({

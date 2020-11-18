@@ -1,4 +1,4 @@
-@other-height: 82px;
+@other-height: 132px;
 .root {
     display: flex;
 
@@ -14,7 +14,7 @@
     flex-direction: column;
     align-items: center;
     flex: 1 1 50%;
-    height: calc(100vh - @other-height);
+    height: 100%;
 
     border-right: 1px solid #e8e8e8;
     /* 格子背景 */
@@ -58,7 +58,7 @@
     display: flex;
     justify-content: center;
     width: 100%;
-    height: 100%;
+    flex: 1;
     overflow-y: scroll;
 
     .empty {
@@ -113,5 +113,5 @@
 .operator-root {
     flex: 1 1 50%;
     padding: 16px;
-    height: calc(100vh - @other-height);
+    height: 100%;
 }

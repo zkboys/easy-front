@@ -3,8 +3,8 @@
     "version": "4.0.0",
     "private": true,
     "scripts": {
-        "start": "node scripts/start.js",
-        "build": "cross-env NODE_ENV=production node scripts/build.js",
+        "start": "BASE_NAME=/easy_front PORT=4001 node scripts/start.js",
+        "build": "cross-env NODE_ENV=production BASE_NAME=/easy_front node scripts/build.js",
         "build:pre": "git fetch --all && git reset --hard origin/master && git pull && yarn && cross-env MOCK=true yarn build && cp -r ./docs ./build/",
         "build:dll": "rimraf config/dll && webpack --config config/webpack.dll.config.js",
         "build:analyz": "cross-env ANALYZ=true yarn build",

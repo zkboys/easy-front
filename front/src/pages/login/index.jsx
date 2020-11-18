@@ -39,7 +39,7 @@ export default class extends Component {
         };
 
         this.setState({ loading: true, message: '' });
-        this.props.ajax.post('/login', params, { errorTip: false })
+        this.props.ajax.post('/login', params, { errorTip: false, baseURL: '/mainApp' })
             .then(res => {
                 const { id, name } = res;
                 setLoginUser({

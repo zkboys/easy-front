@@ -1,6 +1,5 @@
 'use strict';
 const { pathToRegexp } = require('path-to-regexp');
-const jwt = require('jsonwebtoken');
 
 /** 鉴权拦截 */
 function canPass(ctx) {
@@ -25,7 +24,7 @@ function canPass(ctx) {
  */
 async function getToken(ctx) {
   const { tokenName, cookieName } = ctx.app.config.jwt;
-  const { redis } = ctx.app;
+  // const { redis } = ctx.app;
 
   let token;
   const headerToken = ctx.request.header[String(tokenName).toLowerCase()];
@@ -36,29 +35,34 @@ async function getToken(ctx) {
   if (authorizationToken) token = authorizationToken;
   if (headerToken) token = headerToken;
 
-  const existToken = await redis.get(token);
-  return existToken || 'no token';
+  return token;
+
+  // const existToken = await redis.get(token);
+  // return existToken || 'no token';
 }
 
 /** 验证用户是否已经登录，做统一拦截 */
 module.exports = () => {
   return async function auth(ctx, next) {
-    const { secret } = ctx.app.config.jwt;
     const { User } = ctx.model;
 
     if (canPass(ctx)) return await next();
 
     const token = await getToken(ctx);
 
-    // 验证
+    // 通过主应用进行验证
     try {
-      const decoded = jwt.verify(token, secret);
+      const { mainApp } = ctx.app;
+      const res = await mainApp.request({ url: '/getLoginUser', token });
 
-      const { id } = decoded;
+      const { id } = res.data;
 
-      const user = await User.findByPk(id);
+      let user = await User.findByPk(id);
 
-      if (!user) throw Error('用户不存在');
+      // 用户不存在，创建一个用户
+      if (!user) {
+        user = await User.create(res.data);
+      }
 
       // ctx.user 为只读属性，防止业务代码串改
       Object.defineProperty(ctx, 'user', {

@@ -1,8 +1,9 @@
 import { session } from 'src/library/utils/storage';
 import { getNodeByPropertyAndValue, convertToTree } from 'src/library/utils/tree-utils';
 import { pathToRegexp } from 'path-to-regexp';
-import { loadScript } from 'src/library/utils';
-import { ROUTE_BASE_NAME } from 'src/router/AppRouter';
+import cfg from 'src/config';
+
+const { baseName, poweredByQianKun } = cfg;
 
 const LOGIN_USER_STORAGE_KEY = 'login-user';
 
@@ -65,7 +66,7 @@ export function toHome() {
 
     // 强制跳转 进入系统之后，需要一些初始化工作，需要所有的js重新加载
     // 拼接ROUTE_BASE_NAME，系统有可能发布在域名二级目录下
-    window.location.href = lastHref || `${ROUTE_BASE_NAME}/`;
+    window.location.href = lastHref || `${baseName}/`;
 }
 
 /**
@@ -86,8 +87,11 @@ export function toLogin() {
     sessionStorage.clear();
     sessionStorage.setItem('last-href', window.location.pathname);
 
+    if (poweredByQianKun) {
+        return window.location.href = '/login';
+    }
     // 强制跳转，让浏览器刷新，重置数据
-    window.location.href = `${ROUTE_BASE_NAME}${loginPath}`;
+    window.location.href = `${baseName}${loginPath}`;
 
     return null;
 }
@@ -99,7 +103,7 @@ export function toLogin() {
  * @returns {*}
  */
 export function getSelectedMenuByPath(path, menuTreeData) {
-    path = path.replace(ROUTE_BASE_NAME, '');
+    path = path.replace(baseName, '');
     let selectedMenu;
     if (menuTreeData) {
         if (path.indexOf('/_') > -1) {
@@ -235,62 +239,6 @@ export const valueTypeOptions = [
     { value: 'object', label: 'Object', color: '' },
     { value: 'array', label: 'Array', color: '' },
 ];
-
-
-const OLD_LESS_ID = `less:color:old`;
-const LESS_ID = `less:color`;
-const LESS_URL = `/less.min.js`;
-
-// 主题颜色快速生效
-const themeStyleContent = window.localStorage.getItem('theme-style-content');
-if (themeStyleContent) {
-    const themeStyle = document.createElement('style');
-    themeStyle.type = 'text/css';
-    themeStyle.id = OLD_LESS_ID;
-    themeStyle.innerHTML = themeStyleContent;
-    document.body.insertBefore(themeStyle, document.body.firstChild);
-}
-
-export function setPrimaryColor(color) {
-    const changeColor = () => {
-        window.less
-            .modifyVars({
-                '@primary-color': color,
-            })
-            .then(() => {
-                // 先清除缓存样式
-                const oldStyle = document.getElementById(OLD_LESS_ID);
-                if (oldStyle) oldStyle.remove();
-
-                // 将生成之后的style标签插入body首部
-                // 由于每个页面的css也是异步加载（无论开发、还是生产），会导致样式插入在生成的style标签之后，导致主题失效
-                const lessColor = document.getElementById(LESS_ID);
-                if (!lessColor) return;
-
-                // document.head.appendChild(lessColor);
-                document.body.insertBefore(lessColor, document.body.firstChild);
-                window.localStorage.setItem('theme-style-content', lessColor.innerHTML);
-            });
-    };
-
-    if (window._lessLoaded) {
-        changeColor();
-    } else {
-        window.less = {
-            logLevel: 2,
-            async: true,
-            javascriptEnabled: true,
-            modifyVars: { // less.js加载完成就会触发一次转换，需要传入变量
-                '@primary-color': color,
-            },
-        };
-
-        loadScript(LESS_URL).then(() => {
-            window._lessLoaded = true;
-            changeColor();
-        });
-    }
-}
 
 // 获取path中参数
 export function getPathParams(path) {

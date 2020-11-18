@@ -1,6 +1,8 @@
 'use strict';
+const axios = require('axios');
 
 const REDIS = Symbol('Application#redis');
+const MAIN_APP = Symbol('Application#mainApp');
 module.exports = {
 
   // 数据库模拟Redis存储 需要使用真正redis，添加 egg-redis 插件，并把此处扩展删除即可
@@ -39,5 +41,29 @@ module.exports = {
       };
     }
     return this[REDIS];
+  },
+
+  get mainApp() {
+    if (!this[MAIN_APP]) {
+      const { mainApp = {} } = this.config;
+      const { server } = mainApp;
+      const baseUrl = '/api';
+
+      this[MAIN_APP] = {
+        request: async (options) => {
+          const { url, token, headers = {}, ...others } = options;
+          if (!headers.Authorization) {
+            headers.Authorization = `Bearer ${token}`;
+          }
+          return axios({
+            url: `${server}${baseUrl}${url}`,
+            headers,
+            ...others,
+          });
+        },
+      };
+    }
+
+    return this[MAIN_APP];
   },
 };
