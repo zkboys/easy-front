@@ -21,7 +21,7 @@ const EditTable = tableEditable(Table);
 
 const BASE_WIDTH = 400;
 
-export default config({ path: '/image-page', noAuth: true })(props => {
+export default config({ path: '/image-page', side: false })(props => {
     const blockRef = useRef(null);
     const containerRef = useRef(null);
     const [ form ] = Form.useForm();

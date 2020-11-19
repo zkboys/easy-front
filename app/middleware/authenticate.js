@@ -53,9 +53,9 @@ module.exports = () => {
     // 通过主应用进行验证
     try {
       const { mainApp } = ctx.app;
-      const res = await mainApp.request({ url: '/getLoginUser', token });
+      const res = await mainApp.request({ url: '/loginUser', token });
 
-      const { id } = res.data;
+      const { id, menus = [] } = res.data;
 
       let user = await User.findByPk(id);
 
@@ -73,6 +73,11 @@ module.exports = () => {
       Object.defineProperty(ctx, 'userToken', {
         writable: false,
         value: token,
+      });
+
+      Object.defineProperty(ctx, 'userMenus', {
+        writable: false,
+        value: menus,
       });
 
       await next();

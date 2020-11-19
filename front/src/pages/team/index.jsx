@@ -26,6 +26,7 @@ const { TabPane } = Tabs;
 
 export default config({
     pageHead: false,
+    side: false,
     path: '/teams/:teamId/:tabId',
     connect: true,
 })(props => {

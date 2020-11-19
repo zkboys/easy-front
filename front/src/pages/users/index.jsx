@@ -67,7 +67,7 @@ export default config({
             title: '角色', dataIndex: 'roles', width: 400,
             render: (value, recode) => {
                 if (recode.isAdmin) return '超级管理员';
-                const roleIds = value.map(item => item.id);
+                const roleIds = (value || []).map(item => item.id);
                 return (
                     <Select
                         style={{ width: '100%' }}

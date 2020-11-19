@@ -83,53 +83,10 @@ module.exports = class UserController extends Controller {
 
   // 获取所有用户
   async index(ctx) {
-    const { pageNum = 1, pageSize = 10, keyWord, roleId } = ctx.query;
+    const { user: userService } = ctx.service;
 
-    const { User, Role, Permission } = ctx.model;
-
-    const page = 'pageNum' in ctx.query ? {
-      offset: (pageNum - 1) * pageSize,
-      limit: +pageSize,
-    } : undefined;
-
-    const where = keyWord ? {
-      [Op.or]: [
-        { name: { [Op.like]: `%${keyWord.trim()}%` } },
-        { account: { [Op.like]: `%${keyWord.trim()}%` } },
-        { email: { [Op.like]: `%${keyWord.trim()}%` } },
-      ],
-    } : undefined;
-
-    const options = {
-      ...page,
-      include: {
-        model: Role,
-        where: roleId ? { id: roleId } : undefined,
-        left: true,
-        include: Permission,
-      },
-      where,
-      order: [
-        [ 'jobNumber', 'ASC' ],
-      ],
-    };
-
-    const { count, rows } = await User.findAndCountAll(options);
-
-
-    // 查询用户的完整的角色列表
-    let result = rows;
-    if (roleId) {
-      result = [];
-      for (const user of rows) {
-        const roles = await user.getRoles();
-        const userJson = user.toJSON();
-
-        result.push({ ...userJson, roles });
-      }
-    }
-
-    ctx.success({ rows: result, count });
+    const users = await userService.getUsers();
+    ctx.success({ rows: users, count: users.length });
   }
 
   // 获取用户详情
