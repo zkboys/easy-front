@@ -14,7 +14,6 @@ module.exports = app => {
     name: STRING(200),
     url: STRING(100), // 页面发布之后的地址
     src: STRING(500), // 基础图片地址
-    srcs: TEXT, // 切分之后图片地址，英文逗号分隔
     quality: { // 图片压缩比 1 - 100
       type: INTEGER,
       defaultValue: 100,

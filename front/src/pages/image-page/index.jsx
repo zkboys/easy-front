@@ -3,12 +3,12 @@
 import { css, jsx } from '@emotion/react';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Button, Slider, Upload, Form, Empty } from 'antd';
+import { Button, Slider, Upload, Form, Empty, Modal } from 'antd';
 import {
     UploadOutlined,
     ExportOutlined,
     RollbackOutlined,
-    EyeOutlined,
+    SaveOutlined,
     CloudUploadOutlined,
 } from '@ant-design/icons';
 import { v4 as uuid } from 'uuid';
@@ -54,25 +54,7 @@ export default config({ path: '/teams/:teamId/image-page/:id', side: false })(pr
 
     useEffect(() => {
         (async () => {
-            const data = await fetchImagePage({ teamId, id: imagePageId });
-
-            setPageLoading(true);
-            setData(data);
-
-            // 原始图片
-            const { base64: oriBase64 } = await compressImage(data?.src, 100);
-
-            // 压缩后
-            const { base64, width, height } = await compressImage(data?.src, data?.quality || 100);
-            const size = getImageSizeByBase64(base64);
-
-            setImageSrc(base64);
-            setImageOriSrc(oriBase64);
-            setBlocks(data?.hotBlocks);
-            setSize(`${renderSize(size)}  ${width} * ${height}`);
-            form.setFieldsValue({ ...data });
-
-            setPageLoading(false);
+            await getImagePage();
         })();
     }, []);
 
@@ -130,6 +112,28 @@ export default config({ path: '/teams/:teamId/image-page/:id', side: false })(pr
             },
         },
     ];
+
+    async function getImagePage() {
+        const data = await fetchImagePage({ teamId, id: imagePageId });
+
+        setPageLoading(true);
+        setData(data);
+
+        // 原始图片
+        const { base64: oriBase64 } = await compressImage(data?.src, 100);
+
+        // 压缩后
+        const { base64, width, height } = await compressImage(data?.src, data?.quality || 100);
+        const size = getImageSizeByBase64(base64);
+
+        setImageSrc(base64);
+        setImageOriSrc(oriBase64);
+        setBlocks(data?.hotBlocks);
+        setSize(`${renderSize(size)}  ${width} * ${height}`);
+        form.setFieldsValue({ ...data });
+
+        setPageLoading(false);
+    }
 
     function handleMouseDown(e) {
         // console.log('handleMouseDown');
@@ -214,9 +218,9 @@ export default config({ path: '/teams/:teamId/image-page/:id', side: false })(pr
     async function saveBlocks(nextBlocks) {
         setBlocks(nextBlocks);
 
-        const blocks = await saveHotBlock({ teamId, id: imagePageId, blocks: nextBlocks });
-
-        setBlocks(blocks);
+        // const blocks = await saveHotBlock({ teamId, id: imagePageId, blocks: nextBlocks });
+        //
+        // setBlocks(blocks);
     }
 
     async function handleQualityChange(value, data) {
@@ -258,8 +262,9 @@ export default config({ path: '/teams/:teamId/image-page/:id', side: false })(pr
 
             handleQualityChange(100, imageSrc);
         });
-        await saveBlocks([]);
-        form.resetFields();
+        // TODO 上传图片到 oss 拿到 src
+        const src = '';
+        form.setFieldsValue({ quality: 100, src });
         return false;
     }
 
@@ -274,12 +279,17 @@ export default config({ path: '/teams/:teamId/image-page/:id', side: false })(pr
     }
 
     // 预览
-    async function handlePreview() {
+    async function handleSave(deploy) {
+        if (deploy) {
+            await new Promise((resolve, reject) => Modal.confirm({
+                title: '提示',
+                content: '您确定进行发布吗？',
+                onOk: () => resolve(),
+                onCancel: () => reject('用户取消发布'),
+            }));
+        }
         // TODO
-    }
-
-    async function handleDeploy() {
-        // TODO
+        console.log(deploy);
     }
 
     const itemProps = {
@@ -375,17 +385,18 @@ export default config({ path: '/teams/:teamId/image-page/:id', side: false })(pr
                         <Button
                             type="primary"
                             disabled={disabled}
-                            icon={<EyeOutlined/>}
-                            onClick={handlePreview}
-                        >预览</Button>
+                            icon={<SaveOutlined/>}
+                            onClick={() => handleSave()}
+                        >保存</Button>
                         <Button
                             danger
                             disabled={disabled}
                             icon={<CloudUploadOutlined/>}
-                            onClick={handleDeploy}
-                        >发布</Button>
+                            onClick={() => handleSave(true)}
+                        >保存并发布</Button>
                     </div>
 
+                    <FormElement {...itemProps} name="src" type="hidden"/>
                     <FormElement
                         {...itemProps}
                         style={{ marginTop: 50 }}
@@ -397,15 +408,20 @@ export default config({ path: '/teams/:teamId/image-page/:id', side: false })(pr
                     >
                         <Slider tooltipVisible/>
                     </FormElement>
-                    <FormElement
-                        {...itemProps}
-                        type="number"
-                        label="相对裁剪高度"
-                        name="curHeight"
-                        step={50}
-                        min={10}
-                        tip="将图片裁剪成多个小图，提高加载性能，可以设置一个较大的值，不进行裁剪"
-                    />
+                    <div css={css`display: flex; align-items: center`}>
+                        <FormElement
+                            {...itemProps}
+                            width={190}
+                            type="number"
+                            label="相对裁剪高度"
+                            name="curHeight"
+                            step={50}
+                            min={10}
+                        />
+                        <div css={css`padding-bottom: 18px; flex: 1; padding-left: 8px`}>
+                            将图片裁剪成多个小图，提高加载性能，可以设置一个较大的值，不进行裁剪
+                        </div>
+                    </div>
                     <FormElement
                         {...itemProps}
                         label="显示热区"

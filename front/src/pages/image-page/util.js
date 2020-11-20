@@ -160,7 +160,7 @@ export function getY(obj) {
 // 导出压缩包
 export async function exportZip(options) {
     const {
-        imageUrl: imageBase64,
+        imageSrc: imageBase64,
         blocks,
         minHeight,
         baseWidth,
@@ -172,7 +172,6 @@ export async function exportZip(options) {
     const folder = zip.folder('image-page');
     // 创建一个名为images的新的文件目录
     const imagesFolder = folder.folder('images');
-
     const imgType = getImageType(imageBase64).replace('image/', '');
     const imageNames = [];
     const minImageNames = [];
@@ -201,6 +200,7 @@ export async function exportZip(options) {
 
     folder.file('index.html', html);
 
+
     // 把打包内容异步转成blob二进制格式
     zip.generateAsync({ type: 'blob' }).then(function(content) {
         // content就是blob数据，这里以example.zip名称下载
@@ -213,6 +213,7 @@ export async function exportZip(options) {
 async function getImageBase64List(imageBase64, minHeight, baseWidth) {
     return new Promise((resolve, reject) => {
         const img = document.createElement('img');
+        img.setAttribute('crossOrigin', 'Anonymous');
         img.src = imageBase64;
         img.onload = function() {
             const imageWidth = img.width;
