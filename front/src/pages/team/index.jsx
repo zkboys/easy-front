@@ -102,8 +102,7 @@ export default config({
     // 搜索团队
     const handleSearchTeam = _.debounce((e) => {
         // 获取不到e.target
-        const input = document.getElementById('search-team');
-        const value = input.value;
+        const { value } = e.target;
         teams.forEach(item => {
             const { name } = item;
 
@@ -112,7 +111,7 @@ export default config({
             item._hide = !name?.includes(value);
         });
         setTeams([ ...teams ]);
-    }, 100);
+    }, 300);
 
     // 组件加载完成
     useEffect(() => {
@@ -231,10 +230,12 @@ export default config({
                             {hasTeam ? team.description : '点击创建自己的团队或者联系管理员将您加入相关团队'}
                         </div>
                         <Input
-                            id="search-team"
                             allowClear
                             placeholder="输入团队名称进行搜索"
-                            onChange={handleSearchTeam}
+                            onChange={e => {
+                                e.persist();
+                                handleSearchTeam(e);
+                            }}
                         />
                     </>
                 )}

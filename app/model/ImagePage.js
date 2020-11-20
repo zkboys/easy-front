@@ -12,8 +12,9 @@ module.exports = app => {
       unique: true,
     },
     name: STRING(200),
-    url: STRING(500), // 基础图片地址
-    urls: TEXT, // 切分之后图片地址，英文逗号分隔
+    url: STRING(100), // 页面发布之后的地址
+    src: STRING(500), // 基础图片地址
+    srcs: TEXT, // 切分之后图片地址，英文逗号分隔
     quality: { // 图片压缩比 1 - 100
       type: INTEGER,
       defaultValue: 100,
@@ -21,10 +22,6 @@ module.exports = app => {
     curHeight: {  // 相对裁剪高度
       type: INTEGER,
       defaultValue: 400,
-    },
-    showHotBlock: { // 是否显示热区
-      type: BOOLEAN,
-      defaultValue: true,
     },
     description: STRING(500),
     teamId: INTEGER,

@@ -88,6 +88,7 @@ module.exports = app => {
 
   // 图片页面 crud
   api.resources('/teams/:teamId/imagePages', permission.team.master, imagePage);
+  api.post('/teams/:teamId/imagePages/:id/hotBlocks', permission.team.master, imagePage.saveBlocks);
 
   // 项目 crud
   api.get('/projects', project.index);

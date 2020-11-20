@@ -4,7 +4,13 @@ import { css, jsx } from '@emotion/react';
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Button, Slider, Upload, Form, Empty } from 'antd';
-import { UploadOutlined, ExportOutlined, RollbackOutlined } from '@ant-design/icons';
+import {
+    UploadOutlined,
+    ExportOutlined,
+    RollbackOutlined,
+    EyeOutlined,
+    CloudUploadOutlined,
+} from '@ant-design/icons';
 import { v4 as uuid } from 'uuid';
 import { Rnd } from 'react-rnd';
 
@@ -20,63 +26,86 @@ import {
     exportZip,
 } from './util';
 import './style.less';
-import { useGet } from '@/commons/ajax';
+import { useGet, usePost } from '@/commons/ajax';
 
 const EditTable = tableEditable(Table);
 
 const BASE_WIDTH = 400;
 
-export default config({ path: '/image-page/:id', side: false })(props => {
-    const { match: { params: { id: imagePageId } } } = props;
+export default config({ path: '/teams/:teamId/image-page/:id', side: false })(props => {
+    const { match: { params: { teamId, id: imagePageId } } } = props;
 
     const blockRef = useRef(null);
     const containerRef = useRef(null);
     const [ form ] = Form.useForm();
 
+    const [ pageLoading, setPageLoading ] = useState(false);
     const [ data, setData ] = useState({});
+    const [ size, setSize ] = useState('');
 
     const [ blocks, setBlocks ] = useState([]);
     const [ blockVisible, setBlockVisible ] = useState(true);
     const [ currentBlockId, setCurrentBlockId ] = useState(null);
-    const [ imageUrl, setImageUrl ] = useState(null);
-    const [ imageOriUrl, setImageOriUrl ] = useState(null);
+    const [ imageSrc, setImageSrc ] = useState(null);
+    const [ imageOriSrc, setImageOriSrc ] = useState(null);
 
-    const [ loading, fetchImagePage ] = useGet('/imagePages/:id');
+    const [ loading, fetchImagePage ] = useGet('/teams/:teamId/imagePages/:id');
+    const [ , saveHotBlock ] = usePost('/teams/:teamId/imagePages/:id/hotBlocks');
 
     useEffect(() => {
         (async () => {
-            const data = await fetchImagePage(imagePageId);
+            const data = await fetchImagePage({ teamId, id: imagePageId });
+
+            setPageLoading(true);
             setData(data);
+
+            // 原始图片
+            const { base64: oriBase64 } = await compressImage(data?.src, 100);
+
+            // 压缩后
+            const { base64, width, height } = await compressImage(data?.src, data?.quality || 100);
+            const size = getImageSizeByBase64(base64);
+
+            setImageSrc(base64);
+            setImageOriSrc(oriBase64);
+            setBlocks(data?.hotBlocks);
+            setSize(`${renderSize(size)}  ${width} * ${height}`);
+            form.setFieldsValue({ ...data });
+
+            setPageLoading(false);
         })();
     }, []);
 
     const columns = [
         {
-            title: '热区名称', dataIndex: 'blockName',
+            title: '热区名称', dataIndex: 'name',
             formProps: (record) => {
                 return {
-                    onBlur: (e) => {
-                        record.blockName = e.target.value;
+                    onBlur: async (e) => {
+                        record.name = e.target.value;
+                        await saveBlocks(blocks);
                     },
                 };
             },
         },
         {
-            title: '热区连接', dataIndex: 'blockHref',
+            title: '热区动作', dataIndex: 'action',
             formProps: (record) => {
                 return {
-                    onBlur: (e) => {
-                        record.blockHref = e.target.value;
+                    onBlur: async (e) => {
+                        record.action = e.target.value;
+                        await saveBlocks(blocks);
                     },
                 };
             },
         },
         {
-            title: '热区事件', dataIndex: 'blockAction',
+            title: '热区动作参数', dataIndex: 'actionParam',
             formProps: (record) => {
                 return {
-                    onBlur: (e) => {
-                        record.blockAction = e.target.value;
+                    onBlur: async (e) => {
+                        record.actionParam = e.target.value;
+                        await saveBlocks(blocks);
                     },
                 };
             },
@@ -84,14 +113,14 @@ export default config({ path: '/image-page/:id', side: false })(props => {
         {
             title: '操作', dataIndex: 'operator', width: 70,
             render: (value, record) => {
-                const { blockId, blockName } = record;
+                const { id: blockId, name } = record;
 
                 const items = [
                     {
                         label: '删除',
                         color: 'red',
                         confirm: {
-                            title: `您确定删除"${blockName}"?`,
+                            title: `您确定删除"${name}"?`,
                             onConfirm: () => handleDeleteBlock(blockId),
                         },
                     },
@@ -153,7 +182,7 @@ export default config({ path: '/image-page/:id', side: false })(props => {
         div.style.height = `${height}px`;
     }
 
-    function handleMouseUp(e) {
+    async function handleMouseUp(e) {
         // console.log('handleMouseUp');
         e.preventDefault();
 
@@ -177,35 +206,43 @@ export default config({ path: '/image-page/:id', side: false })(props => {
         if (width < 10 || height < 10) return;
 
         const blockId = uuid();
-        const nextBlocks = [ ...blocks, { blockId, blockName: '新建热区', left, top, width, height } ];
-        setBlocks(nextBlocks);
+        const nextBlocks = [ ...blocks, { id: blockId, name: '新建热区', left, top, width, height } ];
+        await saveBlocks(nextBlocks);
         handleBlockClick(blockId, nextBlocks);
     }
 
-    async function handleQualityChange(value, data) {
-        const url = data || imageOriUrl;
+    async function saveBlocks(nextBlocks) {
+        setBlocks(nextBlocks);
 
-        const { base64, width, height } = await compressImage(url, value);
-        setImageUrl(base64);
+        const blocks = await saveHotBlock({ teamId, id: imagePageId, blocks: nextBlocks });
+
+        setBlocks(blocks);
+    }
+
+    async function handleQualityChange(value, data) {
+        const src = data || imageOriSrc;
+
+        const { base64, width, height } = await compressImage(src, value);
+        setImageSrc(base64);
         const size = getImageSizeByBase64(base64);
-        form.setFieldsValue({ size: `${renderSize(size)}  ${width} * ${height}` });
+        setSize(`${renderSize(size)}  ${width} * ${height}`);
     }
 
     function handleBlockClick(blockId, nb) {
-        const block = (nb || blocks).find(item => item.blockId === blockId);
+        const block = (nb || blocks).find(item => item.id === blockId);
         setCurrentBlockId(blockId);
         form.setFieldsValue({
-            blockName: undefined,
-            blockHref: undefined,
-            blockAction: undefined,
+            name: undefined,
+            action: undefined,
+            actionParam: undefined,
             ...block,
         });
     }
 
-    function handleDeleteBlock(blockId) {
-        const nextBlocks = blocks.filter(item => item.blockId !== blockId);
+    async function handleDeleteBlock(blockId) {
+        const nextBlocks = blocks.filter(item => item.id !== blockId);
 
-        setBlocks(nextBlocks);
+        await saveBlocks(nextBlocks);
     }
 
     function getBase64(img, callback) {
@@ -214,34 +251,42 @@ export default config({ path: '/image-page/:id', side: false })(props => {
         reader.readAsDataURL(img);
     }
 
-    function handleImageChange(file) {
-        getBase64(file, imageUrl => {
-            setImageUrl(imageUrl);
-            setImageOriUrl(imageUrl);
+    async function handleImageChange(file) {
+        getBase64(file, imageSrc => {
+            setImageSrc(imageSrc);
+            setImageOriSrc(imageSrc);
 
-            handleQualityChange(100, imageUrl);
+            handleQualityChange(100, imageSrc);
         });
-        setBlocks([]);
+        await saveBlocks([]);
         form.resetFields();
-        form.setFieldsValue({ size: renderSize(file.size) });
         return false;
     }
 
     async function handleExport() {
-        const minHeight = form.getFieldValue('minHeight');
+        const minHeight = form.getFieldValue('curHeight');
         await exportZip({
-            imageUrl,
+            imageSrc,
             blocks,
             minHeight,
             baseWidth: BASE_WIDTH,
         });
     }
 
+    // 预览
+    async function handlePreview() {
+        // TODO
+    }
+
+    async function handleDeploy() {
+        // TODO
+    }
+
     const itemProps = {
         labelWidth: 100,
     };
 
-    const disabled = !imageUrl;
+    const disabled = !imageSrc;
 
     const renderUpload = () => (
         <Upload
@@ -256,12 +301,12 @@ export default config({ path: '/image-page/:id', side: false })(props => {
         <Form
             form={form}
             initialValues={{
-                blockVisible: true,
+                showHotBlock: true,
                 quality: 100,
-                minHeight: 400,
+                curHeight: 400,
             }}
         >
-            <PageContent styleName="root" fitHeight loading={loading}>
+            <PageContent styleName="root" fitHeight loading={loading || pageLoading}>
                 <div styleName="img-root-outer">
                     <div styleName="title">
                         <Button
@@ -284,14 +329,14 @@ export default config({ path: '/image-page/:id', side: false })(props => {
                             onMouseMove={!disabled && handleMouseMove}
                             onMouseUp={!disabled && handleMouseUp}
                         >
-                            {imageUrl ? (<img styleName="base-img" src={imageUrl} alt="图片"/>) : (
+                            {imageSrc ? (<img styleName="base-img" src={imageSrc} alt="图片"/>) : (
                                 <div styleName="empty">
                                     <Empty description={renderUpload()}/>
                                 </div>
                             )}
                             <div styleName="base-block" ref={blockRef}/>
                             {blockVisible && blocks.map(item => {
-                                const { blockId, left: x, top: y, width, height } = item;
+                                const { id: blockId, left: x, top: y, width, height } = item;
 
                                 const isActive = currentBlockId === blockId;
                                 return (
@@ -320,14 +365,25 @@ export default config({ path: '/image-page/:id', side: false })(props => {
                     </div>
                 </div>
                 <div styleName="operator-root">
-                    <div>
+                    <div styleName="btns">
                         {renderUpload()}
                         <Button
                             disabled={disabled}
-                            style={{ marginLeft: 16 }}
                             icon={<ExportOutlined/>}
                             onClick={handleExport}
                         >导出</Button>
+                        <Button
+                            type="primary"
+                            disabled={disabled}
+                            icon={<EyeOutlined/>}
+                            onClick={handlePreview}
+                        >预览</Button>
+                        <Button
+                            danger
+                            disabled={disabled}
+                            icon={<CloudUploadOutlined/>}
+                            onClick={handleDeploy}
+                        >发布</Button>
                     </div>
 
                     <FormElement
@@ -337,29 +393,24 @@ export default config({ path: '/image-page/:id', side: false })(props => {
                         name="quality"
                         onAfterChange={handleQualityChange}
                         disabled={disabled}
+                        tip={<div style={{ width: 200, paddingLeft: 16 }}>{size}</div>}
                     >
                         <Slider tooltipVisible/>
                     </FormElement>
                     <FormElement
                         {...itemProps}
-                        label="图片大小"
-                        name="size"
-                        disabled
-                    />
-                    <FormElement
-                        {...itemProps}
                         type="number"
                         label="相对裁剪高度"
-                        name="minHeight"
-                        width={190}
+                        name="curHeight"
                         step={50}
                         min={10}
+                        tip="将图片裁剪成多个小图，提高加载性能，可以设置一个较大的值，不进行裁剪"
                     />
                     <FormElement
                         {...itemProps}
                         label="显示热区"
                         type="switch"
-                        name="blockVisible"
+                        name="showHotBlock"
                         onChange={setBlockVisible}
                         width={190}
                         tip={<span>共{blocks.length}个</span>}
@@ -368,14 +419,14 @@ export default config({ path: '/image-page/:id', side: false })(props => {
                     <EditTable
                         columns={columns}
                         dataSource={blocks}
-                        rowKey="blockId"
+                        rowKey="id"
                         onRow={record => {
                             return {
-                                onClick: () => setCurrentBlockId(record.blockId),
+                                onClick: () => setCurrentBlockId(record.id),
                             };
                         }}
                         rowClassName={record => {
-                            return record.blockId === currentBlockId ? 'table-row-active' : '';
+                            return record.id === currentBlockId ? 'table-row-active' : '';
                         }}
                     />
                 </div>

@@ -40,9 +40,9 @@ module.exports = class ImagePageController extends Controller {
     }, ctx.params);
 
     const { id } = ctx.params;
-    const { ImagePage, Team, User } = ctx.model;
+    const { ImagePage, Team, User, HotBlock } = ctx.model;
 
-    const result = await ImagePage.findByPk(id, { include: [ Team, User ] });
+    const result = await ImagePage.findByPk(id, { include: [ Team, User, HotBlock ] });
 
     ctx.success(result);
   }
@@ -132,5 +132,45 @@ module.exports = class ImagePageController extends Controller {
     const result = await ImagePage.destroy({ where: { id } });
 
     ctx.success(result);
+  }
+
+  // 批量保存blocks
+  async saveBlocks(ctx) {
+    ctx.validate({
+      id: 'int',
+    }, ctx.params);
+
+    ctx.validate({
+      blocks: 'array',
+    }, ctx.request.body);
+
+    const { id } = ctx.params;
+    const { blocks } = ctx.request.body;
+    const { HotBlock } = ctx.model;
+
+    blocks.forEach(item => {
+      item.imagePageId = id;
+    });
+
+
+    // 多次数据库操作，进行事务处理
+    let transaction;
+    try {
+      transaction = await ctx.model.transaction();
+
+      // 删除
+      await HotBlock.destroy({ where: { imagePageId: id }, transaction });
+
+      // 添加
+      const savedBlocks = await HotBlock.bulkCreate(blocks, { transaction });
+
+      await transaction.commit();
+
+      ctx.success(savedBlocks);
+    } catch (e) {
+      if (transaction) await transaction.rollback();
+
+      throw e;
+    }
   }
 };

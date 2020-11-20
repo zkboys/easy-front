@@ -1,21 +1,25 @@
 'use strict';
 
 module.exports = app => {
-  const { STRING, INTEGER } = app.Sequelize;
+  const { UUID, UUIDV1, STRING, INTEGER } = app.Sequelize;
 
   const HotBlock = app.model.define('hotBlock', {
     id: {
-      type: INTEGER,
-      autoIncrement: true,
+      type: UUID,
       allowNull: false,
       primaryKey: true,
       unique: true,
+      defaultValue: UUIDV1,
     },
     imagePageId: INTEGER,
 
     name: STRING(100),
     action: STRING(100),
     actionParam: STRING(100),
+    top: INTEGER,
+    left: INTEGER,
+    width: INTEGER,
+    height: INTEGER,
   });
 
   // HotBlock.sync({ force: true });

@@ -3,6 +3,7 @@ import { saveAs } from 'file-saver';
 import md5 from 'blueimp-md5';
 import getHtml from './templates/simple';
 
+// 渲染带单位的大小
 export function renderSize(value) {
     if (!value) return '0 Bytes';
 
@@ -14,6 +15,7 @@ export function renderSize(value) {
     return size + unitArr[index];
 }
 
+// 基于base64 获取图片大概的文件大小
 export function getImageSizeByBase64(imageBase64Data) {
     // (((4 * e.file.size) / 3) + 3) & ~3 === base64Data.length
     // ~3 = -4
@@ -24,6 +26,7 @@ export function getImageSizeByBase64(imageBase64Data) {
     return window.parseInt(fileSize, 10) + 3;
 }
 
+// 获取图片类型
 export function getImageType(fileName) {
     const imageTypes = [
         'jpg',
@@ -60,10 +63,44 @@ export function getImageType(fileName) {
     return 'image/jpeg';
 }
 
+// 根据图片的src 获取base64数据
+export function getBase64BySrc(src) {
+    if (!src) return Promise.resolve('');
+
+    return new Promise((resolve, reject) => {
+        const img = document.createElement('img');
+        img.setAttribute('crossOrigin', 'Anonymous');
+        img.src = src;
+        img.onload = function() {
+            const imageWidth = img.width;
+            const imageHeight = img.height;
+
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.width = imageWidth;
+            canvas.height = imageHeight;
+
+            // 核心JS就这个
+            context.drawImage(img, 0, 0, imageWidth, imageHeight);
+
+            const type = getImageType(src);
+
+            const result = canvas.toDataURL(type);
+
+            resolve(result);
+        };
+        img.onerror = function(err) {
+            reject(err);
+        };
+    });
+}
+
+
 // 图片压缩
 export function compressImage(imageBase64, quality) {
     return new Promise((resolve, reject) => {
         const img = document.createElement('img');
+        img.setAttribute('crossOrigin', 'Anonymous');
         img.src = imageBase64;
         img.onload = function() {
             const imageWidth = img.width;
@@ -84,7 +121,11 @@ export function compressImage(imageBase64, quality) {
 
             const result = canvas.toDataURL(type);
 
-            resolve({ base64: result, width, height });
+            resolve({
+                base64: result,
+                width: Math.round(width),
+                height: Math.round(height),
+            });
         };
         img.onerror = function(err) {
             reject(err);
@@ -92,7 +133,7 @@ export function compressImage(imageBase64, quality) {
     });
 }
 
-
+// 获取元素 x
 export function getX(obj) {
     let parObj = obj;
     let left = obj.offsetLeft;
@@ -104,6 +145,7 @@ export function getX(obj) {
     return left;
 }
 
+// 获取元素 y
 export function getY(obj) {
     let parObj = obj;
     let top = obj.offsetTop;
@@ -115,6 +157,7 @@ export function getY(obj) {
     return top;
 }
 
+// 导出压缩包
 export async function exportZip(options) {
     const {
         imageUrl: imageBase64,
@@ -166,6 +209,7 @@ export async function exportZip(options) {
     });
 }
 
+// 裁剪图片
 async function getImageBase64List(imageBase64, minHeight, baseWidth) {
     return new Promise((resolve, reject) => {
         const img = document.createElement('img');

@@ -4,7 +4,6 @@ import { FormElement } from 'src/library/components';
 import config from 'src/commons/config-hoc';
 import { ModalContent } from 'src/library/components';
 import { useGet, usePost, usePut } from 'src/commons/ajax';
-import TeamSelect from '@/pages/team/TeamSelect';
 
 export default config({
     modal: {
@@ -12,7 +11,7 @@ export default config({
         width: 500,
     },
 })(props => {
-    const { teamId, disabledTeam } = props;
+    const { teamId } = props;
     const [ data, setData ] = useState({ teamId });
     const { isEdit, id, onOk } = props;
     const [ form ] = Form.useForm();
@@ -56,25 +55,22 @@ export default config({
             onOk={() => form.submit()}
             onCancel={() => form.resetFields()}
         >
-            {!isEdit ? <Alert type="warning" style={{ marginBottom: 16 }} message="当前团队中所有成员将自动加入到此页面中"/> : null}
+            {!isEdit ? (
+                <Alert
+                    type="warning"
+                    style={{ marginBottom: 16 }}
+                    message="当前团队中所有成员将拥有此页面所有权限！"
+                />
+            ) : null}
             <Form
                 name="imagePage"
                 form={form}
                 onFinish={handleSubmit}
-                initialValues={data}
+                initialValues={{ teamId, ...data }}
             >
                 {isEdit ? <FormElement {...formProps} type="hidden" name="id"/> : null}
 
-                <FormElement
-                    {...formProps}
-                    label="所属团队"
-                    name="teamId"
-                    required
-                    autoFocus
-                    disabled={disabledTeam}
-                >
-                    <TeamSelect/>
-                </FormElement>
+                <FormElement {...formProps} type="hidden" name="teamId"/>
                 <FormElement
                     {...formProps}
                     label="页面名称"

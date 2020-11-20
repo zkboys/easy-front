@@ -12,7 +12,7 @@ import { useDel } from '@/commons/ajax';
 
 export default config({})(props => {
     const { data = {}, onChange, user } = props;
-    const { id, name, url, description, team = {}, users = [] } = data;
+    const { id, name, src, description, team = {}, users = [] } = data;
 
     const [ visible, setVisible ] = useState(false);
 
@@ -56,14 +56,14 @@ export default config({})(props => {
                     <div>
                         <Image
                             styleName="image"
-                            src={url}
+                            src={src}
                         />
                     </div>
                 </div>
 
 
                 <div styleName="title">
-                    <Link to={`/image-page/${id}`}>{name}</Link>
+                    <Link to={`/teams/${team.id}/image-page/${id}`}>{name}</Link>
                 </div>
                 <div styleName="description">
                     {description}
@@ -71,7 +71,7 @@ export default config({})(props => {
             </div>
 
             <div styleName="footer" style={{ borderColor: color }}>
-                <Link to={`/teams/${team.id}/imagePage`}>
+                <Link to={`/teams/${team.id}/image-page`}>
                     <TeamOutlined/>{team.name}
                 </Link>
                 <RoleTag role={role}/>
@@ -81,8 +81,6 @@ export default config({})(props => {
                 id={id}
                 isEdit={!!id}
                 teamId={team.id}
-                teams={[ team ]}
-                disabledTeam
                 onOk={async (data) => {
                     setVisible(false);
                     onChange(data);
