@@ -28,7 +28,7 @@ module.exports = app => {
       const defaultPassword = bcrypt.hashSync('123456', 8);
 
       // 创建一个管理员用户
-      await adminRole.createUser({
+      const user = await adminRole.createUser({
         account: 'admin',
         jobNumber: 'admin',
         password: defaultPassword,
@@ -59,6 +59,18 @@ module.exports = app => {
       for (const menu of menus) {
         await adminRole.createMenu(menu);
       }
+
+      // 创建一个团队
+      const team = await user.createTeam({
+        name: '测试团队',
+        description: '测试团队的描述',
+      });
+
+      await user.createImagePage({
+        teamId: team.id,
+        name: '测试页面',
+        description: '我是测试页面',
+      });
     });
 
   }

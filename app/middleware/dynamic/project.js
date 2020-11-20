@@ -82,7 +82,7 @@ module.exports = {
     if (!member) return await next();
 
     let prevRole;
-    if (member && member.projects && member.projects.length) prevRole = member.projects[0].project_user.role;
+    if (member && member.projects && member.projects.length) prevRole = member.projects[0].projectUser.role;
 
     await next();
 

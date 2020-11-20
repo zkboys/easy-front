@@ -1,6 +1,10 @@
-import React, { useState, useRef } from 'react';
+// this comment tells babel to convert jsx to calls to a function called jsx instead of React.createElement
+/** @jsx jsx */
+import { css, jsx } from '@emotion/react';
+
+import React, { useState, useRef, useEffect } from 'react';
 import { Button, Slider, Upload, Form, Empty } from 'antd';
-import { UploadOutlined, ExportOutlined } from '@ant-design/icons';
+import { UploadOutlined, ExportOutlined, RollbackOutlined } from '@ant-design/icons';
 import { v4 as uuid } from 'uuid';
 import { Rnd } from 'react-rnd';
 
@@ -16,21 +20,35 @@ import {
     exportZip,
 } from './util';
 import './style.less';
+import { useGet } from '@/commons/ajax';
 
 const EditTable = tableEditable(Table);
 
 const BASE_WIDTH = 400;
 
-export default config({ path: '/image-page', side: false })(props => {
+export default config({ path: '/image-page/:id', side: false })(props => {
+    const { match: { params: { id: imagePageId } } } = props;
+
     const blockRef = useRef(null);
     const containerRef = useRef(null);
     const [ form ] = Form.useForm();
+
+    const [ data, setData ] = useState({});
 
     const [ blocks, setBlocks ] = useState([]);
     const [ blockVisible, setBlockVisible ] = useState(true);
     const [ currentBlockId, setCurrentBlockId ] = useState(null);
     const [ imageUrl, setImageUrl ] = useState(null);
     const [ imageOriUrl, setImageOriUrl ] = useState(null);
+
+    const [ loading, fetchImagePage ] = useGet('/imagePages/:id');
+
+    useEffect(() => {
+        (async () => {
+            const data = await fetchImagePage(imagePageId);
+            setData(data);
+        })();
+    }, []);
 
     const columns = [
         {
@@ -243,8 +261,17 @@ export default config({ path: '/image-page', side: false })(props => {
                 minHeight: 400,
             }}
         >
-            <PageContent styleName="root" fitHeight>
+            <PageContent styleName="root" fitHeight loading={loading}>
                 <div styleName="img-root-outer">
+                    <div styleName="title">
+                        <Button
+                            icon={<RollbackOutlined/>}
+                            onClick={() => props.history.goBack()}
+                        >
+                            返回团队
+                        </Button>
+                        <h2>{data.name}</h2>
+                    </div>
                     <div styleName="tip-block">
                         {disabled ? null : (<div style={{ width: BASE_WIDTH }} styleName="width-tip">{BASE_WIDTH}px</div>)}
                     </div>
@@ -293,8 +320,15 @@ export default config({ path: '/image-page', side: false })(props => {
                     </div>
                 </div>
                 <div styleName="operator-root">
-                    {renderUpload()}
-                    <Button disabled={disabled} style={{ marginLeft: 16 }} icon={<ExportOutlined/>} onClick={handleExport}>导出</Button>
+                    <div>
+                        {renderUpload()}
+                        <Button
+                            disabled={disabled}
+                            style={{ marginLeft: 16 }}
+                            icon={<ExportOutlined/>}
+                            onClick={handleExport}
+                        >导出</Button>
+                    </div>
 
                     <FormElement
                         {...itemProps}

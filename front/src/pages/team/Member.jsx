@@ -101,7 +101,7 @@ export default config({ router: true })(props => {
     }, [ teamId ]);
 
     const showMembers = members.filter(item => !item._hide);
-    const userTeamRole = team?.users?.find(item => item.id === user.id)?.team_user.role;
+    const userTeamRole = team?.users?.find(item => item.id === user.id)?.teamUser.role;
     const isTeamMaster = user.isAdmin || [ 'owner', 'master' ].includes(userTeamRole);
 
     return (

@@ -9,7 +9,7 @@ import ProjectModal from 'src/pages/project/ProjectModal';
 import ProjectItem from 'src/pages/project/ProjectItem';
 
 export default config()(props => {
-    const { height, team, showAdd, onChange } = props;
+    const { height, team, onChange } = props;
     const [ projects, setProjects ] = useState([]);
     const [ projectVisible, setProjectVisible ] = useState(false);
     const [ refresh, setRefresh ] = useState({});
@@ -17,6 +17,8 @@ export default config()(props => {
     const [ projectLoading, fetchProjects ] = useGet('/projects');
 
     const teamId = team?.id;
+
+    const showAdd = !!team;
 
 
     async function getProjects() {

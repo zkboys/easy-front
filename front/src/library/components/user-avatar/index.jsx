@@ -1,6 +1,6 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import { UserOutlined } from '@ant-design/icons';
-import { Avatar } from "antd";
+import { Avatar } from 'antd';
 import PropTypes from 'prop-types';
 
 /**
@@ -15,9 +15,9 @@ export default class UserAvatar extends Component {
     };
 
     render() {
-        const {name = 'unknown', src, icon, ...others} = this.props;
+        const { name = 'unknown', src, icon, ...others } = this.props;
 
-        if (icon === true) return <UserOutlined style={{marginRight: 5}} />;
+        if (icon === true) return <UserOutlined style={{ marginRight: 5 }}/>;
 
         if (src) return <Avatar {...others} src={src}/>;
 
@@ -40,7 +40,7 @@ export default class UserAvatar extends Component {
         others.style.verticalAlign = 'middle';
 
         return (
-            <Avatar{...others}>
+            <Avatar {...others}>
                 {nameFirstChar}
             </Avatar>
         );

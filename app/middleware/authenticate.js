@@ -61,7 +61,8 @@ module.exports = () => {
 
       // 用户不存在，创建一个用户
       if (!user) {
-        user = await User.create(res.data);
+        // 使用 bulkCreate 创建或更新，不会有主键冲突问题
+        [ user ] = await User.bulkCreate([ res.data ], { ignoreDuplicates: true });
       }
 
       // ctx.user 为只读属性，防止业务代码串改

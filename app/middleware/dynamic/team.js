@@ -77,7 +77,7 @@ module.exports = {
     if (!member) return await next();
 
     let prevRole;
-    if (member && member.teams && member.teams.length) prevRole = member.teams[0].team_user.role;
+    if (member && member.teams && member.teams.length) prevRole = member.teams[0].teamUser.role;
 
     await next();
 

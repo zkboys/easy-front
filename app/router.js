@@ -22,6 +22,7 @@ module.exports = app => {
     upload,
     wiki,
     mind,
+    imagePage,
   } = controller;
 
   // 登录
@@ -84,6 +85,9 @@ module.exports = app => {
 
   // 团队动态
   api.get('/teams/:id/dynamics', permission.team.member, dynamicController.index);
+
+  // 图片页面 crud
+  api.resources('/imagePages', permission.admin, permission.imagePage.master, imagePage);
 
   // 项目 crud
   api.get('/projects', project.index);

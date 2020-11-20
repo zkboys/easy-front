@@ -10,93 +10,44 @@ module.exports = {
     await next();
   },
   team: {
-    owner: async (ctx, next) => {
-      let { id } = ctx.params;
-      const user = ctx.user;
-
-      if (user.isAdmin) return await next();
-
-      const found = await user.getTeams({ where: { id } });
-
-      if (!found || !found.length) ctx.throw(403);
-
-      if (found[0].team_user.role === 'owner') return await next();
-
-      ctx.throw(403);
-    },
-    master: async (ctx, next) => {
-      let { id } = ctx.params;
-      const user = ctx.user;
-
-      if (user.isAdmin) return await next();
-
-      const found = await user.getTeams({ where: { id } });
-
-      if (!found || !found.length) ctx.throw(403);
-
-      if ([ 'owner', 'master' ].includes(found[0].team_user.role)) return await next();
-
-      ctx.throw(403);
-    },
-    member: async (ctx, next) => {
-      let { id } = ctx.params;
-      const user = ctx.user;
-
-      if (user.isAdmin) return await next();
-
-      const found = await user.getTeams({ where: { id } });
-
-      if (found && found.length) return await next();
-
-      ctx.throw(403);
-    },
+    ...identityPermission('teamId', 'getTeams', 'teamUser'),
+  },
+  imagePage: {
+    ...identityPermission('imagePageId', 'getImagePages', 'imagePageUser'),
   },
   project: {
-    owner: async (ctx, next) => {
-      let { id, projectId } = ctx.params;
-      if (projectId) id = projectId;
-
-      const user = ctx.user;
-
-      if (user.isAdmin) return await next();
-
-      const found = await user.getProjects({ where: { id } });
-
-      if (!found || !found.length) ctx.throw(403);
-
-      if (found[0].project_user.role === 'owner') return await next();
-
-      ctx.throw(403);
-    },
-    master: async (ctx, next) => {
-      let { id, projectId } = ctx.params;
-      if (projectId) id = projectId;
-
-      const user = ctx.user;
-
-      if (user.isAdmin) return await next();
-
-      const found = await user.getProjects({ where: { id } });
-
-      if (!found || !found.length) ctx.throw(403);
-
-      if ([ 'owner', 'master' ].includes(found[0].project_user.role)) return await next();
-
-      ctx.throw(403);
-    },
-    member: async (ctx, next) => {
-      let { id, projectId } = ctx.params;
-      if (projectId) id = projectId;
-
-      const user = ctx.user;
-
-      if (user.isAdmin) return await next();
-
-      const found = await user.getProjects({ where: { id } });
-
-      if (found && found.length) return await next();
-
-      ctx.throw(403);
-    },
+    ...identityPermission('projectId', 'getProjects', 'projectUser'),
   },
 };
+
+function identityPermission(idField, getItemMethod, userObj) {
+  return {
+    owner: identity([ 'owner' ], idField, getItemMethod, userObj),
+    master: identity([ 'owner', 'master' ], idField, getItemMethod, userObj),
+    member: identity([ 'owner', 'master', 'member' ], idField, getItemMethod, userObj),
+  };
+}
+
+// 身份
+function identity(identities, idField, getItemMethod, userObj) {
+
+  return async (ctx, next) => {
+    // 获取id
+    // /xxx/:id 或者 /xxx/:[idField]
+    let { id } = ctx.params;
+    let itemId = ctx.params[idField];
+    if (itemId) id = itemId;
+
+    const user = ctx.user;
+
+    if (user.isAdmin) return await next();
+
+    const found = await user[getItemMethod]({ where: { id } });
+
+    if (!found || !found.length) ctx.throw(403);
+
+    if (identities.includes(found[0][userObj].role)) return await next();
+
+    ctx.throw(403);
+  };
+}

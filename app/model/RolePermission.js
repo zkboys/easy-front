@@ -2,7 +2,7 @@
 module.exports = app => {
   const { INTEGER } = app.Sequelize;
 
-  return app.model.define('role_permission', {
+  return app.model.define('rolePermission', {
     id: {
       type: INTEGER,
       autoIncrement: true,

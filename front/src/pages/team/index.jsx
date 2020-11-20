@@ -16,7 +16,7 @@ import RoleTag from 'src/components/role-tag';
 import TabPage from 'src/components/tab-page';
 import Dynamic from 'src/components/dynamic';
 import confirm from 'src/components/confirm';
-import ProjectList from './ProjectList';
+import ImagePageList from 'src/pages/image-page/ImagePageList';
 import Member from './Member';
 
 import './style.less';
@@ -34,7 +34,7 @@ export default config({
 
     const [ refresh, setRefresh ] = useState(0);
     const [ height, setHeight ] = useState(0);
-    const [ activeKey, setActiveKey ] = useState(params.tabId !== ':tabId' ? params.tabId : 'project');
+    const [ activeKey, setActiveKey ] = useState(params.tabId !== ':tabId' ? params.tabId : 'image-page');
     const [ teamId, setTeamId ] = useState(params.teamId);
     const [ teams, setTeams ] = useState([]);
     const [ team, setTeam ] = useState({});
@@ -46,10 +46,9 @@ export default config({
     const [ teamDeleteLoading, deleteTeam ] = useDel('/teams/:id');
 
     // 只用teamId 更新之后，Project才重新渲染
-    const projectComponent = useMemo(() => (
-        <ProjectList
+    const imagePageComponent = useMemo(() => (
+        <ImagePageList
             height={height}
-            showAdd={!!team}
             team={team}
             onChange={() => setTeam({ ...team })}
         />
@@ -165,7 +164,7 @@ export default config({
         })();
     }, [ teamId, refresh ]);
 
-    const userTeamRole = team?.users?.find(item => item.id === user.id)?.team_user.role;
+    const userTeamRole = team?.users?.find(item => item.id === user.id)?.teamUser.role;
     const isTeamMaster = user.isAdmin || [ 'owner', 'master' ].includes(userTeamRole);
     const isTeamOwner = user.isAdmin || [ 'owner' ].includes(userTeamRole);
     const hasTeam = !!team?.name;
@@ -267,8 +266,8 @@ export default config({
                     </Empty>
                 )}
             >
-                <TabPane tab={<span><AppstoreOutlined/> 项目列表</span>} key="project">
-                    {projectComponent}
+                <TabPane tab={<span><AppstoreOutlined/> 图片转页面</span>} key="image-page">
+                    {imagePageComponent}
                 </TabPane>
                 <TabPane tab={<span><TeamOutlined/> 团队成员</span>} key="member">
                     {memberComponent}

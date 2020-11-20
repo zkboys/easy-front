@@ -2,7 +2,7 @@
 module.exports = app => {
   const { INTEGER, BIGINT, UUID, UUIDV4 } = app.Sequelize;
 
-  return app.model.define('department_user', {
+  return app.model.define('departmentUser', {
     id: {
       type: UUID,
       allowNull: false,

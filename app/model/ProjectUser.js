@@ -2,7 +2,7 @@
 module.exports = app => {
   const { ENUM, UUID, INTEGER } = app.Sequelize;
 
-  return app.model.define('project_user', {
+  return app.model.define('projectUser', {
     id: {
       type: INTEGER,
       autoIncrement: true,

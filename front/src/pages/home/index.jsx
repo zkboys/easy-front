@@ -1,19 +1,22 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import config from 'src/commons/config-hoc';
 import PageContent from 'src/layouts/page-content';
+import UserInfo from './UserInfo';
+import UserTeam from './UserTeam';
 import './style.less';
 
 export default config({
     pageHead: false,
     path: '/',
-    title: { text: '首页', icon: 'home' },
+    title: { text: '工作台', icon: 'home' },
     breadcrumbs: [ { key: 'home', text: '首页', icon: 'home' } ],
 })(props => {
     useEffect(() => {
-        props.history.push('/teams/:teamId/:tabId');
     }, []);
     return (
-        <PageContent>
+        <PageContent styleName="root">
+            <UserInfo/>
+            <UserTeam/>
         </PageContent>
     );
 });
