@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Tooltip } from 'antd';
+import { Tooltip, Image } from 'antd';
 import { Link } from 'react-router-dom';
 import { FormOutlined, TeamOutlined, DeleteOutlined } from '@ant-design/icons';
 import config from 'src/commons/config-hoc';
@@ -12,11 +12,11 @@ import { useDel } from '@/commons/ajax';
 
 export default config({})(props => {
     const { data = {}, onChange, user } = props;
-    const { id, name, description, team = {}, users = [] } = data;
+    const { id, name, url, description, team = {}, users = [] } = data;
 
     const [ visible, setVisible ] = useState(false);
 
-    const [ deleting, deleteImagePage ] = useDel('/imagePages/:id', { successTip: '删除成功！' });
+    const [ deleting, deleteImagePage ] = useDel('/teams/:teamId/imagePages/:id', { successTip: '删除成功！' });
 
     const handleDelete = async () => {
         if (deleting) return;
@@ -34,16 +34,16 @@ export default config({})(props => {
                 <div styleName="operator">
                     {isMaster ? (
                         <>
-                            <Tooltip title="修改项目">
+                            <Tooltip title="修改页面">
                                 <FormOutlined onClick={() => setVisible(true)}/>
                             </Tooltip>
-                            <Tooltip title="删除项目">
+                            <Tooltip title="删除页面">
                                 <DeleteOutlined
                                     disabled={deleting}
                                     onClick={async () => {
                                         await confirm({
-                                            title: `您确定要删除项目「${name}」吗?`,
-                                            content: `「${name}」项目下的所有接口、成员等信息也将被删除，请谨慎操作！`,
+                                            title: `您确定要删除页面「${name}」吗?`,
+                                            content: `「${name}」页面将无法访问，请谨慎操作！`,
                                         });
                                         await handleDelete();
                                     }}/>
@@ -52,7 +52,15 @@ export default config({})(props => {
                     ) : null}
                 </div>
 
-                <div styleName="image"></div>
+                <div styleName="image-wrap">
+                    <div>
+                        <Image
+                            styleName="image"
+                            src={url}
+                        />
+                    </div>
+                </div>
+
 
                 <div styleName="title">
                     <Link to={`/image-page/${id}`}>{name}</Link>

@@ -30,10 +30,29 @@
     }
 }
 
-.image {
-    height: 120px;
-    background: green;
+.image-wrap {
     margin: 8px 0;
+    height: 120px;
+    overflow: hidden;
+    cursor: pointer;
+
+    /* 格子背景 */
+    background-color: #e8e8e8;
+    background-image: linear-gradient(rgba(255, 255, 255, .3) 1px, transparent 0),
+    linear-gradient(90deg, rgba(255, 255, 255, .3) 1px, transparent 0),
+    linear-gradient(white 1px, transparent 0),
+    linear-gradient(90deg, white 1px, transparent 0);
+    background-size: 15px 15px, 15px 15px, 75px 75px, 75px 75px;
+
+    & > div {
+        /* 设置一个足够长的高度 使img可以不拉伸*/
+        height: 10000px;
+    }
+}
+
+.image {
+    width: 100%;
+    height: auto;
 }
 
 .title {

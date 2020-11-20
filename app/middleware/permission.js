@@ -12,9 +12,6 @@ module.exports = {
   team: {
     ...identityPermission('teamId', 'getTeams', 'teamUser'),
   },
-  imagePage: {
-    ...identityPermission('imagePageId', 'getImagePages', 'imagePageUser'),
-  },
   project: {
     ...identityPermission('projectId', 'getProjects', 'projectUser'),
   },

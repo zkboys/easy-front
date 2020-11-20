@@ -25,6 +25,10 @@ function getErrorTip({ error, errorTip }) {
         // 后端自定义信息
         if (data && typeof data === 'string') return data;
 
+        const { errors } = data;
+
+        if (errors?.length) return errors.map(item => JSON.stringify(item, null, 4));
+
         const message = data?.message || serverErrorTip;
         if (message && typeof message === 'string') return message;
     }

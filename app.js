@@ -69,6 +69,7 @@ module.exports = app => {
       await user.createImagePage({
         teamId: team.id,
         name: '测试页面',
+        url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
         description: '我是测试页面',
       });
     });

@@ -87,7 +87,7 @@ module.exports = app => {
   api.get('/teams/:id/dynamics', permission.team.member, dynamicController.index);
 
   // 图片页面 crud
-  api.resources('/imagePages', permission.admin, permission.imagePage.master, imagePage);
+  api.resources('/teams/:teamId/imagePages', permission.team.master, imagePage);
 
   // 项目 crud
   api.get('/projects', project.index);

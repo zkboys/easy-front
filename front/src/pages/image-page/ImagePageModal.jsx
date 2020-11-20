@@ -16,13 +16,13 @@ export default config({
     const [ data, setData ] = useState({ teamId });
     const { isEdit, id, onOk } = props;
     const [ form ] = Form.useForm();
-    const [ loading, fetchImagePage ] = useGet('/imagePages/:id');
-    const [ saving, saveImagePage ] = usePost('/imagePages', { successTip: '添加成功！' });
-    const [ updating, updateImagePage ] = usePut('/imagePages/:id', { successTip: '修改成功！' });
+    const [ loading, fetchImagePage ] = useGet('/teams/:teamId/imagePages/:id');
+    const [ saving, saveImagePage ] = usePost('/teams/:teamId/imagePages', { successTip: '添加成功！' });
+    const [ updating, updateImagePage ] = usePut('/teams/:teamId/imagePages/:id', { successTip: '修改成功！' });
 
     async function fetchData() {
         if (loading) return;
-        const res = await fetchImagePage(id);
+        const res = await fetchImagePage({ teamId, id });
 
         setData(res || {});
         form.setFieldsValue(res || {});

@@ -14,7 +14,7 @@ export default config()(props => {
     const [ imagePageVisible, setImagePageVisible ] = useState(false);
     const [ refresh, setRefresh ] = useState({});
 
-    const [ imagePageLoading, fetchImagePages ] = useGet('/imagePages');
+    const [ imagePageLoading, fetchImagePages ] = useGet('/teams/:teamId/imagePages');
 
     const teamId = team?.id;
 
@@ -41,6 +41,7 @@ export default config()(props => {
     }, 300);
 
     useEffect(() => {
+        if (!teamId) return;
         (async () => {
             await getImagePages();
         })();
