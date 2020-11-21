@@ -138,6 +138,11 @@ export default config({ path: '/teams/:teamId/image-page/:id', side: false })(pr
 
         await handleBlockFileChange(data.hotBlockFileId);
 
+        if (!data?.src) {
+            form.setFieldsValue({ ...data });
+            setPageLoading(false);
+            return;
+        }
         // 原始图片
         const { base64: oriBase64 } = await compressImage(data?.src, 100);
 
@@ -149,7 +154,7 @@ export default config({ path: '/teams/:teamId/image-page/:id', side: false })(pr
         setImageOriSrc(oriBase64);
         setBlocks(data?.hotBlocks);
         setSize(`${renderSize(size)}  ${width} * ${height}`);
-        form.setFieldsValue({ ...data });
+
 
         setPageLoading(false);
     }
@@ -468,6 +473,7 @@ export default config({ path: '/teams/:teamId/image-page/:id', side: false })(pr
                             name="curHeight"
                             step={50}
                             min={10}
+                            disabled={disabled}
                             required
                         />
                         <div css={css`padding-bottom: 18px; flex: 1; padding-left: 8px`}>

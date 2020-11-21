@@ -64,8 +64,11 @@ module.exports = app => {
       const team = await user.createTeam({
         name: '测试团队',
         description: '测试团队的描述',
+      }, {
+        through: { role: 'owner' },
       });
-      await team.createImagePage({
+      await user.createImagePage({
+        teamId: team.id,
         name: '测试页面',
         src: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
         description: '我是测试页面',

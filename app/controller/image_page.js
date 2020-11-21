@@ -6,7 +6,7 @@ module.exports = class ImagePageController extends Controller {
   // 查询
   async index(ctx) {
     const { name, teamId } = ctx.query;
-    const { ImagePage, Team } = ctx.model;
+    const { ImagePage, Team, User } = ctx.model;
 
     const options = {
       where: {
@@ -17,6 +17,7 @@ module.exports = class ImagePageController extends Controller {
       },
       include: [
         Team,
+        User,
       ],
       order: [
         [ 'updatedAt', 'DESC' ],
@@ -35,9 +36,9 @@ module.exports = class ImagePageController extends Controller {
     }, ctx.params);
 
     const { id } = ctx.params;
-    const { ImagePage, Team, HotBlock, HotBlockFile } = ctx.model;
+    const { ImagePage, Team, User, HotBlock, HotBlockFile } = ctx.model;
 
-    const result = await ImagePage.findByPk(id, { include: [ Team, HotBlock, HotBlockFile ] });
+    const result = await ImagePage.findByPk(id, { include: [ Team, HotBlock, HotBlockFile, User ] });
 
     ctx.success(result);
   }
@@ -62,6 +63,7 @@ module.exports = class ImagePageController extends Controller {
 
   // 创建
   async create(ctx) {
+    const { user } = ctx.user;
     const requestBody = ctx.request.body;
     const { ImagePage } = ctx.model;
 
@@ -77,7 +79,7 @@ module.exports = class ImagePageController extends Controller {
     const foundImagePage = await ImagePage.findOne({ where: { name, teamId } });
     if (foundImagePage) return ctx.fail('此项目名在团队中已存在');
 
-    const savedImagePage = await ImagePage.create({ ...requestBody }, {
+    const savedImagePage = await ImagePage.create({ ...requestBody, userId: user.id }, {
       through: { role: 'owner' },
     });
     ctx.success(savedImagePage);
@@ -85,6 +87,7 @@ module.exports = class ImagePageController extends Controller {
 
   // 更新
   async update(ctx) {
+    const { user } = ctx.user;
     const requestBody = ctx.request.body;
 
     ctx.validate({
@@ -109,7 +112,7 @@ module.exports = class ImagePageController extends Controller {
     const exitName = await ImagePage.findOne({ where: { name } });
     if (exitName && exitName.id !== imagePageId) return ctx.fail('此项目名已被占用！');
 
-    const result = await imagePage.update({ ...requestBody });
+    const result = await imagePage.update({ ...requestBody, userId: user.id });
 
     ctx.success(result);
   }
@@ -145,7 +148,6 @@ module.exports = class ImagePageController extends Controller {
     blocks.forEach(item => {
       item.imagePageId = id;
     });
-
 
     // 多次数据库操作，进行事务处理
     let transaction;

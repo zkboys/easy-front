@@ -45,6 +45,9 @@ module.exports = app => {
       through: app.model.TeamUser,
     });
 
+    app.model.User.hasMany(app.model.ImagePage);
+    app.model.User.hasMany(app.model.HotBlockFile);
+
     // 与Project存在多对多关系，使用belongsToMany()
     app.model.User.belongsToMany(app.model.Project, {
       through: app.model.ProjectUser,

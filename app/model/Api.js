@@ -35,7 +35,7 @@ module.exports = app => {
   Api.associate = function() {
     app.model.Api.belongsTo(app.model.Category, { onDelete: 'CASCADE' });
     app.model.Api.belongsTo(app.model.Project, { onDelete: 'CASCADE' });
-    app.model.Api.belongsTo(app.model.User, { onDelete: 'CASCADE' });
+    app.model.Api.belongsTo(app.model.User, { onDelete: 'SET NULL' });
     app.model.Api.hasMany(app.model.Param);
   };
 

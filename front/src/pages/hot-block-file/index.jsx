@@ -15,6 +15,7 @@ import {
 
 import EditModal from './EditModal';
 import { RollbackOutlined } from '@ant-design/icons';
+import UserLink from '@/components/user-link';
 
 export default config({
     path: '/teams/:teamId/resource/hot-block-file',
@@ -44,7 +45,12 @@ export default config({
             },
         },
         { title: '文件描述', dataIndex: 'description' },
-
+        {
+            title: '创建者', dataIndex: 'user', width: 150,
+            render: value => {
+                return <UserLink user={value} size="small"/>;
+            },
+        },
         {
             title: '操作', dataIndex: 'operator', width: 100,
             render: (value, record) => {

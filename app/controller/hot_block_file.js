@@ -7,7 +7,7 @@ module.exports = class HotBlockFileController extends Controller {
   async index(ctx) {
     const { teamId } = ctx.params;
     const { keyWord, pageNum = 1, pageSize = 10 } = ctx.query;
-    const { HotBlockFile, Team } = ctx.model;
+    const { HotBlockFile, Team, User } = ctx.model;
 
     const keyWordWhere = keyWord ? {
       [Op.or]: [
@@ -32,6 +32,7 @@ module.exports = class HotBlockFileController extends Controller {
       },
       include: [
         Team,
+        User,
       ],
       order: [
         [ 'updatedAt', 'DESC' ],
@@ -50,9 +51,9 @@ module.exports = class HotBlockFileController extends Controller {
     }, ctx.params);
 
     const { id } = ctx.params;
-    const { HotBlockFile, Team } = ctx.model;
+    const { HotBlockFile, Team, User } = ctx.model;
 
-    const result = await HotBlockFile.findByPk(id, { include: [ Team ] });
+    const result = await HotBlockFile.findByPk(id, { include: [ Team, User ] });
 
     ctx.success(result);
   }
@@ -77,6 +78,7 @@ module.exports = class HotBlockFileController extends Controller {
 
   // 创建
   async create(ctx) {
+    const { user } = ctx;
     const requestBody = ctx.request.body;
     const { HotBlockFile } = ctx.model;
 
@@ -96,7 +98,7 @@ module.exports = class HotBlockFileController extends Controller {
     const foundHotBlockFile = await HotBlockFile.findOne({ where: { name, teamId } });
     if (foundHotBlockFile) return ctx.fail('此名称在团队中已存在');
 
-    const savedHotBlockFile = await HotBlockFile.create({ ...requestBody, teamId }, {
+    const savedHotBlockFile = await HotBlockFile.create({ ...requestBody, teamId, userId: user.id }, {
       through: { role: 'owner' },
     });
     ctx.success(savedHotBlockFile);
@@ -104,6 +106,7 @@ module.exports = class HotBlockFileController extends Controller {
 
   // 更新
   async update(ctx) {
+    const { user } = ctx;
     const requestBody = ctx.request.body;
 
     ctx.validate({
@@ -128,7 +131,7 @@ module.exports = class HotBlockFileController extends Controller {
     const exitName = await HotBlockFile.findOne({ where: { name } });
     if (exitName && exitName.id !== hotBlockFileId) return ctx.fail('此名称已被占用！');
 
-    const result = await hotBlockFile.update({ ...requestBody, teamId });
+    const result = await hotBlockFile.update({ ...requestBody, teamId, userId: user.id });
 
     ctx.success(result);
   }

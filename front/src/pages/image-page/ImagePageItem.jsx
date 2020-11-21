@@ -4,15 +4,16 @@ import { Link } from 'react-router-dom';
 import { FormOutlined, TeamOutlined, DeleteOutlined } from '@ant-design/icons';
 import config from 'src/commons/config-hoc';
 import { getColor } from 'src/commons';
-import RoleTag from 'src/components/role-tag';
 import ImagePageModal from './ImagePageModal';
 import './ImagePageItem.less';
 import confirm from '@/components/confirm';
 import { useDel } from '@/commons/ajax';
+import UserLink from '@/components/user-link';
 
 export default config({})(props => {
-    const { data = {}, onChange, user } = props;
-    const { id, name, src, description, team = {}, users = [] } = data;
+    const { data = {}, onChange } = props;
+    const { id, name, src, description, team = {} } = data;
+    console.log(data);
 
     const [ visible, setVisible ] = useState(false);
 
@@ -25,31 +26,25 @@ export default config({})(props => {
     };
 
     const color = getColor(data.name);
-    const role = users.find(item => item.id === user.id)?.imagePageUser?.role;
-    const isMaster = user.isAdmin || [ 'owner', 'master' ].includes(role);
 
     return (
         <div styleName="root">
             <div styleName="content" style={{ backgroundColor: color }}>
                 <div styleName="operator">
-                    {isMaster ? (
-                        <>
-                            <Tooltip title="修改页面">
-                                <FormOutlined onClick={() => setVisible(true)}/>
-                            </Tooltip>
-                            <Tooltip title="删除页面">
-                                <DeleteOutlined
-                                    disabled={deleting}
-                                    onClick={async () => {
-                                        await confirm({
-                                            title: `您确定要删除页面「${name}」吗?`,
-                                            content: `「${name}」页面将无法访问，请谨慎操作！`,
-                                        });
-                                        await handleDelete();
-                                    }}/>
-                            </Tooltip>
-                        </>
-                    ) : null}
+                    <Tooltip title="修改页面">
+                        <FormOutlined onClick={() => setVisible(true)}/>
+                    </Tooltip>
+                    <Tooltip title="删除页面">
+                        <DeleteOutlined
+                            disabled={deleting}
+                            onClick={async () => {
+                                await confirm({
+                                    title: `您确定要删除页面「${name}」吗?`,
+                                    content: `「${name}」页面将无法访问，请谨慎操作！`,
+                                });
+                                await handleDelete();
+                            }}/>
+                    </Tooltip>
                 </div>
 
                 <div styleName="image-wrap">
@@ -74,7 +69,7 @@ export default config({})(props => {
                 <Link to={`/teams/${team.id}/image-page`}>
                     <TeamOutlined/>{team.name}
                 </Link>
-                <RoleTag role={role}/>
+                <UserLink user={data.user} size="small"/>
             </div>
             <ImagePageModal
                 visible={visible}

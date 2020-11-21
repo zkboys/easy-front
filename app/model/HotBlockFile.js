@@ -20,6 +20,7 @@ module.exports = app => {
   // HotBlockFile.sync({ force: true });
   HotBlockFile.associate = function() {
     app.model.HotBlockFile.belongsTo(app.model.Team, { onDelete: 'CASCADE' });
+    app.model.HotBlockFile.belongsTo(app.model.User, { onDelete: 'SET NULL' });
 
     app.model.HotBlockFile.hasMany(app.model.ImagePage);
   };
