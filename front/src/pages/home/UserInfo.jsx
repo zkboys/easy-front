@@ -1,7 +1,7 @@
 // this comment tells babel to convert jsx to calls to a function called jsx instead of React.createElement
 /** @jsx jsx */
 import { css, jsx } from '@emotion/react';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import config from 'src/commons/config-hoc';
 import PageContent from 'src/layouts/page-content';
 import { getLoginUser } from '@/commons';

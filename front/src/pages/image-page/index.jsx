@@ -2,7 +2,7 @@
 /** @jsx jsx */
 import { css, jsx } from '@emotion/react';
 
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button, Slider, Upload, Form, Empty, Modal } from 'antd';
 import {
     UploadOutlined,
@@ -28,7 +28,7 @@ import {
     getCurlyBracketContent,
 } from './util';
 import './style.less';
-import { useGet, usePost } from '@/commons/ajax';
+import { useGet } from '@/commons/ajax';
 
 const EditTable = tableEditable(Table);
 
@@ -54,7 +54,7 @@ export default config({ path: '/teams/:teamId/image-page/:id', side: false })(pr
     const [ imageOriSrc, setImageOriSrc ] = useState(null);
 
     const [ loading, fetchImagePage ] = useGet('/teams/:teamId/imagePages/:id');
-
+    const [ , fetchHotBlockFiles ] = useGet(`/teams/${teamId}/hotBlockFiles`);
 
     useEffect(() => {
         (async () => {
@@ -126,25 +126,14 @@ export default config({ path: '/teams/:teamId/image-page/:id', side: false })(pr
         setPageLoading(true);
         setData(data);
 
-        // TODO 发请求，获取team下所有 hotBlockFile文件
-        const files = [
-            {
-                id: 1,
-                name: '测试文件',
-                description: '文件的描述',
-                url: 'http://localhost:4001/hot_block_file.js',
-            },
-            {
-                id: 2,
-                name: '测试文件2',
-                description: '文件的描述2',
-                url: 'http://localhost:4001/hot_block_file2.js',
-            },
-        ];
-
-        setHotBlockFileOptions(files.map(item => {
+        const { rows: files } = await fetchHotBlockFiles();
+        setHotBlockFileOptions((files || []).map(item => {
             const { id, name, description } = item;
-            return { ...item, value: id, label: `${name} - ${description}` };
+            return {
+                ...item,
+                value: id,
+                label: `${name} - ${description}`,
+            };
         }));
 
         await handleBlockFileChange(data.hotBlockFileId);
@@ -337,6 +326,8 @@ export default config({ path: '/teams/:teamId/image-page/:id', side: false })(pr
 
     // 预览
     async function handleSave(deploy) {
+        const values = await form.validateFields();
+
         if (deploy) {
             await new Promise((resolve, reject) => Modal.confirm({
                 title: '提示',
@@ -348,7 +339,7 @@ export default config({ path: '/teams/:teamId/image-page/:id', side: false })(pr
         await Promise.all(blocks.map(block => block._form.validateFields()));
 
         // TODO
-        console.log(deploy);
+        console.log(deploy, values, blocks);
     }
 
     const itemProps = {
@@ -492,8 +483,8 @@ export default config({ path: '/teams/:teamId/image-page/:id', side: false })(pr
                         disabled={disabled}
                         required
                         tip={<div style={{ width: 200 }}/>}
-                        options={hotBlockFileOptions}
                         onChange={handleBlockFileChange}
+                        options={hotBlockFileOptions}
                     />
                     <FormElement
                         {...itemProps}

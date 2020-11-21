@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import config from 'src/commons/config-hoc';
 import PageContent from 'src/layouts/page-content';
 import UserInfo from './UserInfo';

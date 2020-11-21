@@ -23,6 +23,7 @@ module.exports = app => {
     wiki,
     mind,
     imagePage,
+    hotBlockFile,
   } = controller;
 
   // 登录
@@ -89,6 +90,9 @@ module.exports = app => {
   // 图片页面 crud
   api.resources('/teams/:teamId/imagePages', permission.team.master, imagePage);
   api.post('/teams/:teamId/imagePages/:id/hotBlocks', permission.team.master, imagePage.saveBlocks);
+
+  // 热区事件资源文件 crud
+  api.resources('/teams/:teamId/hotBlockFiles', permission.team.master, hotBlockFile);
 
   // 项目 crud
   api.get('/projects', project.index);

@@ -109,7 +109,7 @@ export default class TableComponent extends Component {
             this.tableBody.style.height = `${tableBodyHeight}px`;
         } else {
             this.tableBody.style.height = '0px';
-            this.tablePlaceholder.style.height = `${tableBodyHeight - 36}px`;
+            this.tablePlaceholder.style.height = `${tableBodyHeight}px`;
         }
 
         this.setState({ tableBodyHeight });

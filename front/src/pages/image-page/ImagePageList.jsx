@@ -3,12 +3,12 @@ import config from 'src/commons/config-hoc';
 import { useGet } from 'src/commons/ajax';
 import _ from 'lodash';
 import { Button, Empty, Input } from 'antd';
-import { AppstoreAddOutlined } from '@ant-design/icons';
+import { AppstoreAddOutlined, FolderOutlined } from '@ant-design/icons';
 import PageContent from 'src/layouts/page-content';
 import ImagePageModal from 'src/pages/image-page/ImagePageModal';
 import ImagePageItem from 'src/pages/image-page/ImagePageItem';
 
-export default config()(props => {
+export default config({ router: true })(props => {
     const { height, team, onChange } = props;
     const [ imagePages, setImagePages ] = useState([]);
     const [ imagePageVisible, setImagePageVisible ] = useState(false);
@@ -54,9 +54,17 @@ export default config()(props => {
                 <span style={{ flex: 1, marginLeft: 0 }}>
                     当前团队共{imagePages.length}个页面
                 </span>
+                <Button
+                    icon={<FolderOutlined/>}
+                    onClick={() => {
+                        props.history.push(`/teams/${teamId}/resource/hot-block-file`);
+                    }}
+                >
+                    事件文件管理
+                </Button>
                 <Input
                     allowClear
-                    style={{ width: 200, height: 28 }}
+                    style={{ marginLeft: 8, width: 200, height: 28 }}
                     placeholder="请输入关键字进行搜索"
                     onChange={e => {
                         e.persist();

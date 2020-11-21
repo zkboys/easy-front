@@ -1,12 +1,12 @@
 // this comment tells babel to convert jsx to calls to a function called jsx instead of React.createElement
 /** @jsx jsx */
 import { css, jsx } from '@emotion/react';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Card } from 'antd';
 import config from 'src/commons/config-hoc';
 import PageContent from 'src/layouts/page-content';
-import { useDel, useGet } from '@/commons/ajax';
+import { useGet } from '@/commons/ajax';
 
 
 const rootCss = css`
@@ -30,7 +30,6 @@ export default config()(props => {
     const [ teams, setTeams ] = useState([]);
 
     const [ teamsLoading, fetchTeams ] = useGet('/teams');
-    const [ teamDeleteLoading, deleteTeam ] = useDel('/teams/:id');
 
     useEffect(() => {
         (async () => {

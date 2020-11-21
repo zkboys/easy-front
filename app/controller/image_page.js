@@ -62,7 +62,6 @@ module.exports = class ImagePageController extends Controller {
 
   // 创建
   async create(ctx) {
-    const user = ctx.user;
     const requestBody = ctx.request.body;
     const { ImagePage } = ctx.model;
 
