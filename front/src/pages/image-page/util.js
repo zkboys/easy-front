@@ -255,3 +255,30 @@ async function getImageBase64List(imageBase64, minHeight, baseWidth) {
     });
 }
 
+
+// 获取 {} 内的内容 算法不是很严谨，如果字符串中含有不成对的{}，会出错
+export function getCurlyBracketContent(content) {
+    const stack = [];
+    const left = '{';
+    const right = '}';
+    const startIndex = content.indexOf(left);
+    if (startIndex === -1) return '';
+
+    content = content.substring(startIndex);
+
+    for (let i = 0; i < content.length; i++) {
+
+        let s = content[i];
+        if (left === s) {
+            stack.push(s);
+        }
+        if (right === s) {
+            stack.pop();
+            if (stack.length === 0) {
+                return content.substring(0, i + 1);
+            }
+        }
+    }
+
+    return '';
+}

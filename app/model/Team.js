@@ -19,6 +19,8 @@ module.exports = app => {
   Team.associate = function() {
     app.model.Team.hasMany(app.model.Project);
     app.model.Team.hasMany(app.model.Dynamic);
+    app.model.Team.hasMany(app.model.ImagePage);
+    app.model.Team.hasMany(app.model.HotBlockFile);
 
     // 与User表是多对多关系
     app.model.Team.belongsToMany(app.model.User, {

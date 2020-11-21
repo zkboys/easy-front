@@ -13,6 +13,7 @@ import {
 } from '@ant-design/icons';
 import { v4 as uuid } from 'uuid';
 import { Rnd } from 'react-rnd';
+import JSON5 from 'json5';
 
 import config from 'src/commons/config-hoc';
 import PageContent from 'src/layouts/page-content';
@@ -24,6 +25,7 @@ import {
     getX,
     getY,
     exportZip,
+    getCurlyBracketContent,
 } from './util';
 import './style.less';
 import { useGet, usePost } from '@/commons/ajax';
@@ -42,6 +44,8 @@ export default config({ path: '/teams/:teamId/image-page/:id', side: false })(pr
     const [ pageLoading, setPageLoading ] = useState(false);
     const [ data, setData ] = useState({});
     const [ size, setSize ] = useState('');
+    const [ hotBlockFileOptions, setHotBlockFileOptions ] = useState([]);
+    const [ actionOptions, setActionOptions ] = useState([]);
 
     const [ blocks, setBlocks ] = useState([]);
     const [ blockVisible, setBlockVisible ] = useState(true);
@@ -50,7 +54,7 @@ export default config({ path: '/teams/:teamId/image-page/:id', side: false })(pr
     const [ imageOriSrc, setImageOriSrc ] = useState(null);
 
     const [ loading, fetchImagePage ] = useGet('/teams/:teamId/imagePages/:id');
-    const [ , saveHotBlock ] = usePost('/teams/:teamId/imagePages/:id/hotBlocks');
+
 
     useEffect(() => {
         (async () => {
@@ -74,8 +78,10 @@ export default config({ path: '/teams/:teamId/image-page/:id', side: false })(pr
             title: '热区动作', dataIndex: 'action',
             formProps: (record) => {
                 return {
-                    onBlur: async (e) => {
-                        record.action = e.target.value;
+                    type: 'select',
+                    options: actionOptions,
+                    onChange: async (value) => {
+                        record.action = value;
                         await saveBlocks(blocks);
                     },
                 };
@@ -118,6 +124,29 @@ export default config({ path: '/teams/:teamId/image-page/:id', side: false })(pr
 
         setPageLoading(true);
         setData(data);
+
+        // TODO 发请求，获取team下所有 hotBlockFile文件
+        const files = [
+            {
+                id: 1,
+                name: '测试文件',
+                description: '文件的描述',
+                url: 'http://localhost:4001/hot_block_file.js',
+            },
+            {
+                id: 2,
+                name: '测试文件2',
+                description: '文件的描述2',
+                url: 'http://localhost:4001/hot_block_file2.js',
+            },
+        ];
+
+        setHotBlockFileOptions(files.map(item => {
+            const { id, name, description } = item;
+            return { ...item, value: id, label: `${name} - ${description}` };
+        }));
+
+        await handleBlockFileChange(data.hotBlockFileId);
 
         // 原始图片
         const { base64: oriBase64 } = await compressImage(data?.src, 100);
@@ -247,6 +276,33 @@ export default config({ path: '/teams/:teamId/image-page/:id', side: false })(pr
         const nextBlocks = blocks.filter(item => item.id !== blockId);
 
         await saveBlocks(nextBlocks);
+    }
+
+    async function handleBlockFileChange(fileId) {
+        // 清空热区参数
+        blocks.forEach(item => {
+            item.action = undefined;
+            item.actionParam = undefined;
+            item._form.setFieldsValue({ action: undefined, actionParam: undefined });
+        });
+        setBlocks([ ...blocks ]);
+
+        const fileData = hotBlockFileOptions.find(item => item.value === fileId);
+        if (!fileData) {
+            setActionOptions([]);
+            return;
+        }
+
+        // 获取文件中定义的action
+        const { url } = fileData;
+        const content = await props.ajax.get(url);
+        const actionsStr = getCurlyBracketContent(content);
+        if (actionsStr) {
+            const data = JSON5.parse(actionsStr);
+            const options = Object.entries(data).map(([ value, label ]) => ({ value, label }));
+            setActionOptions(options);
+        }
+
     }
 
     function getBase64(img, callback) {
@@ -404,6 +460,7 @@ export default config({ path: '/teams/:teamId/image-page/:id', side: false })(pr
                         name="quality"
                         onAfterChange={handleQualityChange}
                         disabled={disabled}
+                        required
                         tip={<div style={{ width: 200, paddingLeft: 16 }}>{size}</div>}
                     >
                         <Slider tooltipVisible/>
@@ -417,11 +474,24 @@ export default config({ path: '/teams/:teamId/image-page/:id', side: false })(pr
                             name="curHeight"
                             step={50}
                             min={10}
+                            required
                         />
                         <div css={css`padding-bottom: 18px; flex: 1; padding-left: 8px`}>
                             将图片裁剪成多个小图，提高加载性能，可以设置一个较大的值，不进行裁剪
                         </div>
                     </div>
+                    <FormElement
+                        {...itemProps}
+                        label="热区事件文件"
+                        type="select"
+                        showSearch
+                        name="hotBlockFileId"
+                        disabled={disabled}
+                        required
+                        tip={<div style={{ width: 200 }}/>}
+                        options={hotBlockFileOptions}
+                        onChange={handleBlockFileChange}
+                    />
                     <FormElement
                         {...itemProps}
                         label="显示热区"

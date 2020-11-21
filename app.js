@@ -4,8 +4,9 @@ const bcrypt = require('bcryptjs');
 
 module.exports = app => {
   /** 同步数据库 */
-  const isSync = false;
-  // const isSync = app.config.env === 'local' || app.config.env === 'unittest';
+  // const isSync = false;
+
+  const isSync = app.config.env === 'local' || app.config.env === 'unittest';
 
   if (isSync) {
     app.beforeStart(async () => {
@@ -65,9 +66,7 @@ module.exports = app => {
         name: '测试团队',
         description: '测试团队的描述',
       });
-
-      await user.createImagePage({
-        teamId: team.id,
+      await team.createImagePage({
         name: '测试页面',
         src: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
         description: '我是测试页面',

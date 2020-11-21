@@ -5,9 +5,8 @@ const Controller = require('egg').Controller;
 module.exports = class ImagePageController extends Controller {
   // 查询
   async index(ctx) {
-    const user = ctx.user;
     const { name, teamId } = ctx.query;
-    const { ImagePage, Team, User } = ctx.model;
+    const { ImagePage, Team } = ctx.model;
 
     const options = {
       where: {
@@ -18,10 +17,6 @@ module.exports = class ImagePageController extends Controller {
       },
       include: [
         Team,
-        {
-          model: User,
-          where: user.isAdmin ? undefined : { id: user.id },
-        },
       ],
       order: [
         [ 'updatedAt', 'DESC' ],
@@ -40,9 +35,9 @@ module.exports = class ImagePageController extends Controller {
     }, ctx.params);
 
     const { id } = ctx.params;
-    const { ImagePage, Team, User, HotBlock } = ctx.model;
+    const { ImagePage, Team, HotBlock, HotBlockFile } = ctx.model;
 
-    const result = await ImagePage.findByPk(id, { include: [ Team, User, HotBlock ] });
+    const result = await ImagePage.findByPk(id, { include: [ Team, HotBlock, HotBlockFile ] });
 
     ctx.success(result);
   }
@@ -69,7 +64,7 @@ module.exports = class ImagePageController extends Controller {
   async create(ctx) {
     const user = ctx.user;
     const requestBody = ctx.request.body;
-    const ImagePage = ctx.model.ImagePage;
+    const { ImagePage } = ctx.model;
 
     ctx.validate({
       name: 'string',
@@ -83,7 +78,7 @@ module.exports = class ImagePageController extends Controller {
     const foundImagePage = await ImagePage.findOne({ where: { name, teamId } });
     if (foundImagePage) return ctx.fail('此项目名在团队中已存在');
 
-    const savedImagePage = await user.createImagePage({ ...requestBody }, {
+    const savedImagePage = await ImagePage.create({ ...requestBody }, {
       through: { role: 'owner' },
     });
     ctx.success(savedImagePage);
