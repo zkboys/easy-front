@@ -21,6 +21,7 @@ import Member from './Member';
 
 import './style.less';
 import { getColor } from 'src/commons';
+import UserLink from '@/components/user-link';
 
 const { TabPane } = Tabs;
 
@@ -246,7 +247,21 @@ export default config({
                         selectedKeys={[ teamId ]}
                         mode="inline"
                     >
-                        {showTeams.map(item => <Menu.Item key={item.id}><TeamOutlined/> {item.name}</Menu.Item>)}
+                        {showTeams.map(item => {
+                            const owner = item?.users?.find(u => u?.teamUser?.role === 'owner');
+                            return (
+                                <Menu.Item key={item.id}>
+                                    <div style={{ display: 'flex' }}>
+                                        <div style={{ flex: 1 }}>
+                                            <TeamOutlined/> {item.name}
+                                        </div>
+                                        <div style={{ flex: 0 }}>
+                                            <UserLink user={owner} size="small"/>
+                                        </div>
+                                    </div>
+                                </Menu.Item>
+                            );
+                        })}
                     </Menu>
                 ) : (
                     <Empty

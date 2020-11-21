@@ -4,7 +4,8 @@ import { UserAvatar } from 'src/library/components';
 import { Link } from 'react-router-dom';
 
 const UserLink = props => {
-    const { user , size} = props;
+    let { user, size } = props;
+    if (!user) user = { name: '未知用户' };
     return (
         <Link to={`/users/${user?.id}/project`}>
             <UserAvatar src={user?.avatar} name={user?.name} size={size}/>
