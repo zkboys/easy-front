@@ -80,6 +80,7 @@ export default config({ path: '/teams/:teamId/image-page/:id', side: false })(pr
                 return {
                     type: 'select',
                     options: actionOptions,
+                    required: true,
                     onChange: async (value) => {
                         record.action = value;
                         await saveBlocks(blocks);
@@ -344,6 +345,8 @@ export default config({ path: '/teams/:teamId/image-page/:id', side: false })(pr
                 onCancel: () => reject('用户取消发布'),
             }));
         }
+        await Promise.all(blocks.map(block => block._form.validateFields()));
+
         // TODO
         console.log(deploy);
     }
