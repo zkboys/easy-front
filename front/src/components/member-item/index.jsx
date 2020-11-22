@@ -18,9 +18,9 @@ export default config({})(props => {
         onDelete,
         onLeave,
     } = props;
-    const { team_user, project_user, id, name, avatar, email } = data;
+    const { teamUser, projectUser, id, name, avatar, email } = data;
 
-    let role = team_user?.role || project_user?.role;
+    let role = teamUser?.role || projectUser?.role;
 
     const isSelf = user?.id === id;
 

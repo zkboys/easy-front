@@ -17,15 +17,17 @@ module.exports = class TeamController extends Controller {
       },
       include: {
         model: User,
-        where: user.isAdmin ? undefined : { id: user.id },
       },
       order: [
         [ 'updatedAt', 'DESC' ],
       ],
     };
 
-    const result = await Team.findAll(options);
+    let result = await Team.findAll(options);
 
+    if (!user.isAdmin) {
+      result = result.filter(item => item.users && item.users.find(it => it.id === user.id));
+    }
     ctx.success(result);
   }
 

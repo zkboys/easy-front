@@ -23,6 +23,7 @@ module.exports = app => {
     app.model.HotBlockFile.belongsTo(app.model.User, { onDelete: 'SET NULL' });
 
     app.model.HotBlockFile.hasMany(app.model.ImagePage);
+    app.model.HotBlockFile.hasMany(app.model.Dynamic);
   };
 
   return HotBlockFile;

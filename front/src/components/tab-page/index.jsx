@@ -7,7 +7,7 @@ import PageContent from 'src/layouts/page-content';
 
 import './style.less';
 
-const otherHeight = 176;
+const otherHeight = 172;
 
 const TabPage = config({
     pageHead: false,
@@ -57,7 +57,7 @@ const TabPage = config({
             loading={loading}
         >
             <div styleName="root-wrap">
-                <div styleName="detail-wrap" style={{ height: height + 94 }}>
+                <div styleName="detail-wrap" style={{ height: height + 90 }}>
                     <div styleName="top" style={detailStyle}>
                         {detail}
                     </div>

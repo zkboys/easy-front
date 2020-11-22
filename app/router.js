@@ -88,11 +88,11 @@ module.exports = app => {
   api.get('/teams/:id/dynamics', permission.team.member, dynamicController.index);
 
   // 图片页面 crud
-  api.resources('/teams/:teamId/imagePages', permission.team.master, imagePage);
-  api.post('/teams/:teamId/imagePages/:id/hotBlocks', permission.team.master, imagePage.saveBlocks);
+  api.resources('/teams/:teamId/imagePages', permission.team.member, imagePage);
+  api.post('/teams/:teamId/imagePages/:id/hotBlocks', permission.team.member, imagePage.saveBlocks);
 
   // 热区事件资源文件 crud
-  api.resources('/teams/:teamId/hotBlockFiles', permission.team.master, hotBlockFile);
+  api.resources('/teams/:teamId/hotBlockFiles', permission.team.member, hotBlockFile);
 
   // 项目 crud
   api.get('/projects', project.index);

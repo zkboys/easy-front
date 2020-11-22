@@ -6,7 +6,7 @@ import {
     UsergroupAddOutlined,
     FormOutlined,
     AppstoreOutlined,
-    SolutionOutlined,
+    // SolutionOutlined,
     DeleteOutlined,
 } from '@ant-design/icons';
 import _ from 'lodash';
@@ -14,14 +14,13 @@ import { useGet, useDel } from 'src/commons/ajax';
 import TeamModal from './TeamModal';
 import RoleTag from 'src/components/role-tag';
 import TabPage from 'src/components/tab-page';
-import Dynamic from 'src/components/dynamic';
+// import Dynamic from 'src/components/dynamic';
 import confirm from 'src/components/confirm';
 import ImagePageList from 'src/pages/image-page/ImagePageList';
 import Member from './Member';
-
-import './style.less';
 import { getColor } from 'src/commons';
 import UserLink from '@/components/user-link';
+import './style.less';
 
 const { TabPane } = Tabs;
 
@@ -73,11 +72,11 @@ export default config({
     ), [ height, team ]);
 
     // 只用teamId, team 更新之后，Dynamic才重新渲染
-    const dynamicComponent = useMemo(() => (
-        <div className="pan-content" style={{ height: height + 50 }}>
-            <Dynamic url={`/teams/${team?.id ? team.id : ':teamId'}/dynamics`} team={team}/>
-        </div>
-    ), [ height, team ]);
+    // const dynamicComponent = useMemo(() => (
+    //     <div className="pan-content" style={{ height: height + 50 }}>
+    //         <Dynamic url={`/teams/${team?.id ? team.id : ':teamId'}/dynamics`} team={team}/>
+    //     </div>
+    // ), [ height, team ]);
 
     async function getTeams() {
         const teams = await fetchTeams();
@@ -242,21 +241,21 @@ export default config({
                 )}
                 list={showTeams?.length ? (
                     <Menu
-                        onClick={info => setTeamId(info.key)}
                         style={{ width: '100%' }}
-                        selectedKeys={[ teamId ]}
+                        onSelect={info => setTeamId(info.key)}
+                        selectedKeys={[ `${teamId}` ]}
                         mode="inline"
                     >
                         {showTeams.map(item => {
                             const owner = item?.users?.find(u => u?.teamUser?.role === 'owner');
                             return (
-                                <Menu.Item key={item.id}>
+                                <Menu.Item key={item.id} styleName="team-item">
                                     <div style={{ display: 'flex' }}>
                                         <div style={{ flex: 1 }}>
                                             <TeamOutlined/> {item.name}
                                         </div>
-                                        <div style={{ flex: 0 }}>
-                                            <UserLink user={owner} size="small"/>
+                                        <div style={{ flex: '0 0 100px' }}>
+                                            <UserLink user={owner} size="small" link={false}/>
                                         </div>
                                     </div>
                                 </Menu.Item>
@@ -288,9 +287,9 @@ export default config({
                 <TabPane tab={<span><TeamOutlined/> 团队成员</span>} key="member">
                     {memberComponent}
                 </TabPane>
-                <TabPane tab={<span><SolutionOutlined/> 团队动态</span>} key="dynamic">
-                    {dynamicComponent}
-                </TabPane>
+                {/*<TabPane tab={<span><SolutionOutlined/> 团队动态</span>} key="dynamic">*/}
+                {/*    {dynamicComponent}*/}
+                {/*</TabPane>*/}
             </TabPage>
             <TeamModal
                 visible={teamVisible}

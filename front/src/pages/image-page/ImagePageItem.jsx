@@ -13,7 +13,6 @@ import UserLink from '@/components/user-link';
 export default config({})(props => {
     const { data = {}, onChange } = props;
     const { id, name, src, description, team = {} } = data;
-    console.log(data);
 
     const [ visible, setVisible ] = useState(false);
 

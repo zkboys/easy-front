@@ -3,6 +3,7 @@ import { Select, Tag } from 'antd';
 import config from 'src/commons/config-hoc';
 import { useGet } from 'src/commons/ajax';
 import { getColor } from 'src/commons';
+import UserLink from '@/components/user-link';
 
 export default config({})((props) => {
     const { exclude = [], ...others } = props;
@@ -15,10 +16,11 @@ export default config({})((props) => {
             const options = rows.filter(item => !exclude.includes(item.id))
                 .map(item => {
                     const { id, account, name } = item;
+                    const user = { ...item, name: `${name}(${account})` };
 
                     return {
                         value: id,
-                        label: `${name}(${account})`,
+                        label: <UserLink user={user} size="small" link={false}/>,
                     };
                 });
 
@@ -33,13 +35,16 @@ export default config({})((props) => {
             options={options}
             tagRender={(props) => {
                 const { label, closable, onClose } = props;
-                const color = getColor(label);
+                const name = label?.props?.user?.name;
+                const color = getColor(name);
+
                 return (
                     <Tag
                         color={color}
                         closable={closable}
                         onClose={onClose}
-                        style={{ marginRight: 3 }}>
+                        style={{ marginRight: 3 }}
+                    >
                         {label}
                     </Tag>
                 );

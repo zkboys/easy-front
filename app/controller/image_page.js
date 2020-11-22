@@ -63,7 +63,7 @@ module.exports = class ImagePageController extends Controller {
 
   // 创建
   async create(ctx) {
-    const { user } = ctx.user;
+    const { user } = ctx;
     const requestBody = ctx.request.body;
     const { ImagePage } = ctx.model;
 
@@ -79,6 +79,7 @@ module.exports = class ImagePageController extends Controller {
     const foundImagePage = await ImagePage.findOne({ where: { name, teamId } });
     if (foundImagePage) return ctx.fail('此项目名在团队中已存在');
 
+    console.log(user);
     const savedImagePage = await ImagePage.create({ ...requestBody, userId: user.id }, {
       through: { role: 'owner' },
     });
@@ -87,7 +88,7 @@ module.exports = class ImagePageController extends Controller {
 
   // 更新
   async update(ctx) {
-    const { user } = ctx.user;
+    const { user } = ctx;
     const requestBody = ctx.request.body;
 
     ctx.validate({

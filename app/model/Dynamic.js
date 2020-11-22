@@ -14,6 +14,8 @@ module.exports = app => {
     userId: UUID,
     teamId: INTEGER,
     projectId: INTEGER,
+    imagePageId: INTEGER,
+    hotBlockFileId: INTEGER,
 
     type: ENUM('create', 'update', 'delete'),
     title: STRING(100),
@@ -31,6 +33,8 @@ module.exports = app => {
     // 团队删除的时候，设置 dynamic.teamId = null
     app.model.Dynamic.belongsTo(app.model.Team, { onDelete: 'SET NULL' });
     app.model.Dynamic.belongsTo(app.model.Project, { onDelete: 'SET NULL' });
+    app.model.Dynamic.belongsTo(app.model.ImagePage, { onDelete: 'SET NULL' });
+    app.model.Dynamic.belongsTo(app.model.HotBlockFile, { onDelete: 'SET NULL' });
   };
 
   return Dynamic;

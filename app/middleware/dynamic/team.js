@@ -61,7 +61,7 @@ module.exports = {
     const user = ctx.user;
     const { Dynamic, User, Team } = ctx.model;
 
-    const { id: teamId, memberId } = ctx.params;
+    const { teamId, id: memberId } = ctx.params;
     const { role } = ctx.request.body;
 
     const member = await User.findOne({
@@ -91,7 +91,7 @@ module.exports = {
     const user = ctx.user;
     const { Dynamic, User } = ctx.model;
 
-    const { id: teamId, memberId } = ctx.params;
+    const { id: memberId, teamId } = ctx.params;
 
     const member = await User.findByPk(memberId);
 

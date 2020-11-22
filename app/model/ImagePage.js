@@ -35,6 +35,7 @@ module.exports = app => {
     app.model.ImagePage.belongsTo(app.model.User, { onDelete: 'SET NULL' });
 
     app.model.ImagePage.hasMany(app.model.HotBlock);
+    app.model.ImagePage.hasMany(app.model.Dynamic);
   };
 
   return ImagePage;
