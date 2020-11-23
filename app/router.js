@@ -90,6 +90,7 @@ module.exports = app => {
   // 图片页面 crud
   api.resources('/teams/:teamId/imagePages', permission.team.member, imagePage);
   api.post('/teams/:teamId/imagePages/:id/hotBlocks', permission.team.member, imagePage.saveBlocks);
+  api.put('/teams/:teamId/imagePages/:id/saveAndDeploy', permission.team.member, imagePage.saveAndDeploy);
 
   // 热区事件资源文件 crud
   api.resources('/teams/:teamId/hotBlockFiles', permission.team.member, hotBlockFile);

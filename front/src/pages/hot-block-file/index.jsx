@@ -123,7 +123,7 @@ export default config({
                         <Button
                             style={{ marginLeft: 8 }}
                             icon={<RollbackOutlined/>}
-                            onClick={() => props.history.goBack()}
+                            onClick={() => props.history.push(`/teams/${teamId}/image-page`)}
                         >
                             返回团队
                         </Button>

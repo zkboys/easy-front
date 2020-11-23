@@ -28,7 +28,7 @@ import {
     getCurlyBracketContent,
 } from './util';
 import './style.less';
-import { useGet } from '@/commons/ajax';
+import { useGet, usePut } from '@/commons/ajax';
 
 const EditTable = tableEditable(Table);
 
@@ -53,8 +53,9 @@ export default config({ path: '/teams/:teamId/image-page/:id', side: false })(pr
     const [ imageSrc, setImageSrc ] = useState(null);
     const [ imageOriSrc, setImageOriSrc ] = useState(null);
 
-    const [ loading, fetchImagePage ] = useGet('/teams/:teamId/imagePages/:id');
+    const [ loading, fetchImagePage ] = useGet(`/teams/${teamId}/imagePages/:id`);
     const [ , fetchHotBlockFiles ] = useGet(`/teams/${teamId}/hotBlockFiles`);
+    const [ saving, saveAndDeploy ] = usePut(`/teams/${teamId}/imagePages/:id/saveAndDeploy`);
 
     useEffect(() => {
         (async () => {
@@ -121,40 +122,45 @@ export default config({ path: '/teams/:teamId/image-page/:id', side: false })(pr
     ];
 
     async function getImagePage() {
-        const data = await fetchImagePage({ teamId, id: imagePageId });
-
         setPageLoading(true);
-        setData(data);
 
+        // 获取页面数据
+        const data = await fetchImagePage(imagePageId);
+
+        // 获取热区事件文件下拉
         const { rows: files } = await fetchHotBlockFiles();
-        setHotBlockFileOptions((files || []).map(item => {
+        const fileOptions = (files || []).map(item => {
             const { id, name, description } = item;
             return {
                 ...item,
                 value: id,
                 label: `${name} - ${description}`,
             };
-        }));
+        });
+        setHotBlockFileOptions(fileOptions);
+        await handleBlockFileChange(data.hotBlockFileId, fileOptions);
 
-        await handleBlockFileChange(data.hotBlockFileId);
+        // 回显数据
+        setData(data);
+        form.setFieldsValue({ ...data });
+        setBlocks(data?.hotBlocks);
 
+        // 处理图片信息
         if (!data?.src) {
-            form.setFieldsValue({ ...data });
             setPageLoading(false);
             return;
         }
         // 原始图片
         const { base64: oriBase64 } = await compressImage(data?.src, 100);
+        setImageOriSrc(oriBase64);
 
         // 压缩后
         const { base64, width, height } = await compressImage(data?.src, data?.quality || 100);
-        const size = getImageSizeByBase64(base64);
-
         setImageSrc(base64);
-        setImageOriSrc(oriBase64);
-        setBlocks(data?.hotBlocks);
-        setSize(`${renderSize(size)}  ${width} * ${height}`);
 
+        // 回显图片大小
+        const size = getImageSizeByBase64(base64);
+        setSize(`${renderSize(size)}  ${width} * ${height}`);
 
         setPageLoading(false);
     }
@@ -236,7 +242,7 @@ export default config({ path: '/teams/:teamId/image-page/:id', side: false })(pr
         const blockId = uuid();
         const nextBlocks = [ ...blocks, { id: blockId, name: '新建热区', left, top, width, height } ];
         await saveBlocks(nextBlocks);
-        handleBlockClick(blockId, nextBlocks);
+        handleBlockClick(blockId);
     }
 
     async function saveBlocks(nextBlocks) {
@@ -256,15 +262,8 @@ export default config({ path: '/teams/:teamId/image-page/:id', side: false })(pr
         setSize(`${renderSize(size)}  ${width} * ${height}`);
     }
 
-    function handleBlockClick(blockId, nb) {
-        const block = (nb || blocks).find(item => item.id === blockId);
+    function handleBlockClick(blockId) {
         setCurrentBlockId(blockId);
-        form.setFieldsValue({
-            name: undefined,
-            action: undefined,
-            actionParam: undefined,
-            ...block,
-        });
     }
 
     async function handleDeleteBlock(blockId) {
@@ -273,7 +272,7 @@ export default config({ path: '/teams/:teamId/image-page/:id', side: false })(pr
         await saveBlocks(nextBlocks);
     }
 
-    async function handleBlockFileChange(fileId) {
+    async function handleBlockFileChange(fileId, options) {
         // 清空热区参数
         blocks.forEach(item => {
             item.action = undefined;
@@ -282,7 +281,8 @@ export default config({ path: '/teams/:teamId/image-page/:id', side: false })(pr
         });
         setBlocks([ ...blocks ]);
 
-        const fileData = hotBlockFileOptions.find(item => item.value === fileId);
+        const fileData = (options || hotBlockFileOptions).find(item => item.value === fileId);
+
         if (!fileData) {
             setActionOptions([]);
             return;
@@ -331,6 +331,8 @@ export default config({ path: '/teams/:teamId/image-page/:id', side: false })(pr
 
     // 预览
     async function handleSave(deploy) {
+        if (saving) return;
+
         const values = await form.validateFields();
 
         if (deploy) {
@@ -343,8 +345,8 @@ export default config({ path: '/teams/:teamId/image-page/:id', side: false })(pr
         }
         await Promise.all(blocks.map(block => block._form.validateFields()));
 
-        // TODO
-        console.log(deploy, values, blocks);
+        const params = { deploy, ...values, blocks };
+        saveAndDeploy(params, { successTip: deploy ? '发布成功！' : '保存成功！' });
     }
 
     const itemProps = {
@@ -371,12 +373,12 @@ export default config({ path: '/teams/:teamId/image-page/:id', side: false })(pr
                 curHeight: 400,
             }}
         >
-            <PageContent styleName="root" fitHeight loading={loading || pageLoading}>
+            <PageContent styleName="root" fitHeight loading={loading || pageLoading || saving}>
                 <div styleName="img-root-outer">
                     <div styleName="title">
                         <Button
                             icon={<RollbackOutlined/>}
-                            onClick={() => props.history.goBack()}
+                            onClick={() => props.history.push(`/teams/${teamId}/image-page`)}
                         >
                             返回团队
                         </Button>
@@ -452,6 +454,7 @@ export default config({ path: '/teams/:teamId/image-page/:id', side: false })(pr
                     </div>
 
                     <FormElement {...itemProps} name="src" type="hidden"/>
+                    <FormElement {...itemProps} name="id" type="hidden"/>
                     <FormElement
                         {...itemProps}
                         style={{ marginTop: 50 }}
@@ -489,7 +492,7 @@ export default config({ path: '/teams/:teamId/image-page/:id', side: false })(pr
                         disabled={disabled}
                         required
                         tip={<div style={{ width: 200 }}/>}
-                        onChange={handleBlockFileChange}
+                        onChange={id => handleBlockFileChange(id)}
                         options={hotBlockFileOptions}
                     />
                     <FormElement

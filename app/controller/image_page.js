@@ -118,6 +118,58 @@ module.exports = class ImagePageController extends Controller {
     ctx.success(result);
   }
 
+  // 保存、发布
+  async saveAndDeploy(ctx) {
+    const { user } = ctx;
+    const requestBody = ctx.request.body;
+
+    ctx.validate({
+      id: 'string',
+      teamId: 'int',
+    }, ctx.params);
+
+    ctx.validate({
+      quality: 'int',
+      curHeight: 'int',
+      hotBlockFileId: 'int',
+      blocks: 'array?',
+      // src: 'string', // TODO
+    }, requestBody);
+
+    const { id: imagePageId, teamId } = ctx.params;
+    const { blocks } = requestBody;
+
+    const { ImagePage, HotBlock } = ctx.model;
+
+    const imagePage = await ImagePage.findByPk(imagePageId);
+    if (!imagePage) return ctx.fail('页面不存在或已删除！');
+
+    // 多次数据库操作，进行事务处理
+    let transaction;
+    try {
+      transaction = await ctx.model.transaction();
+
+      // 更新页面信息
+      const result = await imagePage.update({ ...requestBody, teamId, userId: user.id });
+
+      // 删除 热区
+      await HotBlock.destroy({ where: { imagePageId }, transaction });
+
+      // 从新 添加 热区
+      blocks.forEach(item => item.imagePageId = imagePageId);
+      await HotBlock.bulkCreate(blocks, { transaction });
+
+      await transaction.commit();
+
+      ctx.success(result);
+    } catch (e) {
+      if (transaction) await transaction.rollback();
+
+      throw e;
+    }
+
+  }
+
   // 删除
   async destroy(ctx) {
     ctx.validate({
