@@ -1,33 +1,119 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, user-scalable=no"/>
     <title>Title</title>
-    <link rel="stylesheet" href="./css/index.css">
+    <style>
+        * {
+            /*禁止文字被鼠标选中*/
+            -moz-user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+
+            /*解决点击背景闪烁一下*/
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            padding: 0;
+            margin: 0;
+        }
+
+        .image-container {
+            position: relative;
+            width: 100%;
+            font-size: 0;
+        }
+
+        .image-container > img {
+            width: 100%;
+            height: auto;
+        }
+
+        .image-container > .block {
+            position: absolute;
+            cursor: pointer;
+            opacity: .5;
+        }
+
+        .debug .image-container > .block {
+            border: 1px solid red;
+            background: rosybrown;
+        }
+
+        .image-container > .block > a {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .debug .image-container > .block > a {
+            background: green;
+        }
+
+    </style>
 </head>
 <body>
 <div class="image-container">
-    <img src="./images/0-e4d704ac420e96cf057a44637f011d3c.min.jpeg" alt="image0">
-    <img src="./images/1-0f4825bcc8dba577baa2c1ed5e1affdd.min.jpeg" alt="image1">
-    <img src="./images/2-4a0c78f9893b067dcc47b6a1fc13811b.min.jpeg" alt="image2">
-    <img src="./images/3-0c870428359bc8e7ba02b871e915be87.min.jpeg" alt="image3">
-    <img src="./images/4-bf05a54f4bcd23cc10d88a8c175593dc.min.jpeg" alt="image4">
-    <img src="./images/5-9f8430cf745dcb919bf5c3853c29e649.min.jpeg" alt="image5">
-    <img src="./images/6-56565dfad8cca121c75b50de01f8cf5c.min.jpeg" alt="image6">
-    <img src="./images/7-a8db6bb89b54384fdd4e33f5c5806878.min.jpeg" alt="image7">
-    <img src="./images/8-cf9569f9e239538d7a6472c347a7be14.min.jpeg" alt="image8">
-    <img src="./images/9-d73385afc0ecabc335bf40dcd11714e4.min.jpeg" alt="image9">
+    <img src="./images/0-e4d704ac420e96cf057a44637f011d3c.jpeg" alt="image0">
+    <img src="./images/1-0f4825bcc8dba577baa2c1ed5e1affdd.jpeg" alt="image1">
+    <img src="./images/2-4a0c78f9893b067dcc47b6a1fc13811b.jpeg" alt="image2">
+    <img src="./images/3-0c870428359bc8e7ba02b871e915be87.jpeg" alt="image3">
+    <img src="./images/4-bf05a54f4bcd23cc10d88a8c175593dc.jpeg" alt="image4">
+    <img src="./images/5-9f8430cf745dcb919bf5c3853c29e649.jpeg" alt="image5">
+    <img src="./images/6-56565dfad8cca121c75b50de01f8cf5c.jpeg" alt="image6">
+    <img src="./images/7-a8db6bb89b54384fdd4e33f5c5806878.jpeg" alt="image7">
+    <img src="./images/8-cf9569f9e239538d7a6472c347a7be14.jpeg" alt="image8">
+    <img src="./images/9-d73385afc0ecabc335bf40dcd11714e4.jpeg" alt="image9">
 </div>
 
-
-<script src="./js/index.js"></script>
 <script>
-    var blocks = [
-    ];
-    var baseWidth = 400;
-    renderBlocks(blocks, baseWidth);
+    (function() {
+        var blocks = [
+            {
+                abc: 123,
+            },
+            {},
+        ];
+        var baseWidth = 400;
+        renderBlocks(blocks, baseWidth);
+
+
+        // 渲染热区
+        function renderBlocks(blocks, BASE_WIDTH) {
+            var container = document.querySelector('.image-container');
+            var width = container.clientWidth;
+            var ratio = width / BASE_WIDTH;
+            if (window.location.href.includes('debug=true')) {
+                document.body.classList.add('debug');
+            }
+
+            blocks.forEach(item => {
+                var { spec, blockHref, onClick } = item;
+                var [ left, top, width, height ] = spec;
+                var div = document.createElement('div');
+                div.classList.add('block');
+                div.style.top = (top * ratio) + 'px';
+                div.style.left = (left * ratio) + 'px';
+                div.style.width = (width * ratio) + 'px';
+                div.style.height = (height * ratio) + 'px';
+
+                if (blockHref) {
+                    var a = document.createElement('a');
+                    a.href = blockHref;
+                    div.appendChild(a);
+                }
+
+                if (onClick) {
+                    div.addEventListener('click', onClick);
+                }
+                container.appendChild(div);
+            });
+        }
+    })();
+
 </script>
 </body>
 </html>

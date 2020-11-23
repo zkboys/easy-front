@@ -21,6 +21,7 @@ import { FormElement, Operator, Table, tableEditable } from 'src/library/compone
 import {
     renderSize,
     getImageSizeByBase64,
+    getImageBase64List,
     compressImage,
     getX,
     getY,
@@ -154,13 +155,7 @@ export default config({ path: '/teams/:teamId/image-page/:id', side: false })(pr
         const { base64: oriBase64 } = await compressImage(data?.src, 100);
         setImageOriSrc(oriBase64);
 
-        // 压缩后
-        const { base64, width, height } = await compressImage(data?.src, data?.quality || 100);
-        setImageSrc(base64);
-
-        // 回显图片大小
-        const size = getImageSizeByBase64(base64);
-        setSize(`${renderSize(size)}  ${width} * ${height}`);
+        await handleQualityChange(data?.quality || 100, oriBase64);
 
         setPageLoading(false);
     }
@@ -345,7 +340,17 @@ export default config({ path: '/teams/:teamId/image-page/:id', side: false })(pr
         }
         await Promise.all(blocks.map(block => block._form.validateFields()));
 
+
+        const minHeight = form.getFieldValue('curHeight');
+
         const params = { deploy, ...values, blocks };
+
+        if (deploy) {
+            // 裁剪之后的图片base64 列表，用于发布，后端库并不存储
+            params.images = await getImageBase64List(imageSrc, minHeight, BASE_WIDTH);
+        }
+
+        console.log(params);
         saveAndDeploy(params, { successTip: deploy ? '发布成功！' : '保存成功！' });
     }
 
@@ -435,6 +440,7 @@ export default config({ path: '/teams/:teamId/image-page/:id', side: false })(pr
                     <div styleName="btns">
                         {renderUpload()}
                         <Button
+                            css={css`display: none`}
                             disabled={disabled}
                             icon={<ExportOutlined/>}
                             onClick={handleExport}

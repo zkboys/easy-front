@@ -210,7 +210,7 @@ export async function exportZip(options) {
 }
 
 // 裁剪图片
-async function getImageBase64List(imageBase64, minHeight, baseWidth) {
+export async function getImageBase64List(imageBase64, minHeight, baseWidth) {
     return new Promise((resolve, reject) => {
         const img = document.createElement('img');
         img.setAttribute('crossOrigin', 'Anonymous');

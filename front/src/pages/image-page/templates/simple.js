@@ -63,43 +63,50 @@ export default function(data) {
 </div>
 
 <script>
-    var blocks = [${blocks.map(item => `
-        {
-            blockName: '${item.blockName || ''}',
-            blockHref: '${item.blockHref || ''}',
-            spec: ${JSON.stringify(item.spec)},
-        }`)}
-    ];
+    (function () {
+        var blocks = [${blocks.map(item => `
+            {
+                blockName: '${item.blockName || ''}',
+                blockHref: '${item.blockHref || ''}',
+                spec: ${JSON.stringify(item.spec)},
+            }`)}
+        ];
 
-    var BASE_WIDTH = ${baseWidth};
-    var container = document.querySelector('.image-container');
-    var width = container.clientWidth;
-    var ratio = width / BASE_WIDTH;
-    if (window.location.href.includes('debug=true')) {
-        document.body.classList.add('debug');
-    }
+        var BASE_WIDTH = ${baseWidth};
+        renderBlocks(blocks, BASE_WIDTH);
 
-    blocks.forEach(item => {
-        var { spec, blockHref, onClick } = item;
-        var [ left, top, width, height ] = spec;
-        var div = document.createElement('div');
-        div.classList.add('block');
-        div.style.top = (top * ratio) + 'px';
-        div.style.left = (left * ratio) + 'px';
-        div.style.width = (width * ratio) + 'px';
-        div.style.height = (height * ratio) + 'px';
+        // 渲染热区
+        function renderBlocks(blocks, BASE_WIDTH) {
+            var container = document.querySelector('.image-container');
+            var width = container.clientWidth;
+            var ratio = width / BASE_WIDTH;
+            if (window.location.href.includes('debug=true')) {
+                document.body.classList.add('debug');
+            }
 
-        if (blockHref) {
-            var a = document.createElement('a');
-            a.href = blockHref;
-            div.appendChild(a);
+            blocks.forEach(item => {
+                var { spec, blockHref, onClick } = item;
+                var [ left, top, width, height ] = spec;
+                var div = document.createElement('div');
+                div.classList.add('block');
+                div.style.top = (top * ratio) + 'px';
+                div.style.left = (left * ratio) + 'px';
+                div.style.width = (width * ratio) + 'px';
+                div.style.height = (height * ratio) + 'px';
+
+                if (blockHref) {
+                    var a = document.createElement('a');
+                    a.href = blockHref;
+                    div.appendChild(a);
+                }
+
+                if (onClick) {
+                    div.addEventListener('click', onClick);
+                }
+                container.appendChild(div);
+            });
         }
-
-        if (onClick) {
-            div.addEventListener('click', onClick);
-        }
-        container.appendChild(div);
-    });
+    })()
 </script>
 </body>
 </html>
