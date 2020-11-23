@@ -1,6 +1,7 @@
 'use strict';
 const { Op } = require('sequelize');
 const Controller = require('egg').Controller;
+const template = require('../util/image-page-template');
 
 module.exports = class ImagePageController extends Controller {
   // 查询
@@ -133,11 +134,13 @@ module.exports = class ImagePageController extends Controller {
       curHeight: 'int',
       hotBlockFileId: 'int',
       blocks: 'array?',
+      images: 'array?',
+      baseWidth: 'int',
       // src: 'string', // TODO
     }, requestBody);
 
     const { id: imagePageId, teamId } = ctx.params;
-    const { blocks } = requestBody;
+    const { blocks, baseWidth, images, deploy } = requestBody;
 
     const { ImagePage, HotBlock } = ctx.model;
 
@@ -159,6 +162,11 @@ module.exports = class ImagePageController extends Controller {
       blocks.forEach(item => item.imagePageId = imagePageId);
       await HotBlock.bulkCreate(blocks, { transaction });
 
+      if (deploy) {
+        const hotBlockFile = await result.getHotBlockFile();
+        await this.deploy({ name: result.name, blocks, images, baseWidth, hotBlockFile });
+      }
+
       await transaction.commit();
 
       ctx.success(result);
@@ -167,7 +175,13 @@ module.exports = class ImagePageController extends Controller {
 
       throw e;
     }
+  }
 
+  // 发布
+  async deploy({ name, blocks, images, baseWidth, hotBlockFile }) {
+    // TODO 上传 images  imageNames 为保存之后的图片名称
+    const html = template({ name, imageNames: images, blocks, baseWidth, hotBlockFile });
+    console.log(html);
   }
 
   // 删除

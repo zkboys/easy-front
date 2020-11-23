@@ -343,7 +343,7 @@ export default config({ path: '/teams/:teamId/image-page/:id', side: false })(pr
 
         const minHeight = form.getFieldValue('curHeight');
 
-        const params = { deploy, ...values, blocks };
+        const params = { deploy, ...values, baseWidth: BASE_WIDTH, blocks };
 
         if (deploy) {
             // 裁剪之后的图片base64 列表，用于发布，后端库并不存储
